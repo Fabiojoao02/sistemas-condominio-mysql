@@ -8,12 +8,12 @@ class BlocoInLine(admin.TabularInline):
 
 
 class CondominioAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'Cidade', 'Estado',
-                    'Bairro', 'Fracao_ideal_tem', 'get_Taxa_condominio', 'get_Fundo_reserva', 'mostrar']
+    list_display = ['nome', 'endereco', 'cidade',
+                    'estado', 'bairro', 'cep', 'mostrar']
     # list_display_links = ['nome', 'Cidade', 'Estado']
     # list_filter = ['nome', 'Cidade', 'Estado']
     list_per_page = 10  # lista 10 registrod=s na pagina
-    search_fields = ['nome', 'Cidade', 'Estado']
+    search_fields = ['nome', 'cidade', 'estado']
     list_editable = ['mostrar']
     inlines = [
         BlocoInLine
@@ -36,8 +36,20 @@ class MoradorAdmin(admin.ModelAdmin):
     def nome_bloco(self, obj):
         return obj.bloco.nome
 
-    list_display = ['nome', 'apto_sala', 'cpf', 'telefone',
-                    'email', 'estado', 'nome_bloco']
+    def nome_morador(self, obj):
+        return obj.cadastro.nome
+
+    def cpf_cnpj_morador(self, obj):
+        return obj.cadastro.cpf_cnpj
+
+    def telefone_morador(self, obj):
+        return obj.cadastro.telefone
+
+    def email_morador(self, obj):
+        return obj.cadastro.email
+
+    list_display = ['nome_morador', 'apto_sala', 'cpf_cnpj_morador', 'telefone_morador',
+                    'email_morador', 'nome_bloco', 'qt_moradores']
 
 
 admin.site.register(models.Condominio, CondominioAdmin)
