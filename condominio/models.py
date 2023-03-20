@@ -9,7 +9,11 @@ import os
 from PIL import Image
 from django.db import models
 from django.conf import settings
+from django.forms import ValidationError
+from cadastro.models import Cadastro, Estado
+
 import re
+from utils.validacpf import valida_cpf
 
 
 class AuthGroup(models.Model):
@@ -91,47 +95,67 @@ class Bloco(models.Model):
     taxa_condominio = models.FloatField()
     fracao_ideal = models.FloatField()
 
-    class Meta:
-        managed = False
-        db_table = 'bloco'
-
     def get_Taxa_condominio(self):
-        return f' {self.Taxa_condominio:.2f}%'.replace('.', ',')
+        return f' {self.taxa_condominio:.2f}%'.replace('.', ',')
     get_Taxa_condominio.short_description = 'Tx Condominio'
 
     def get_Fundo_reserva(self):
-        return f' {self.Fundo_reserva:.2f}%'.replace('.', ',')
+        return f' {self.fundo_reserva:.2f}%'.replace('.', ',')
     get_Fundo_reserva.short_description = 'Fundo Reserva'
 
     def get_Fracao_ideal(self):
         return f' {self.fracao_ideal:.2f}%'.replace('.', ',')
     get_Fracao_ideal.short_description = 'Fração Ideal'
 
-
-class Cadastro(models.Model):
-    id_cadastro = models.AutoField(primary_key=True)
-    cpf_cnpj = models.CharField(unique=True, max_length=14)
-    nome = models.CharField(max_length=250)
-    endereco = models.CharField(max_length=250)
-    bairro = models.CharField(max_length=250)
-    cidade = models.CharField(max_length=250)
-    estado = models.ForeignKey('Estado', models.DO_NOTHING, db_column='estado')
-    cep = models.CharField(max_length=8)
-    situacao = models.CharField(max_length=1)
-    dt_registro = models.DateTimeField()
-    email = models.CharField(max_length=250)
-    telefone = models.CharField(max_length=250)
-    data_nascimento = models.DateField(blank=True, null=True)
+    def __str__(self) -> str:
+        return self.nome
 
     class Meta:
         managed = False
-        db_table = 'cadastro'
+        db_table = 'bloco'
+        verbose_name = 'Bloco'
+        verbose_name_plural = 'Blocos'
+
+
+# class Cadastro(models.Model):
+#     id_cadastro = models.AutoField(primary_key=True)
+#     cpf_cnpj = models.CharField(unique=True, max_length=14)
+#     nome = models.CharField(max_length=250)
+#     endereco = models.CharField(max_length=250)
+#     bairro = models.CharField(max_length=250)
+#     cidade = models.CharField(max_length=250)
+#     estado = models.ForeignKey('Estado', models.DO_NOTHING, db_column='estado')
+#     cep = models.CharField(max_length=8)
+#     situacao = models.CharField(max_length=1)
+#     dt_registro = models.DateTimeField()
+#     email = models.CharField(max_length=250)
+#     telefone = models.CharField(max_length=250)
+#     data_nascimento = models.DateField(blank=True, null=True)
+
+#     def __str__(self) -> str:
+#         return self.nome
+
+#     class Meta:
+#         managed = False
+#         db_table = 'cadastro'
+#         verbose_name = 'Cadastro'
+#         verbose_name_plural = 'Cadastros'
+
+#     def clean(self):
+#         error_messages = {}
+
+#         if re.search(r'[^0-9]', self.cep) or len(self.cep) < 8:
+#             error_messages['cep'] = 'CEP inválido, digite apenas números 8 dígitos'
+
+#         if error_messages:
+#             raise ValidationError(error_messages)
 
 
 class Calculos(models.Model):
     id_calculos = models.AutoField(primary_key=True)
     id_morador = models.IntegerField()
-    id_contas = models.IntegerField()
+    id_contas = models.ForeignKey(
+        'Contas', models.DO_NOTHING, db_column='id_contas')
     valor = models.FloatField()
     publica = models.IntegerField()
     dt_lancamento = models.DateTimeField()
@@ -140,6 +164,8 @@ class Calculos(models.Model):
     class Meta:
         managed = False
         db_table = 'calculos'
+        verbose_name = 'Calculo'
+        verbose_name_plural = 'Calculos'
 
 
 class Condominio(models.Model):
@@ -149,13 +175,17 @@ class Condominio(models.Model):
     cidade = models.CharField(max_length=100)
     bairro = models.CharField(max_length=100)
     cep = models.CharField(max_length=8)
-    estado = models.ForeignKey('Estado', models.DO_NOTHING, db_column='estado')
-    foto = models.CharField(max_length=250, blank=True, null=True)
+    estado = models.ForeignKey(
+        Estado, models.DO_NOTHING, db_column='estado', related_name='estado')
+    foto = models.ImageField(
+        upload_to='condominio_imagens', blank=True, null=True)
     mostrar = models.BooleanField(default=True)
 
     class Meta:
         managed = False
         db_table = 'condominio'
+        verbose_name = 'Condominio'
+        verbose_name_plural = 'Condominios'
 
     @staticmethod
     def resize_image(img, new_width=800):
@@ -187,21 +217,20 @@ class Condominio(models.Model):
     def __str__(self) -> str:
         return self.nome
 
-    def clean(self):
-        error_messages = {}
-
-        if re.search(r'[^0-9]', self.CEP) or len(self.CEP) < 8:
-            error_messages['CEP'] = 'CEP inválido, digite apenas números 8 dígitos'
-
 
 class Contas(models.Model):
     id_conta = models.AutoField(primary_key=True)
     nome = models.CharField(unique=True, max_length=250)
     situacao = models.CharField(max_length=1)
 
+    def __str__(self) -> str:
+        return self.nome
+
     class Meta:
         managed = False
         db_table = 'contas'
+        verbose_name = 'Conta'
+        verbose_name_plural = 'Contas'
 
 
 class DjangoAdminLog(models.Model):
@@ -250,23 +279,26 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class Estado(models.Model):
-    uf = models.CharField(primary_key=True, max_length=2)
-    nome = models.CharField(unique=True, max_length=250)
+# class Estado(models.Model):
+#     uf = models.CharField(primary_key=True, max_length=2)
+#     nome = models.CharField(unique=True, max_length=250)
 
-    class Meta:
-        managed = False
-        db_table = 'estado'
+#     def __str__(self) -> str:
+#         return self.nome
 
-    def __str__(self) -> str:
-        return self.nome
+#     class Meta:
+#         managed = False
+#         db_table = 'estado'
+#         verbose_name = 'Estado'
+#         verbose_name_plural = 'Estados'
 
 
 class Leituras(models.Model):
     id_leituras = models.AutoField(primary_key=True)
     mesano = models.CharField(max_length=6)
     id_morador = models.IntegerField()
-    id_contas = models.IntegerField()
+    id_contas = models.ForeignKey(
+        Contas, models.DO_NOTHING, db_column='id_contas')
     dt_leitura = models.DateTimeField()
     vl_gas_m3 = models.FloatField()
     leitura_inicial = models.FloatField()
@@ -275,24 +307,58 @@ class Leituras(models.Model):
     class Meta:
         managed = False
         db_table = 'leituras'
+        verbose_name = 'Leitura'
+        verbose_name_plural = 'Leituras'
 
 
 class Morador(models.Model):
     id_morador = models.AutoField(primary_key=True)
     id_inquilino = models.ForeignKey(
-        Cadastro, models.DO_NOTHING, related_name='id_inquilino')
+        Cadastro, models.DO_NOTHING, db_column='id_inquilino', related_name='id_inquilino')
     id_proprietario = models.ForeignKey(
-        Cadastro, models.DO_NOTHING, related_name='id_proprietario')
+        Cadastro, models.DO_NOTHING, db_column='id_proprietario', related_name='id_proprietario')
     apto_sala = models.CharField(max_length=80)
     id_bloco = models.ForeignKey(
         Bloco, models.DO_NOTHING, db_column='id_bloco')
     qt_moradores = models.IntegerField()
     situacao = models.CharField(max_length=1)
     responsavel = models.CharField(max_length=1)
+    foto = models.ImageField(
+        upload_to='morador_imagens', blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.apto_sala
+
+    # @property
+    def get_nome_bloco(self):
+        return '%s ' % (self.id_bloco.nome)
+    get_nome_bloco.short_description = 'Bloco'
+
+    def get_nome_inquilino(self):
+        return '%s' % (self.id_inquilino.nome)
+    get_nome_inquilino.short_description = 'Inquilino'
+
+    def get_nome_proprietario(self):
+        return '%s' % (self.id_proprietario.nome)
+    get_nome_proprietario.short_description = 'Proprietário'
+
+    def get_telefone_morador(self):
+        return '%s' % (self.id_inquilino.telefone)
+    get_telefone_morador.short_description = 'Telefone'
+
+    def get_email_morador(self):
+        return '%s' % (self.id_inquilino.email)
+    get_email_morador.short_description = 'Telefone'
+
+    def get_cpf_cnpj_morador(self):
+        return '%s' % (self.id_inquilino.cpf_cnpj)
+    get_cpf_cnpj_morador.short_description = 'CPF/CNPJ'
 
     class Meta:
         managed = False
         db_table = 'morador'
+        verbose_name = 'Morador'
+        verbose_name_plural = 'Moradores'
 
 
 class Movimento(models.Model):
@@ -305,10 +371,15 @@ class Movimento(models.Model):
         'TipoCalculo', models.DO_NOTHING, db_column='id_tipo_calculo')
     dt_lancamento = models.DateTimeField()
 
+    def __str__(self) -> str:
+        return self.mesano
+
     class Meta:
         managed = False
         db_table = 'movimento'
         unique_together = (('mesano', 'id_contas'),)
+        verbose_name = 'Movimento'
+        verbose_name_plural = 'Movimentos'
 
 
 class TipoCalculo(models.Model):
@@ -317,6 +388,11 @@ class TipoCalculo(models.Model):
     situacao = models.CharField(max_length=1)
     descricao = models.CharField(max_length=250)
 
+    def __str__(self) -> str:
+        return self.nome
+
     class Meta:
         managed = False
         db_table = 'tipo_calculo'
+        verbose_name = 'Tipo Calculo'
+        verbose_name_plural = 'Tipo Calculos'

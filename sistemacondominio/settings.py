@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'condominio.apps.CondominioConfig',
+    'cadastro.apps.CadastroConfig',
 
 
     # TODO: Remover debug toobar
@@ -93,7 +94,6 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': BASE_DIR / 'condominio',
         'NAME': 'condominio',
         'USER': 'root',
         'PASSWORD': '',
