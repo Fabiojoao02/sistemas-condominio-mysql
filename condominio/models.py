@@ -151,21 +151,21 @@ class Bloco(models.Model):
 #             raise ValidationError(error_messages)
 
 
-class Calculos(models.Model):
-    id_calculos = models.AutoField(primary_key=True)
-    id_morador = models.IntegerField()
-    id_contas = models.ForeignKey(
-        'Contas', models.DO_NOTHING, db_column='id_contas')
-    valor = models.FloatField()
-    publica = models.IntegerField()
-    dt_lancamento = models.DateTimeField()
-    mesano = models.CharField(max_length=6)
+# class Calculos(models.Model):
+#     id_calculos = models.AutoField(primary_key=True)
+#     id_morador = models.IntegerField()
+#     id_contas = models.ForeignKey(
+#         Contas, models.DO_NOTHING, db_column='id_contas')
+#     valor = models.FloatField()
+#     publica = models.IntegerField()
+#     dt_lancamento = models.DateTimeField()
+#     mesano = models.CharField(max_length=6)
 
-    class Meta:
-        managed = False
-        db_table = 'calculos'
-        verbose_name = 'Calculo'
-        verbose_name_plural = 'Calculos'
+#     class Meta:
+#         managed = False
+#         db_table = 'calculos'
+#         verbose_name = 'Calculo'
+#         verbose_name_plural = 'Calculos'
 
 
 class Condominio(models.Model):
@@ -218,19 +218,19 @@ class Condominio(models.Model):
         return self.nome
 
 
-class Contas(models.Model):
-    id_conta = models.AutoField(primary_key=True)
-    nome = models.CharField(unique=True, max_length=250)
-    situacao = models.CharField(max_length=1)
+# class Contas(models.Model):
+#     id_conta = models.AutoField(primary_key=True)
+#     nome = models.CharField(unique=True, max_length=250)
+#     situacao = models.CharField(max_length=1)
 
-    def __str__(self) -> str:
-        return self.nome
+#     def __str__(self) -> str:
+#         return self.nome
 
-    class Meta:
-        managed = False
-        db_table = 'contas'
-        verbose_name = 'Conta'
-        verbose_name_plural = 'Contas'
+#     class Meta:
+#         managed = False
+#         db_table = 'contas'
+#         verbose_name = 'Conta'
+#         verbose_name_plural = 'Contas'
 
 
 class DjangoAdminLog(models.Model):
@@ -293,22 +293,22 @@ class DjangoSession(models.Model):
 #         verbose_name_plural = 'Estados'
 
 
-class Leituras(models.Model):
-    id_leituras = models.AutoField(primary_key=True)
-    mesano = models.CharField(max_length=6)
-    id_morador = models.IntegerField()
-    id_contas = models.ForeignKey(
-        Contas, models.DO_NOTHING, db_column='id_contas')
-    dt_leitura = models.DateTimeField()
-    vl_gas_m3 = models.FloatField()
-    leitura_inicial = models.FloatField()
-    leitura_final = models.FloatField()
+# class Leituras(models.Model):
+#     id_leituras = models.AutoField(primary_key=True)
+#     mesano = models.CharField(max_length=6)
+#     id_morador = models.IntegerField()
+#     id_contas = models.ForeignKey(
+#         Contas, models.DO_NOTHING, db_column='id_contas')
+#     dt_leitura = models.DateTimeField()
+#     vl_gas_m3 = models.FloatField()
+#     leitura_inicial = models.FloatField()
+#     leitura_final = models.FloatField()
 
-    class Meta:
-        managed = False
-        db_table = 'leituras'
-        verbose_name = 'Leitura'
-        verbose_name_plural = 'Leituras'
+#     class Meta:
+#         managed = False
+#         db_table = 'leituras'
+#         verbose_name = 'Leitura'
+#         verbose_name_plural = 'Leituras'
 
 
 class Morador(models.Model):
@@ -354,6 +354,9 @@ class Morador(models.Model):
         return '%s' % (self.id_inquilino.cpf_cnpj)
     get_cpf_cnpj_morador.short_description = 'CPF/CNPJ'
 
+    # def get_count_condo(self):
+    #     return Bloco.objects.filter(Morador=obj).count()
+
     class Meta:
         managed = False
         db_table = 'morador'
@@ -361,38 +364,38 @@ class Morador(models.Model):
         verbose_name_plural = 'Moradores'
 
 
-class Movimento(models.Model):
-    id_movimento = models.AutoField(primary_key=True)
-    mesano = models.CharField(max_length=6)
-    id_contas = models.ForeignKey(
-        Contas, models.DO_NOTHING, db_column='id_contas')
-    valor = models.FloatField()
-    id_tipo_calculo = models.ForeignKey(
-        'TipoCalculo', models.DO_NOTHING, db_column='id_tipo_calculo')
-    dt_lancamento = models.DateTimeField()
+# class Movimento(models.Model):
+#     id_movimento = models.AutoField(primary_key=True)
+#     mesano = models.CharField(max_length=6)
+#     id_contas = models.ForeignKey(
+#         Contas, models.DO_NOTHING, db_column='id_contas')
+#     valor = models.FloatField()
+#     id_tipo_calculo = models.ForeignKey(
+#         TipoCalculo, models.DO_NOTHING, db_column='id_tipo_calculo')
+#     dt_lancamento = models.DateTimeField()
 
-    def __str__(self) -> str:
-        return self.mesano
+#     def __str__(self) -> str:
+#         return self.mesano
 
-    class Meta:
-        managed = False
-        db_table = 'movimento'
-        unique_together = (('mesano', 'id_contas'),)
-        verbose_name = 'Movimento'
-        verbose_name_plural = 'Movimentos'
+#     class Meta:
+#         managed = False
+#         db_table = 'movimento'
+#         unique_together = (('mesano', 'id_contas'),)
+#         verbose_name = 'Movimento'
+#         verbose_name_plural = 'Movimentos'
 
 
-class TipoCalculo(models.Model):
-    id_tipo_calculo = models.AutoField(primary_key=True)
-    nome = models.CharField(max_length=5)
-    situacao = models.CharField(max_length=1)
-    descricao = models.CharField(max_length=250)
+# class TipoCalculo(models.Model):
+#     id_tipo_calculo = models.AutoField(primary_key=True)
+#     nome = models.CharField(max_length=5)
+#     situacao = models.CharField(max_length=1)
+#     descricao = models.CharField(max_length=250)
 
-    def __str__(self) -> str:
-        return self.nome
+#     def __str__(self) -> str:
+#         return self.nome
 
-    class Meta:
-        managed = False
-        db_table = 'tipo_calculo'
-        verbose_name = 'Tipo Calculo'
-        verbose_name_plural = 'Tipo Calculos'
+#     class Meta:
+#         managed = False
+#         db_table = 'tipo_calculo'
+#         verbose_name = 'Tipo Calculo'
+#         verbose_name_plural = 'Tipo Calculos'
