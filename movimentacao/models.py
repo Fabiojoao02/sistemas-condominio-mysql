@@ -3,6 +3,7 @@ from conta.models import Contas
 from tipocalculo.models import TipoCalculo
 from cadastro.models import Cadastro
 from condominio.models import Morador
+from django.utils.safestring import mark_safe
 
 
 class Calculos(models.Model):
@@ -74,6 +75,18 @@ class Leituras(models.Model):
     def get_apto_salaLei(self):
         return '%s' % (self.id_morador.apto_sala)
     get_apto_salaLei.short_description = 'Apto/sala'
+
+   # def imprimir(self):
+    #    return mark_safe("""<a href=\"leiturasmes/%s\" target="_blank"><img src=\"/static/images/b_print.png\"></a>""" % self.id_leituras)
+    # return mark_safe("""<a href="{% url 'leiturasmes' leitura_id %}">\" target="_blank"><img src=\"/static/images/b_print.png\"></a>""")
+
+    #     # calculo
+    # def save(self, *args, **kwargs):
+    #     self.consumo3 = self.leitura_final - self.leitura_inicial
+    #     self.vl_consumo = self.consumo3 * self.vl_gas_m3
+    #     self.valor_total += self.vl_consumo
+    #     self.save()
+    #     return super(Leituras, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.mesano

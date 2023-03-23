@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
+DECIMAL_SEPARATOR = '.'
+USE_THOUSAND_SEPARATOR = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
