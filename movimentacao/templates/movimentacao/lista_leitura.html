@@ -1,1 +1,88 @@
-oieee
+{% extends 'base.html' %}
+{% load omfilters %}
+
+{% block conteudo %}
+
+
+<style>
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 9px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<body>
+
+    {% for leitura in leituras|slice:":1" %}
+    <h1>Leituras Mês/Ano: {{ leitura.mesano|formata_mesano }}</h1>
+    {% endfor %}
+
+    <table>
+        <tr>
+            <th>Mês Ano</th>
+            <th>Apto/Sala</th>
+            <th>Contas</th>
+            <th>Valor M3</th>
+            <th>Leitura Inicial</th>
+            <th>Leitura Final</th>
+            <th>Consumo m3</th>
+            <th>Valor</th>
+        </tr>
+    </table>
+</body>
+
+{% for leitura in leituras %}
+
+<!--    
+
+    #se precisar usar imagem tem exemplos
+{% if produto.imagem %} 
+#colocando um link
+<a href="{{ produto.slug }}">
+<img class="card-img-top" src={{ produtos.imagem.url }}" alt="{{ produto.nome}}">
+</a>
+{% endif %}
+
+-->
+
+<body>
+    <table>
+        <tr>
+            <td>{{ leitura.mesano|formata_mesano}}</td>
+            <td>{{ leitura.id_morador }} </td>
+            <td>{{ leitura.id_contas }}</td>
+            <td>{{ leitura.vl_gas_m3|formata_valor}}</td>
+            <td>{{ leitura.leitura_inicial }}</td>
+            <td>{{ leitura.leitura_final}}</td>
+            <td>{{ leitura.id_leituras|consumo_leitura}}</td>
+            <td>{{ leitura.id_leituras|valor_consumo_leitura}}</td>
+            <!--
+            <td><a href="post.html" class="btn btn-primary btn-sm m-1 btn-block">
+                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                    Detalhes
+                </a>
+            -->
+            </td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+
+        </tfoot>
+    </table>
+
+</body>
+
+
+{% endblock %}
