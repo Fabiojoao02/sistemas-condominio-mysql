@@ -351,6 +351,7 @@ class Morador(models.Model):
     get_email_morador.short_description = 'Telefone'
 
     def get_cpf_cnpj_morador(self):
+       # return f'{self.cpf[0:3]}.{self.cpf[3:6]}.{self.cpf[6:9]}-{self.cpf[9:11]}'
         return '%s' % (self.id_inquilino.cpf_cnpj)
     get_cpf_cnpj_morador.short_description = 'CPF/CNPJ'
 

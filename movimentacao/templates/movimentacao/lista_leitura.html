@@ -60,14 +60,14 @@
 <body>
     <table>
         <tr>
-            <td>{{ leitura.mesano|formata_mesano}}</td>
+            <td>{{ leitura.mesano|formata_mesano }}</td>
             <td>{{ leitura.id_morador }} </td>
             <td>{{ leitura.id_contas }}</td>
-            <td>{{ leitura.vl_gas_m3|formata_valor}}</td>
+            <td>{{ leitura.vl_gas_m3|formata_valor }}</td>
             <td>{{ leitura.leitura_inicial }}</td>
-            <td>{{ leitura.leitura_final}}</td>
-            <td>{{ leitura.id_leituras|consumo_leitura}}</td>
-            <td>{{ leitura.id_leituras|valor_consumo_leitura}}</td>
+            <td>{{ leitura.leitura_final }}</td>
+            <td>{{ leitura.id_leituras|consumo_leitura }}</td>
+            <td>{{ leitura.id_leituras|valor_consumo_leitura }}</td>
             <!--
             <td><a href="post.html" class="btn btn-primary btn-sm m-1 btn-block">
                     <i class="fa fa-shopping-cart" aria-hidden="true"></i>
@@ -83,6 +83,10 @@
     </table>
 
 </body>
-
+<div class="=row mt-3">
+    <div class="col">
+        {% include 'parciais/_pagination.html'%}
+    </div>
+</div>
 
 {% endblock %}
