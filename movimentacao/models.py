@@ -6,6 +6,7 @@ from cadastro.models import Cadastro
 from condominio.models import Morador
 from django.utils.safestring import mark_safe
 from utils import utils
+from django.shortcuts import render
 
 
 class Calculos(models.Model):
@@ -65,17 +66,35 @@ class Leituras(models.Model):
     leitura_inicial = models.FloatField()
     leitura_final = models.FloatField()
 
-    def get_count(self):
-        query = "select  id_morador, mesano from leituras where id_leituras =" + \
-            str(self.id_leituras)
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-           # print(list(cursor.fetchall()))
-            # return cursor.execute(query)
-            # return list(cursor.execute(query))
-            return list([cursor.fetchall()])
+    # def dictfetchall(cursor):
+    #     desc = cursor.description
+    #     return [
+    #         dict(zip([col[0] for col in desc], row))
+    #         for row in cursor.fetchall()
+    #     ]
 
-           # return list(cursor.fetchall(query))
+    # def listaleitura(request):
+    #     cursor = connection.cursor()
+    #     cursor.execute("\
+    #         select concat(left(mesano,2),'/',right(mesano,4)) as mesano \
+    #             , id_leituras as id_leituras, \
+    #             l.id_morador as id_morador, \
+    #             cad.nome morador, c.nome as Conta, vl_gas_m3, \
+    #             leitura_inicial, leitura_final, \
+    #             ROUND((leitura_final - leitura_inicial),3) as Consumo_m3, \
+    #             ROUND(((leitura_final - leitura_inicial) * vl_gas_m3),2) Valor,\
+    #             cast(dt_leitura as date) dt_leitura \
+    #         from leituras  l \
+    #         join morador m on \
+    #             m.id_morador = l.id_morador  \
+    #         join cadastro cad on \
+    #             cad.id_cadastro = id_inquilino \
+    #         join contas c on \
+    #             c.id_conta = l.id_contas \
+    # ")
+    #     model = dictfetchall(cursor)
+    #     paginate_by = 2
+    #     return render(request, 'movimentacao/lista_leitura.html', {'leituras': model})
 
     def get_formatvlgasm3(self):
         return f'{self.vl_gas_m3:.2f}'.replace('.', ',')
