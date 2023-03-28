@@ -28,7 +28,7 @@ def listaleitura(request):
     cursor.execute("\
             select concat(left(mesano,2),'/',right(mesano,4)) as mesano \
                 , id_leituras as id_leituras, \
-                l.id_morador as id_morador, \
+                m.apto_sala as Apto_Sala, \
                 cad.nome morador, c.nome as Conta, vl_gas_m3, \
                 leitura_inicial, leitura_final, \
                 ROUND((leitura_final - leitura_inicial),3) as Consumo_m3, \

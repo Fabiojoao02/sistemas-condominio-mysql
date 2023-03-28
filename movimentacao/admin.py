@@ -1,5 +1,7 @@
 from django.contrib import admin
 from . import models
+from django.db.models import Sum
+from .models import Leituras
 
 
 class CalculosAdmin(admin.ModelAdmin):
@@ -21,12 +23,11 @@ class LeiturasAdmin(admin.ModelAdmin):
 
     # get_count()
 
-    # list_display = ['get_count']
-
     list_display = ['id_leituras', 'get_formata_mesano_leitura', 'get_apto_salaLei', 'get_nome_moradorLei', 'get_contasleitura',
                     'get_formatvlgasm3', 'leitura_inicial', 'leitura_final', 'dt_leitura']
+    # list_display = ['get_formata_mesano_leitura']
     list_per_page = 15  # lista 10 registrod=s na pagina
-    list_filter = ['mesano', 'id_leituras']
+    # list_filter = ['mesano', 'id_leituras']
 
 
 class MovimentoAdmin(admin.ModelAdmin):
