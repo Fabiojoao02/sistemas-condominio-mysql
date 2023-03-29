@@ -1,63 +1,49 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load omfilters %}
 
 {% block conteudo %}
 
 
+<table class="table table-striped">
+    <thead class="thead-light">
+        {% for leitura in leituras|slice:":1" %}
+        <h1>Leituras Mês/Ano: {{ leitura.mesano }}</h1>
+        {% endfor %}
 
-{% for leitura in leituras|slice:":1" %}
-<h1>Leituras Mês/Ano: {{ leitura.mesano }}</h1>
-{% endfor %}
-
-<div class="table-responsive">
-    <table class="table table=striped">
         <tr>
-            <th>Mês Ano</th>
-            <th>Apto/Sala</th>
-            <th>Morador</th>
-            <th>Contas</th>
-            <th>Valor M3</th>
-            <th>Leitura Inicial</th>
-            <th>Leitura Final</th>
-            <th>Consumo m3</th>
-            <th>Valor</th>
-            <th>Dt. Leitura</th>
+            <th scope="col">Mês Ano</th>
+            <th scope="col">Apto/Sala</th>
+            <th scope="col">Morador</th>
+            <th scope="col">Contas</th>
+            <th scope="col">Valor M3</th>
+            <th scope="col">Leitura Inicial</th>
+            <th scope="col">Leitura Final</th>
+            <th scope="col">Consumo m3</th>
+            <th scope="col">Valor</th>
+            <th scope="col">Dt. Leitura</th>
+
         </tr>
+    </thead>
+    <tbody>
         {% for leitura in leituras %}
-
-        <!--    
-
-    #se precisar usar imagem tem exemplos
-{% if produto.imagem %} 
-#colocando um link
-<a href="{{ produto.slug }}">
-<img class="card-img-top" src={{ produtos.imagem.url }}" alt="{{ produto.nome}}">
-</a>
-{% endif %}
-
--->
-
         <tr>
-            <td>{{ leitura.mesano }}</td>
-            <td>{{ leitura.Apto_Sala }} </td>
-            <td>{{ leitura.morador }} </td>
-            <td>{{ leitura.Conta }}</td>
-            <td>{{ leitura.vl_gas_m3 }}</td>
-            <td>{{ leitura.leitura_inicial }}</td>
-            <td>{{ leitura.leitura_final }}</td>
-            <td>{{ leitura.Consumo_m3 }}</td>
-            <td>{{ leitura.Valor }}</td>
-            <td>{{ leitura.dt_leitura }}</td>
-            <!--
-            <td><a href="post.html" class="btn btn-primary btn-sm m-1 btn-block">
-                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                    Detalhes
-                </a>
-            -->
+            <th scope="row">{{ leitura.mesano }}</th>
+            <td scope="row">{{ leitura.Apto_Sala }} </td>
+            <td scope="row">{{ leitura.morador }} </td>
+            <td scope="row">{{ leitura.Conta }}</td>
+            <td scope="row">{{ leitura.vl_gas_m3 }}</td>
+            <td scope="row">{{ leitura.leitura_inicial }}</td>
+            <td scope="row">{{ leitura.leitura_final }}</td>
+            <td scope="row">{{ leitura.Consumo_m3 }}</td>
+            <td scope="row">{{ leitura.Valor }}</td>
+            <td scope="row">{{ leitura.dt_leitura }}</td>
+
             </td>
         </tr>
         {% endfor %}
-    </table>
+    </tbody>
+</table>
 </div>
 <tfoot>
 
