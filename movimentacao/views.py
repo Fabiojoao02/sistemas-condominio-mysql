@@ -1,7 +1,7 @@
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
-from django.shortcuts import render, redirect, reverse
-from django.http import HttpResponse
+# from django.views.generic.list import ListView
+from django.views.generic import TemplateView
+# from django.shortcuts import render, redirect, reverse
+# from django.http import HttpResponse
 from django.contrib import messages
 # from django.views import View
 from . models import Leituras
@@ -9,23 +9,14 @@ from django.db import connection
 # from django.db.models import Count
 
 
-# class ListaLeitura(DetailView):
-# def get(self, *args, **kwargs):
-#     messages.error(self.request, 'Erro de teste...')
-#     return redirect(self.request.META[HTTP_REFERER])
+class ListaLeitura(TemplateView):
+    template_name = 'movimentacao/lista_leitura.html'
+    paginate_by = 2
 
-
-def dictfetchall(cursor):
-    desc = cursor.description
-    return [
-        dict(zip([col[0] for col in desc], row))
-        for row in cursor.fetchall()
-    ]
-
-
-def listaleitura(request):
-    cursor = connection.cursor()
-    cursor.execute("\
+    def get_context_data(self, **kwargs):
+        context = super(ListaLeitura, self).get_context_data(**kwargs)
+        context = {
+            'leituras':  Leituras.objects.raw("\
             select concat(left(mesano,2),'/',right(mesano,4)) as mesano \
                 , id_leituras as id_leituras, \
                 m.apto_sala as Apto_Sala, \
@@ -41,7 +32,6 @@ def listaleitura(request):
                 cad.id_cadastro = id_inquilino \
             join contas c on \
                 c.id_conta = l.id_contas \
-    ")
-    model = dictfetchall(cursor)
-    paginate_by = 2
-    return render(request, 'movimentacao/lista_leitura.html', {'leituras': model})
+        ")
+        }
+        return context
