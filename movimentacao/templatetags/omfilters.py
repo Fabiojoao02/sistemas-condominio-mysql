@@ -2,6 +2,7 @@ from django.template import Library
 from utils import utils
 from movimentacao.models import Leituras
 from django.db.models import Sum
+import uuid
 
 register = Library()
 

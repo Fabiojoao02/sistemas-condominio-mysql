@@ -1,57 +1,67 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load omfilters %}
+{% load bootstrap4 %}
+{% load humanize %}
 
 {% block conteudo %}
+<!DOCTYPE html>
+<html lang="'pt-br">
 
+<head>
+    <meta charset="UTF-8">
+    <title>Leituras</title>
+</head>
 
-<table class="table table-striped">
-    <thead class="thead-light">
+<body>
+    <div class="container">
+        {% bootstrap_css %}
         {% for leitura in leituras|slice:":1" %}
-        <h1>Leituras Mês/Ano: {{ leitura.mesano }}</h1>
+        <h1>Leitura Mês/Ano: {{ leitura.mesano }}</h1>
         {% endfor %}
-
-        <tr>
-            <th scope="col">Mês Ano</th>
-            <th scope="col">Apto/Sala</th>
-            <th scope="col">Morador</th>
-            <th scope="col">Contas</th>
-            <th scope="col">Valor M3</th>
-            <th scope="col">Leitura Inicial</th>
-            <th scope="col">Leitura Final</th>
-            <th scope="col">Consumo m3</th>
-            <th scope="col">Valor</th>
-            <th scope="col">Dt. Leitura</th>
-
-        </tr>
-    </thead>
-    <tbody>
-        {% for leitura in leituras %}
-        <tr>
-            <th scope="row">{{ leitura.mesano }}</th>
-            <td scope="row">{{ leitura.Apto_Sala }} </td>
-            <td scope="row">{{ leitura.morador }} </td>
-            <td scope="row">{{ leitura.Conta }}</td>
-            <td scope="row">{{ leitura.vl_gas_m3 }}</td>
-            <td scope="row">{{ leitura.leitura_inicial }}</td>
-            <td scope="row">{{ leitura.leitura_final }}</td>
-            <td scope="row">{{ leitura.Consumo_m3 }}</td>
-            <td scope="row">{{ leitura.Valor }}</td>
-            <td scope="row">{{ leitura.dt_leitura }}</td>
-
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
-<tfoot>
-
-</tfoot>
-<div class="=row mt-3">
-    <div class="col">
-        {% include 'parciais/_pagination.html'%}
+        <table class="table table-striped">
+            {% bootstrap_messages %}
+            <thead>
+                <tr>
+                    <th scope="col">Mês Ano</th>
+                    <th scope="col">Apto/Sala</th>
+                    <th scope="col">Morador</th>
+                    <th scope="col">Contas</th>
+                    <th scope="col">Valor M3</th>
+                    <th scope="col">Leitura Inicial</th>
+                    <th scope="col">Leitura Final</th>
+                    <th scope="col">Consumo m3</th>
+                    <th scope="col">Valor</th>
+                    <th scope="col">Dt. Leitura</th>
+                </tr>
+            </thead>
+            </thead>
+            <tbody>
+                {% for leitura in leituras %}
+                <tr>
+                    <td scope="row">{{ leitura.mesano }}</td>
+                    <td scope="row">{{ leitura.Apto_Sala }} </td>
+                    <td scope="row">{{ leitura.morador }} </td>
+                    <td scope="row">{{ leitura.Conta }}</td>
+                    <td scope="row">{{ leitura.vl_gas_m3 }}</td>
+                    <td scope="row">{{ leitura.leitura_inicial }}</td>
+                    <td scope="row">{{ leitura.leitura_final }}</td>
+                    <td scope="row">{{ leitura.Consumo_m3|intcomma }}</td>
+                    <td scope="row">{{ leitura.Valor }}</td>
+                    <td scope="row">{{ leitura.dt_leitura|date:"d/m/Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
+    <tfoot>
 
+    </tfoot>
+    <div class="=row mt-3">
+        <div class="col">
+            {% include 'parciais/_pagination.html'%}
+        </div>
+    </div>
+    {% bootstrap_javascript jquery='full' %}
+</body>
+
+</html>
 {% endblock %}

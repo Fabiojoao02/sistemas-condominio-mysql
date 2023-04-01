@@ -66,36 +66,6 @@ class Leituras(models.Model):
     leitura_inicial = models.FloatField()
     leitura_final = models.FloatField()
 
-    # def dictfetchall(cursor):
-    #     desc = cursor.description
-    #     return [
-    #         dict(zip([col[0] for col in desc], row))
-    #         for row in cursor.fetchall()
-    #     ]
-
-    # def listaleitura(request):
-    #     cursor = connection.cursor()
-    #     cursor.execute("\
-    #         select concat(left(mesano,2),'/',right(mesano,4)) as mesano \
-    #             , id_leituras as id_leituras, \
-    #             l.id_morador as id_morador, \
-    #             cad.nome morador, c.nome as Conta, vl_gas_m3, \
-    #             leitura_inicial, leitura_final, \
-    #             ROUND((leitura_final - leitura_inicial),3) as Consumo_m3, \
-    #             ROUND(((leitura_final - leitura_inicial) * vl_gas_m3),2) Valor,\
-    #             cast(dt_leitura as date) dt_leitura \
-    #         from leituras  l \
-    #         join morador m on \
-    #             m.id_morador = l.id_morador  \
-    #         join cadastro cad on \
-    #             cad.id_cadastro = id_inquilino \
-    #         join contas c on \
-    #             c.id_conta = l.id_contas \
-    # ")
-    #     model = dictfetchall(cursor)
-    #     paginate_by = 2
-    #     return render(request, 'movimentacao/lista_leitura.html', {'leituras': model})
-
     def get_formatvlgasm3(self):
         return f'{self.vl_gas_m3:.2f}'.replace('.', ',')
     get_formatvlgasm3.short_description = 'Vl gas m3'
@@ -116,12 +86,6 @@ class Leituras(models.Model):
     def get_formata_mesano_leitura(self):
         return utils.formata_mesano(self.mesano)
     get_formata_mesano_leitura.short_description = 'MES/ANO'
-
-   # def imprimir(self):
-    #    return mark_safe("""<a href=\"leiturasmes/%s\" target="_blank"><img src=\"/static/images/b_print.png\"></a>""" % self.id_leituras)
-    # return mark_safe("""<a href="{% url 'leiturasmes' leitura_id %}">\" target="_blank"><img src=\"/static/images/b_print.png\"></a>""")
-
-    # calculo
 
     def __str__(self) -> str:
         return self.mesano
@@ -168,66 +132,3 @@ class Movimento(models.Model):
         unique_together = (('mesano', 'id_contas'),)
         verbose_name = 'Movimento'
         verbose_name_plural = 'Movimentos'
-
-# class RawChangeList(ChangeList):
-#     """
-#     Extended Django ChangeList to be able show data from RawQueryset.
-#     """
-#     def get_count(self):
-#         connection = connections[self.queryset.db]
-#         with connection.cursor() as c:
-#             if connection.vendor == 'microsoft':  # CTE in subquery is not working in SQL Server
-#                 c.execute(self.queryset.raw_query)
-#                 c.execute('SELECT @@ROWCOUNT')
-#             else:
-#                 query = 'SELECT COUNT(*) FROM ({query}) AS sq'
-#                 c.execute(query.format(query=self.queryset.raw_query))
-
-#             return c.fetchone()[0]
-
-#     def get_queryset_slice(self):
-#         connection = connections[self.queryset.db]
-#         if connection.vendor == 'microsoft':
-#             # SQL Server needs ordered query for slicing
-#             if hasattr(self.queryset, 'ordered') and self.queryset.ordered:
-#                 query = '{query}'
-#             else:
-#                 query = '{query} ORDER BY 1'
-#             query += ' OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY'
-#         else:
-#             query = '{query} LIMIT {limit} OFFSET {offset}'
-
-#         return self.queryset.model.objects.raw(
-#             query.format(
-#                 query=self.queryset.raw_query,
-#                 offset=self.page_num * self.list_per_page,
-#                 limit=(self.page_num + 1) * self.list_per_page - self.page_num * self.list_per_page,
-#             )
-#         )
-
-#     def get_queryset(self, request):
-#         """
-#         Overriding to avoid applying filters in ChangeList because RawQueryset has not filter method.
-#         So any filters has to be applied manually for now.
-#         """
-#         qs = self.root_queryset
-#         if not hasattr(qs, 'count'):
-#             qs.count = lambda: self.get_count()
-#         return qs
-
-#     def get_results(self, request):
-#         if self.show_all:
-#             qs = self.queryset
-#         else:
-#             qs = self.get_queryset_slice()
-
-#         paginator = self.model_admin.get_paginator(request, self.queryset, self.list_per_page)
-
-#         self.result_count = paginator.count
-#         self.show_full_result_count = False
-#         self.show_admin_actions = True
-#         self.full_result_count = 0
-#         self.result_list = list(qs)
-#         self.can_show_all = True
-#         self.multi_page = True
-#         self.paginator = paginator

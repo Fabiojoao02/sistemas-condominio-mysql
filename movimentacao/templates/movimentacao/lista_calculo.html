@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% load humanize %}
+
+{% block conteudo %}
+<!DOCTYPE html>
+<html lang="'pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculos</title>
+</head>
+
+<body>
+    <div class="container">
+        {% bootstrap_css %}
+        {% for calculo in calculos|slice:":1" %}
+        <h1>Calculo Mês/Ano: {{ calculo.mesano }}</h1>
+        {% endfor %}
+        <table class="table table-striped">
+            {% bootstrap_messages %}
+            <thead>
+                <tr>
+                    <th scope="col">Mês Ano</th>
+                    <th scope="col">Apto/Sala</th>
+                    <th scope="col">Morador</th>
+                    <th scope="col">qde contas</th>
+                    <th scope="col">Valor</th>
+                </tr>
+            </thead>
+            </thead>
+            <tbody>
+                {% for calculo in calculos %}
+                <tr>
+                    {% if calculo.morador %}
+                    <td scope="row">{{ calculo.mesano }}</td>
+                    <td scope="row">{{ calculo.apto_sala }} </td>
+                    <td scope="row">{{ calculo.morador }} </td>
+                    <td scope="row">{{ calculo.qde_contas }}</td>
+                    <td scope="row">{{ calculo.valor }}</td>
+                    {% endif %}
+                </tr>
+                {% if calculo.mesano is None and calculo.apto_sala is None and calculo.morador is Nome %}
+                <tr>
+                    <th>
+                    <th scope="col"></th>
+                    <th scope=" col"></th>
+                    <th scope="col">TOTAL:</th>
+                    <th scope="col"> {{ calculo.valor }}</th>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <tfoot>
+
+    </tfoot>
+    <div class="=row mt-3">
+        <div class="col">
+            {% include 'parciais/_pagination.html'%}
+        </div>
+    </div>
+    {% bootstrap_javascript jquery='full' %}
+</body>
+
+</html>
+{% endblock %}

@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-lvbf&&x!wms(vk3b7pu9-!$@#&uk7lbke8=*-7@enw3mnbn=9e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'bootstrap4',
     'condominio.apps.CondominioConfig',
     'cadastro.apps.CadastroConfig',
     'conta.apps.ContaConfig',
@@ -141,9 +143,11 @@ TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
-DATE_INPUT_FORMATS = ['%d/%m/%Y']
+DATE_INPUT_FORMATS = ["%d/%m/%Y"]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -177,6 +181,10 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
 
 # Salvar a cada requisição
 SESSION_SAVE_EVERY_REQUEST = False
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Serializer - Padrão JSON
 # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

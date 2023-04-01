@@ -24,6 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+admin.AdminSite.site_header = 'Sistemas de Condomínios'
+admin.AdminSite.site_title = 'Condomínios'
+admin.AdminSite.index_title = 'Condomínios'
+
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [

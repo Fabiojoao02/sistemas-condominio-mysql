@@ -1,10 +1,11 @@
 # from django.views.generic.list import ListView
 from django.views.generic import TemplateView
+# from django.views.generic.detail import deltail
 # from django.shortcuts import render, redirect, reverse
 # from django.http import HttpResponse
 from django.contrib import messages
 # from django.views import View
-from . models import Leituras
+from . models import Leituras, Calculos
 from django.db import connection
 # from django.db.models import Count
 
@@ -17,8 +18,8 @@ class ListaLeitura(TemplateView):
         context = super(ListaLeitura, self).get_context_data(**kwargs)
         context = {
             'leituras':  Leituras.objects.raw("\
-            select concat(left(mesano,2),'/',right(mesano,4)) as mesano \
-                , id_leituras as id_leituras, \
+            select concat(left(mesano,2),'/',right(mesano,4)) as mesano, \
+                id_leituras as id_leituras, \
                 m.apto_sala as Apto_Sala, \
                 cad.nome morador, c.nome as Conta, vl_gas_m3, \
                 leitura_inicial, leitura_final, \
@@ -33,5 +34,33 @@ class ListaLeitura(TemplateView):
             join contas c on \
                 c.id_conta = l.id_contas \
         ")
+        }
+        return context
+
+
+class ListaCalculo(TemplateView):
+    template_name = 'movimentacao/lista_calculo.html'
+    paginate_by = 2
+
+    def get_context_data(self, **kwargs):
+        context = super(ListaCalculo, self).get_context_data(**kwargs)
+        context = {
+            'calculos':  Calculos.objects.raw("\
+            select id_calculos ,\
+                concat(left(mesano,2),'/',right(mesano,4)) as mesano,\
+                m.apto_sala,\
+                cad.nome morador,\
+                count(*) qde_contas,\
+                ROUND(sum(valor), 2) valor \
+            from calculos cal\
+                join contas c on\
+                c.id_conta=cal.id_contas\
+                join morador m on\
+                m.id_morador=cal.id_morador\
+                join cadastro cad on\
+                cad.id_cadastro=case when responsavel='I' \
+                then id_inquilino else id_proprietario end\
+            group by cal.mesano, m.apto_sala, cad.nome  WITH ROLLUP \
+         ")
         }
         return context
