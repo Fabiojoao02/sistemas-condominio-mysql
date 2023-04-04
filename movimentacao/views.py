@@ -2,9 +2,9 @@
 from django.views.generic import TemplateView
 # from django.views.generic.detail import deltail
 # from django.shortcuts import render, redirect, reverse
-# from django.http import HttpResponse
+from django.http import HttpResponse
 from django.contrib import messages
-# from django.views import View
+from django.views import View
 from . models import Leituras, Calculos
 from django.db import connection
 # from django.db.models import
@@ -17,60 +17,107 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 
 
-class RelatorioCalculos(View):
+class RelatorioCalculosPDF(View):
 
-    def get(sel, request, *args, **kwargs):
-        # cria um arquivo para receber os dados e gerar o PDF
-        buffer = io.BytesIO()
+    def get(self, request, *args, **kwargs):
+        # Cria um objeto HttpResponse com o tipo de conteúdo PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="mypdf.pdf"'
 
-        # cria o arquivo PDF
-        pdf = canvas.Canvas(buffer, pagesize=letter, bottomup=0)
-        # cria o texto de objetos
-        textob = pdf.beginText()
-        textob.setTextOrigin(inch, inch)
-        textob.setFont("Helvetica", 14)
+        # Cria o objeto canvas com o objeto HttpResponse
+        p = canvas.Canvas(response)
 
-        # leturas dos dados na tabela da query
-        relatorios = Calculos.objects.raw("\
-                select id_calculos, \
-                concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mesano,\
-                m.apto_sala, cad.nome morador, \
-                c.nome conta,\
-                ROUND(valor,2) valor\
-                from calculos cal\
-                join contas c on\
-                c.id_conta = cal.id_contas\
-                join morador m on\
-                m.id_morador = cal.id_morador\
-                join cadastro cad on\
-                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end\
-                where cal.mesano = 022023 and cal.id_morador = 1\
-         ")
-       # relatorios = Calculos.objects.all()
-        # lines = []
+        # Define a fonte e o tamanho da fonte
+        p.setFont("Helvetica", 10)
+        # Adiciona o texto ao cabeçalho
 
-        # for relatorio in relatorios:
-        #     lines.append(str(relatorio.id_morador))
-        #     lines.append(str(relatorio.id_contas))
-        #     lines.append(str(relatorio.valor))
-        #     lines.append(str(relatorio.mesano))
-        #     lines.append(" ")
+        # Define a cor de fundo do cabeçalho
+        # cinza claro, ajuste os valores para a cor desejada
+        p.setFillColorRGB(0.5, 0.5, 0.5)
+        # Desenha o cabeçalho com fundo colorido
+        p.rect(0, 750, 612, 50, fill=True)
 
-        # inserir dados no PRDF LOOP
-        for relatorio in relatorios:
-            # print(relatorio)
-            textob.textLine(str(relatorio.mesano))
-            textob.textLine(str(relatorio.apto_sala))
-        pdf.drawText(textob)
+        # Executa a consulta SQL bruta e itera sobre os resultados
+        with connection.cursor() as cursor:
+            cursor.execute('''select cal.mesano, m.apto_sala, cad.nome morador,  
+                c.nome conta,
+                ROUND(valor,2) valor
+                from calculos cal
+                join contas c on
+                c.id_conta = cal.id_contas
+                join morador m on
+                m.id_morador = cal.id_morador
+                join cadastro cad on
+                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+                where cal.mesano = 022023 order by mesano,m.apto_sala'''
+                           )
+            rows = cursor.fetchall()
+            y = 750
+            linha = 0
+            subtotais = {}
+            margem = 50
+            total_geral = 0
+            apto_sala_anterior = None
+            for row in rows:
 
-        # quando acabamos de inserir no dpf
-        pdf.showPage()
-        pdf.save()
+                mesano, apto_sala, morador, conta, valor = row
+                if apto_sala != apto_sala_anterior:
+                    # Adiciona um subtotal para a categoria anterior
+                    if apto_sala_anterior:
+                        subtotal = subtotais[apto_sala_anterior]
+                        p.drawString(
+                            430, y, f"Subtotal...............: {subtotal:.2f}")
+                        y -= 20
+                    # Adiciona o cabeçalho da categoria
+                    p.drawString(50, y, f"Apto/Sala: {apto_sala}")
+                    y -= 20
+                    apto_sala_anterior = apto_sala
+                if linha % 25 == 0 and linha != 0:
+                    p.drawString(
+                        250, 765, 'Relatório da Movimentação de contas')
+                    # Define a cor do texto do cabeçalho
+                    p.setFillColorRGB(1, 1, 1)  # branco
 
-        # fim, retorna o buffer para o inicio do arquivo
-        buffer.seek(0)
+                    # Adiciona uma nova página depois de cada quatro linhas
+                    p.showPage()
+                    p.setFont("Helvetica", 10)
+                    # if y < margem:
+                    #   print(y)
+                    y = 750
+                if linha % 25 == 0:
+                    # Adiciona um cabeçalho a cada quatro linhas
+                    p.drawString(50, y, "Mes Ano")
+                    p.drawString(100, y, "Apto/Sala")
+                    p.drawString(150, y, "Morador")
+                    p.drawString(350, y, "Conta")
+                    p.drawString(500, y, "Valor")
+                    y -= 20
+                # Adiciona os dados ao PDF
+                p.drawString(50, y, str(mesano))
+                p.drawString(100, y, str(apto_sala))
+                p.drawString(150, y, str(morador))
+                p.drawString(350, y, str(conta))
+                p.drawString(500, y, str(valor))
+                y -= 20
+                # Atualiza os subtotais e total geral
+                if apto_sala not in subtotais:
+                    subtotais[apto_sala] = 0
+                subtotais[apto_sala] += valor
+                total_geral += valor
+                linha += 1
 
-        return FileResponse(buffer, as_attachment=True, filename='relcal.pdf')
+            # Adiciona o subtotal final
+            subtotal = subtotais[apto_sala_anterior]
+            p.drawString(400, y, f"Subtotal.............: {subtotal:.2f}")
+            y -= 20
+
+            # Adiciona o total geral
+            p.drawString(400, y, f"Total geral..........: {total_geral:.2f}")
+
+        # Finaliza o PDF e retorna o objeto HttpResponse
+        p.showPage()
+        p.save()
+        return response
 
 
 class ListaLeitura(TemplateView):

@@ -1,22 +1,35 @@
 from django.contrib import admin
-from . import models
+# from . import models
 from django.db.models import Sum
-from .models import Leituras, Calculos, Movimento
+from .models import Leituras, Calculos, Movimento, Cadastro
+from django.db import connection
 
 
 @admin.register(Calculos)
 class CalculosAdmin(admin.ModelAdmin):
-    totalAlarmCount = Calculos.objects.filter(mesano='022023').values(
-        'mesano', 'id_morador').annotate(total_valor=Sum('valor')).order_by('mesano', 'id_morador')
+    list_display = ('mesano', 'id_morador', 'valor')
 
-    list_display = ['get_formata_mesano_calculo',  'get_apto_salaCal', 'get_nome_moradorCal', 'get_contascalculo',
-                    'get_formatvalorCal', 'publica']
-    list_filter = ['mesano', 'id_morador', 'id_contas']
-    list_per_page = 15  # lista 10 registrod=s na pagina
-    search_fields = ['mesano', 'id_morador']
+    def get_queryset(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute('''
+            select cal.mesano, cal.id_morador,
+             ROUND(sum(valor),2) valor
+            from calculos cal
+            join contas c on
+            c.id_conta = cal.id_contas
+            join morador m on
+            m.id_morador = cal.id_morador
+            join cadastro cad on
+            cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+            group by cal.mesano, cal.id_morador
+        ''')
+        results = cursor.fetchall()
+       # print([{'mesano': row[0], 'id_morador': row[1], 'valor': row[2]}
+        #      for row in results])
+        return [{'mesano': row[0], 'id_morador': row[1], 'valor': row[2]} for row in results]
 
 
-@admin.register(Leituras)
+@ admin.register(Leituras)
 class LeiturasAdmin(admin.ModelAdmin):
 
     list_display = ['id_leituras', 'get_formata_mesano_leitura', 'get_apto_salaLei', 'get_nome_moradorLei', 'get_contasleitura',
@@ -24,7 +37,7 @@ class LeiturasAdmin(admin.ModelAdmin):
     list_per_page = 15  # lista 10 registrod=s na pagina
 
 
-@admin.register(Movimento)
+@ admin.register(Movimento)
 class MovimentoAdmin(admin.ModelAdmin):
     list_display = ['get_formata_mesano_movimento', 'get_contasmovimento',
                     'get_tipo_calculomov', 'get_formatValorMov']
