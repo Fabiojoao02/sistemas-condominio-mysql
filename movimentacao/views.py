@@ -4,17 +4,24 @@ from django.views.generic import TemplateView
 # from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
 from django.contrib import messages
-from django.views import View
+from django.views.generic import View
 from . models import Leituras, Calculos
 from django.db import connection
 # from django.db.models import
-import io
+from io import BytesIO
 from django.http import FileResponse
 from django.views.generic import View
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from utils import utils
+from PIL import Image
+from reportlab.lib.utils import ImageReader
+from django.urls import reverse
 
 
 class RelatorioCalculosPDF(View):
@@ -22,25 +29,33 @@ class RelatorioCalculosPDF(View):
     def get(self, request, *args, **kwargs):
         # Cria um objeto HttpResponse com o tipo de conteúdo PDF
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="mypdf.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="relatoriocalculospdf.pdf"'
 
         # Cria o objeto canvas com o objeto HttpResponse
         p = canvas.Canvas(response)
 
         # Define a fonte e o tamanho da fonte
-        p.setFont("Helvetica", 10)
+        p.setFont('Helvetica-Bold', 14)
         # Adiciona o texto ao cabeçalho
+
+        p.drawString(
+            180, 765, 'Relatório da Movimentação de contas Mês Ano: 02/2023')
+        p.drawString(
+            180, 765, '')
+        # Define a cor do texto do cabeçalho
+       # p.setFont('Helvetica', 14)
 
         # Define a cor de fundo do cabeçalho
         # cinza claro, ajuste os valores para a cor desejada
-        p.setFillColorRGB(0.5, 0.5, 0.5)
+        # p.setFillColorRGB(0.5, 0.5, 0.5)
         # Desenha o cabeçalho com fundo colorido
-        p.rect(0, 750, 612, 50, fill=True)
+        # p.rect(0, 750, 612, 50, fill=True)
 
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
-            cursor.execute('''select cal.mesano, m.apto_sala, cad.nome morador,  
+            cursor.execute('''select cal.mesano, m.apto_sala, cad.nome morador,
                 c.nome conta,
+                m.foto,
                 ROUND(valor,2) valor
                 from calculos cal
                 join contas c on
@@ -49,55 +64,66 @@ class RelatorioCalculosPDF(View):
                 m.id_morador = cal.id_morador
                 join cadastro cad on
                 cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-                where cal.mesano = 022023 order by mesano,m.apto_sala'''
+                where cal.mesano = 022023 order by mesano,m.apto_sala,id_contas'''
                            )
             rows = cursor.fetchall()
             y = 750
             linha = 0
             subtotais = {}
-            margem = 50
+            # margem = 50
             total_geral = 0
             apto_sala_anterior = None
+            morador_anterior = None
             for row in rows:
-
-                mesano, apto_sala, morador, conta, valor = row
+                mesano, apto_sala, morador, conta, foto, valor = row
                 if apto_sala != apto_sala_anterior:
                     # Adiciona um subtotal para a categoria anterior
                     if apto_sala_anterior:
                         subtotal = subtotais[apto_sala_anterior]
+                        p.setFont('Helvetica-Bold', 14)
                         p.drawString(
-                            430, y, f"Subtotal...............: {subtotal:.2f}")
+                            410, y, f'Subtotal...............: {subtotal:.2f}')
                         y -= 20
                     # Adiciona o cabeçalho da categoria
-                    p.drawString(50, y, f"Apto/Sala: {apto_sala}")
-                    y -= 20
-                    apto_sala_anterior = apto_sala
-                if linha % 25 == 0 and linha != 0:
                     p.drawString(
-                        250, 765, 'Relatório da Movimentação de contas')
+                        50, y, f'Apto/Sala: {apto_sala} - {morador} ')
+                    p.drawString(350, y, 'Conta')
+                    p.drawString(550, y, 'Valor')
+                    y -= 20
+                    p.setFont('Helvetica', 14)
+                    apto_sala_anterior = apto_sala
+                    morador_anterior = morador
+                if linha % 25 == 0 and linha != 0:
+                    p.setFont('Helvetica-Bold', 14)
+                    p.drawString(
+                        180, 765, 'Relatório da Movimentação de contas Mês Ano: 02/2023')
+                    p.setFont('Helvetica', 14)
                     # Define a cor do texto do cabeçalho
-                    p.setFillColorRGB(1, 1, 1)  # branco
-
                     # Adiciona uma nova página depois de cada quatro linhas
                     p.showPage()
-                    p.setFont("Helvetica", 10)
+                    p.setFont('Helvetica', 14)
                     # if y < margem:
                     #   print(y)
                     y = 750
                 if linha % 25 == 0:
+                    # Desenha o cabeçalho com fundo colorido
+                    p.setFont('Helvetica-Bold', 14)
+                    p.drawString(
+                        180, 765, 'Relatório da Movimentação de contas Mês Ano: 02/2023')
+                    p.setFont('Helvetica', 14)
                     # Adiciona um cabeçalho a cada quatro linhas
-                    p.drawString(50, y, "Mes Ano")
-                    p.drawString(100, y, "Apto/Sala")
-                    p.drawString(150, y, "Morador")
-                    p.drawString(350, y, "Conta")
-                    p.drawString(500, y, "Valor")
+                    # p.drawString(50, y,  'Mes Ano')
+                    # p.drawString(100, y, 'Apto/Sala')
+                    # p.drawString(150, y, 'Morador')
+                    # p.drawString(350, y, 'Conta')
+                    # p.drawString(500, y, 'Valor')
                     y -= 20
                 # Adiciona os dados ao PDF
-                p.drawString(50, y, str(mesano))
-                p.drawString(100, y, str(apto_sala))
-                p.drawString(150, y, str(morador))
+                # p.drawString(50, y, str(mesano))
+                # p.drawString(100, y, str(apto_sala))
+                # p.drawString(150, y, str(morador))
                 p.drawString(350, y, str(conta))
-                p.drawString(500, y, str(valor))
+                p.drawString(550, y, f'{utils.formata_valor(valor)}')
                 y -= 20
                 # Atualiza os subtotais e total geral
                 if apto_sala not in subtotais:
@@ -108,12 +134,17 @@ class RelatorioCalculosPDF(View):
 
             # Adiciona o subtotal final
             subtotal = subtotais[apto_sala_anterior]
-            p.drawString(400, y, f"Subtotal.............: {subtotal:.2f}")
+            p.setFont('Helvetica-Bold', 14)
+            p.drawString(
+                410, y, f'Subtotal.............: {utils.formata_valor(subtotal)}')
             y -= 20
 
             # Adiciona o total geral
-            p.drawString(400, y, f"Total geral..........: {total_geral:.2f}")
-
+            p.drawString(
+                # 310, y, f'Total geral..........: {utils.formata_valor(total_geral)}')
+                410, y, f'Total geral..........: {utils.formata_valor(total_geral)}')
+            p.setFont('Helvetica', 14)
+ # f'{val:.2f}'.replace('.', ',')
         # Finaliza o PDF e retorna o objeto HttpResponse
         p.showPage()
         p.save()
@@ -173,4 +204,5 @@ class ListaCalculo(TemplateView):
             group by cal.mesano, m.apto_sala, cad.nome  WITH ROLLUP \
          ")
         }
+        # url = reverse('relatorio_calculos_pdf')
         return context

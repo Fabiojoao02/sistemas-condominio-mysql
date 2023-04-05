@@ -9,6 +9,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Calculos</title>
+    <a class="navbar-brand" href="{% url 'movimentacao:relatorio_calculos_pdf' %}">Relatório detalhado em PDF</a>
+    <a href="{% url 'movimentacao:relatorio_calculos_pdf' %}">
+        <img src="static/images/b_print.png" alt="Descrição da imagem">
+    </a>
+
 </head>
 
 <body>
@@ -37,7 +42,7 @@
                     <td scope="row">{{ calculo.apto_sala }} </td>
                     <td scope="row">{{ calculo.morador }} </td>
                     <td scope="row">{{ calculo.qde_contas }}</td>
-                    <td scope="row">{{ calculo.valor }}</td>
+                    <td scope="row">{{ calculo.valor|intcomma }}</td>
                     {% endif %}
                 </tr>
                 {% if calculo.mesano is None and calculo.apto_sala is None and calculo.morador is Nome %}

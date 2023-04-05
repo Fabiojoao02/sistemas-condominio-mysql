@@ -7,7 +7,8 @@ app_name = 'movimentacao'
 urlpatterns = [
     path('', ListaCalculo.as_view(), name='listacalculo'),
     path('listaleitura/', ListaLeitura.as_view(), name='listaleitura'),
-    path('relatoriocalculospdf/', RelatorioCalculosPDF.as_view(),
-         name='relatoriocalculospdf'),
+    path('relatorio_calculos_pdf/', RelatorioCalculosPDF.as_view(),
+         name='relatorio_calculos_pdf'),
+
 
 ]
