@@ -9,12 +9,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Calculos</title>
-    <a class="navbar-brand" href="{% url 'movimentacao:relatorio_calculos_pdf' %}">Relatório detalhado em PDF</a>
-    <a href="{% url 'movimentacao:relatorio_calculos_pdf' %}">
-        <img src="static/images/b_print.png" alt="Descrição da imagem">
-    </a>
-
 </head>
+
+
+
+<a href="{% url 'movimentacao:relatorio_calculos_pdf' %}">
+    <img data-pdf="icone" src="static/images/PDF_icone.png" alt="Descrição da imagem">
+</a>
+
+
+
 
 <body>
     <div class="container">
