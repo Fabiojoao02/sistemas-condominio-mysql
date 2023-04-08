@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'conta.apps.ContaConfig',
     'tipocalculo.apps.TipocalculoConfig',
     'movimentacao.apps.MovimentacaoConfig',
+    'accounts.apps.AccountsConfig',
 
 
 

@@ -22,11 +22,12 @@ from utils import utils
 from PIL import Image
 from reportlab.lib.utils import ImageReader
 from django.urls import reverse
+from django.db.models import Q
 
 
 class RelatorioCalculosPDF(View):
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request,  *args, **kwargs):
         # Cria um objeto HttpResponse com o tipo de conteúdo PDF
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="relatoriocalculospdf.pdf"'
@@ -52,6 +53,7 @@ class RelatorioCalculosPDF(View):
         # p.rect(0, 750, 612, 50, fill=True)
 
         # Executa a consulta SQL bruta e itera sobre os resultados
+        mesano_pk = '022023'
         with connection.cursor() as cursor:
             cursor.execute('''select cal.mesano, m.apto_sala, cad.nome morador,
                 c.nome conta,
@@ -64,7 +66,7 @@ class RelatorioCalculosPDF(View):
                 m.id_morador = cal.id_morador
                 join cadastro cad on
                 cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-                where cal.mesano = 022023 order by mesano,m.apto_sala,id_contas'''
+                where cal.mesano = ''' + str(mesano_pk) + ''' order by mesano,m.apto_sala,id_contas'''
                            )
             rows = cursor.fetchall()
             y = 750
@@ -206,3 +208,22 @@ class ListaCalculo(TemplateView):
         }
         # url = reverse('relatorio_calculos_pdf')
         return context
+
+
+class Busca(ListaCalculo):
+    def get_queryset(self, *args, **kwargs):
+        termo = self.request.GET.get('termo') or self.request.session['termo']
+        qs = super().get_queryset(*args, **kwargs)
+
+        if not termo:
+            return qs
+
+        self.request.session['termo'] = termo
+
+        qs = qs.filter(
+            Q(apto_sala__icontains=termo) |
+            Q(morador__icontains=termo)
+        )
+
+        self.request.session.save()
+        return qs
