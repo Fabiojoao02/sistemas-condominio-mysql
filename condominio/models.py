@@ -11,7 +11,7 @@ from django.db import models
 from django.conf import settings
 from django.forms import ValidationError
 from cadastro.models import Cadastro, Estado
-
+from django.utils.safestring import mark_safe
 import re
 from utils.validacpf import valida_cpf
 
@@ -163,6 +163,9 @@ class Condominio(models.Model):
 
     def __str__(self) -> str:
         return self.nome
+
+    def vercondominio(self):
+        return mark_safe("""<a href=\"/listacondominio/%s/\" target="_blank">Lista Condominio</a>""" % self.id_condominio)
 
 
 class DjangoAdminLog(models.Model):

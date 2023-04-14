@@ -10,7 +10,7 @@ class BlocoInLine(admin.TabularInline):
 
 class CondominioAdmin(admin.ModelAdmin):
     list_display = ['nome', 'cidade', 'estado',
-                    'bairro', 'mostrar',  'foto_preview']
+                    'bairro', 'mostrar',  'foto_preview', 'vercondominio']
     # list_display_links = ['nome', 'Cidade', 'Estado']
     # list_filter = ['nome', 'Cidade', 'Estado']
     list_per_page = 10  # lista 10 registrod=s na pagina

@@ -10,7 +10,7 @@ from django.db import connection
 # from django.db.models import
 from io import BytesIO
 from django.http import FileResponse
-from django.views.generic import View
+
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
