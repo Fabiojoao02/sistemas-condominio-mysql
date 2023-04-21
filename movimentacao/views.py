@@ -1,7 +1,7 @@
 # from django.views.generic.list import ListView
 from django.views.generic import TemplateView
 # from django.views.generic.detail import deltail
-# from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
 from django.contrib import messages
 from django.views.generic import View
@@ -23,6 +23,13 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from django.urls import reverse
 from django.db.models import Q
+
+
+# def index(request):
+#    context = {
+#        'nome_pagina': 'Início da dashboard',
+#    }
+#    return render(request, 'index.html', context)
 
 
 class RelatorioCalculosPDF(View):

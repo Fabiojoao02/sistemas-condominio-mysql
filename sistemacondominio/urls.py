@@ -17,12 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from condominio.views import index
 
 
 urlpatterns = [
-    path('movimentacao/', include('movimentacao.urls')),
+    # path('', include('movimentacao.urls')),
+    path('', index, name='index'),
     #    path('condominio/', include('condominio.urls')),
-    path('', include('accounts.urls')),
+    # path('', include('accounts.urls')),
     # path('listacondominio/', include('listacondominio.urls')),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
