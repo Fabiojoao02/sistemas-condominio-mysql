@@ -19,10 +19,8 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-
-@login_required(redirect_field_name='redirect_to')
-def listacondominio(request, id=None, *args, **kwargs):
-
+#@login_required(redirect_field_name='redirect_to')
+def listacondominio(request, id):
     context = {
         'calculos':  Condominio.objects.raw('''
             select c.id_condominio, c.nome nome_condominio, id_bloco, b.nome nome_bloco 
@@ -34,4 +32,4 @@ def listacondominio(request, id=None, *args, **kwargs):
         ''')
     }
     # url = reverse('relatorio_calculos_pdf')
-    return context
+    return render(request, 'listacondominio.html', context)

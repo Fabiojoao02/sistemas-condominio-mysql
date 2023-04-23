@@ -16,6 +16,7 @@ import re
 from utils.validacpf import valida_cpf
 
 
+
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
