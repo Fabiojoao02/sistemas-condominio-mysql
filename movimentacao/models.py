@@ -3,7 +3,7 @@ from django.db.models import Avg, Count, Min, Sum
 from conta.models import Contas
 from tipocalculo.models import TipoCalculo
 from cadastro.models import Cadastro
-from condominio.models import Morador
+from condominio.models import Morador, Bloco
 from django.utils.safestring import mark_safe
 from utils import utils
 from django.shortcuts import render
@@ -100,6 +100,8 @@ class Leituras(models.Model):
 class Movimento(models.Model):
     id_movimento = models.AutoField(primary_key=True)
     mesano = models.CharField(max_length=6)
+    id_bloco = models.ForeignKey(
+        Bloco, models.DO_NOTHING, db_column='id_bloco')
     id_contas = models.ForeignKey(
         Contas, models.DO_NOTHING, db_column='id_contas')
     valor = models.FloatField()
