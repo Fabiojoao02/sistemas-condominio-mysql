@@ -77,34 +77,33 @@
     
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
-            <h6 class="m-0 font-weight-bold text-primary">Condomínio --> Bloco</h6>
-        </div>
+            {%for l in condominio1 %}
+               <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} </h6>
+            {% endfor %}
+         </div>
+
 
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
-                        <th>Cod_Condo</th>
-                        <th>Nome Condomínio</th>
-                        <th>Cod-Bloco</th>
+                        <th>Codigo</th>
                         <th>Bloco</th>
                         <th>Mais informações</th>
                     </thead>
 
                     <tbody>
-                        <tr>
-                            {%for lista in condominio %}
-                            <td>{{ lista.id_condominio }}</td>
-                            <td>{{ lista.nome_condominio }}</td>
+                        {%for lista in condominio %}
+                            <tr>
                             <td>{{ lista.id_bloco }}</td>
                             <td>{{ lista.nome_bloco }}</td>
                             <td>
-                                <a href="{% url 'listaconblomorador' id=lista.id_bloco%}">
+                                <a href="{% url 'listaconblomov' id=lista.id_bloco%}">
                                     Ver informações
                                 </a>
                             </td>
-                            {% endfor %}
                         </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>

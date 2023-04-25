@@ -83,7 +83,7 @@
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
-                        <th>Cod</th>
+                        <th>Codigo</th>
                         <th>Nome Condomínio</th>
                         <th>Cidade</th>
                         <th>Bairro</th>
@@ -92,9 +92,9 @@
                     </thead>
 
                     <tbody>
-                        <tr>
-                            {%for lista in listcondo %}
-                            <td>{{ lista.id_condominio }}</td>
+                        {%for lista in listcondo %}
+                            <tr>
+                                <td>{{ lista.id_condominio }}</td>
                             <td>{{ lista.nome_condominio }}</td>
                             <td>{{ lista.cidade }}</td>
                             <td>{{ lista.bairro }}</td>
@@ -104,8 +104,8 @@
                                     Ver informações
                                 </a>
                             </td>
-                            {% endfor %}
                         </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>

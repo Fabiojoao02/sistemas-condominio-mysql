@@ -80,8 +80,9 @@
 
    <div class="card shadow mb-4">
       <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
-         {%for l in calculo1 %}
-            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }}  --> Mês/Ano: {{ l.mes_ano }}</h6>
+         {%for l in conta1 %}
+            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }} --> Apto/Sala: {{ l.apto_sala }}-{{ l.morador }}  --> 
+               Mês/Ano: {{ l.mes_ano }}</h6>
          {% endfor %}
       </div>
 
@@ -90,37 +91,28 @@
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Apto/Sala</th>
-                  <th>Morador</th>
-                  <th>Qde Contas</th>
-                  <th>Valor Total</th>
-                  <th>Mais informações</th>
+                  <th>Codigo</th>
+                  <th>Conta</th>
+                  <th>Valor</th>
                </thead>
 
                <tbody>
-                  {%for lista in calculo %}
+                  {%for lista in conta %}
                      <tr>
-                        <td>{{ lista.apto_sala }}</td>
-                        <td>{{ lista.morador }}</td>
-                        <td>{{ lista.qde_contas }}</td>
+                        <td>{{ lista.id_conta }}</td>
+                        <td>{{ lista.nome_conta }}</td>
                         <td>{{ lista.valor|floatformat:2|intcomma }}</td>
-                        <td>
-                           <a href="{% url 'listaconta' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador %}">
-                              Ver informações
-                        </a>
-                        </td>
                      </tr>
                   {% endfor %}
-                  {%for l in calculo1 %}
+                  {%for l in conta1 %}
                   <tr>
-                     <td></td>
                      <td></td>
                      <td class="m-0 font-weight-bold text-primary">Total</td>
                   <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
                   </tr>
    
                   {% endfor %}
-            
+                        
 
                </tbody>
             </table>

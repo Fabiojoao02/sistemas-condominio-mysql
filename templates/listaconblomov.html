@@ -79,49 +79,36 @@
    </div>
 
    <div class="card shadow mb-4">
+
       <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
-         {%for l in calculo1 %}
-            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }}  --> Mês/Ano: {{ l.mes_ano }}</h6>
+         {%for l in condominio1 %}
+            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }}  </h6>
          {% endfor %}
       </div>
+
 
 
       <div class="card-body">
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Apto/Sala</th>
-                  <th>Morador</th>
-                  <th>Qde Contas</th>
+                  <th>Mês/Ano</th>
                   <th>Valor Total</th>
                   <th>Mais informações</th>
                </thead>
 
                <tbody>
-                  {%for lista in calculo %}
+                  {%for lista in condominio %}
                      <tr>
-                        <td>{{ lista.apto_sala }}</td>
-                        <td>{{ lista.morador }}</td>
-                        <td>{{ lista.qde_contas }}</td>
-                        <td>{{ lista.valor|floatformat:2|intcomma }}</td>
+                        <td>{{ lista.mes_ano }}</td>
+                        <td>{{ lista.valor_total|floatformat:2|intcomma }}</td>
                         <td>
-                           <a href="{% url 'listaconta' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador %}">
+                           <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
                               Ver informações
                         </a>
                         </td>
                      </tr>
                   {% endfor %}
-                  {%for l in calculo1 %}
-                  <tr>
-                     <td></td>
-                     <td></td>
-                     <td class="m-0 font-weight-bold text-primary">Total</td>
-                  <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
-                  </tr>
-   
-                  {% endfor %}
-            
-
                </tbody>
             </table>
          </div>
