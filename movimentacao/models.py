@@ -62,13 +62,13 @@ class Leituras(models.Model):
     id_contas = models.ForeignKey(
         Contas, models.DO_NOTHING, db_column='id_contas')
     dt_leitura = models.DateField()
-    vl_gas_m3 = models.FloatField()
+    valor_m3 = models.FloatField()
     leitura_inicial = models.FloatField()
     leitura_final = models.FloatField()
 
-    def get_formatvlgasm3(self):
+    def get_formatvalorm3(self):
         return f'{self.vl_gas_m3:.2f}'.replace('.', ',')
-    get_formatvlgasm3.short_description = 'Vl gas m3'
+    get_formatvalorm3.short_description = 'Valor m3'
 
     def get_contasleitura(self):
         return '%s' % (self.id_contas.nome)

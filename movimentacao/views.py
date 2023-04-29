@@ -174,7 +174,7 @@ class ListaLeitura(TemplateView):
                 cad.nome morador, c.nome as Conta, vl_gas_m3, \
                 leitura_inicial, leitura_final, \
                 ROUND((leitura_final - leitura_inicial),3) as Consumo_m3, \
-                ROUND(((leitura_final - leitura_inicial) * vl_gas_m3),2) Valor,\
+                ROUND(((leitura_final - leitura_inicial) * valor_m3),2) Valor,\
                 cast(dt_leitura as date) dt_leitura \
             from leituras  l \
             join morador m on \

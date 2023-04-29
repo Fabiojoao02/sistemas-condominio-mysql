@@ -17,10 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta
+from django.contrib.auth import views as auth_views
+from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura
 
 urlpatterns = [
     # path('', include('movimentacao.urls')),
+    path('login/', auth_views.LoginView .as_view(template_name='Login.html'), name='login'),
+    path('logout/', auth_views.LogoutView .as_view(template_name='Logout.html'), name='logout'),
     path('', index, name='index'),
     path('listacondominio/<int:id>/', listacondominio, name='listacondominio'),
     path('listaconblomov/<int:id>/',
@@ -29,6 +32,8 @@ urlpatterns = [
          listaconblomorador, name='listaconblomorador'),
     path('listaconta/<int:idb>/<str:ma>/<int:id_morador>/',
          listaconta, name='listaconta'),
+    path('listaleitura/<int:idb>/<str:ma>/<int:id_morador>/',
+         listaleitura, name='listaleitura'),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -113,6 +113,19 @@
             </table>
          </div>
       </div>
+
+
+      <div class="text-right">
+         {%for lista in condominio1  %}
+         <a href={% url 'listacondominio' id=lista.id_bloco %} class="btn btn-secondary text-white" type="button">
+            <span class="text"><center>Voltar</center>
+            </a>      
+            {% endfor %}
+         </div>      
+
+
+
+
    </div>
 </div>
 

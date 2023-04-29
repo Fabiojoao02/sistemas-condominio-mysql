@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'widget_tweaks',
     'bootstrap4',
     'condominio.apps.CondominioConfig',
     'cadastro.apps.CadastroConfig',
@@ -207,3 +208,6 @@ INTERNAL_IPS = [
 # Para sessions em arquivos ao invés da base de dados
 # SESSION_ENGINE = "django.contrib.sessions.backends.file"
 # SESSION_FILE_PATH = '/home/luizotavio/Desktop/temp'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'

@@ -80,102 +80,45 @@
 
    <div class="card shadow mb-4">
       <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
-         {%for l in conta1 %}
-            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }} --> Apto/Sala: {{ l.apto_sala }}-{{ l.morador }}  --> 
-               Mês/Ano: {{ l.mes_ano }}</h6>
-         {% endfor %}
+         {%for l in leitura %}
+            <h6 class="m-0 font-weight-bold text-primary">Condomínio: {{ l.id_condominio }}-{{ l.nome_condominio }} --> Bloco: {{ l.id_bloco }}-{{ l.nome_bloco }} --> Apto/Sala: {{ l.apto_sala }}-{{ l.morador }}</h6>
+               {% endfor %}
       </div>
-
-
+      <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
+         {%for l in leitura %}
+               <h6 class="m-30 font-weight-bold text-primary">Leitura de {{ l.conta }} - Valor do m3 r$: {{ l.valor_m3 }} --> Data leitura: {{ l.dt_leitura }}--> Referente Mês/Ano: {{ l.mes_ano }}</h6>
+               {% endfor %}
+      </div>
       <div class="card-body">
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Codigo</th>
-                  <th>Conta</th>
-                  <th>Valor</th>
+                  <th>Leitura Inicial</th>
+                  <th>Leitura Final</th>
+                  <th>Consumo M3</th>
+                  <th>Valor Consumo</th>
                </thead>
 
                <tbody>
-                  {%for lista in conta %}
+                  {%for lista in leitura %}
                      <tr>
-                        {% if lista.tem_leitura %}
-                              <td><a href="{% url 'listaleitura' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador%}">
-                                 {{ lista.id_conta }}
-                              </td>
-                        </a>
-                        {%else%}
-                           <td>{{ lista.id_conta }}</td>
-                        {%endif%}   
-                        <td>{{ lista.nome_conta }}</td>
-                        <td>{{ lista.valor|floatformat:2|intcomma }}</td>
+                        <td>{{ lista.leitura_inicial }}</td>
+                        <td>{{ lista.leitura_final }}</td>
+                        <td>{{ lista.consumo_m3|floatformat:3|intcomma }}</td>
+                        <td>{{ lista.vl_consumo|floatformat:2|intcomma }}</td>
                      </tr>
                   {% endfor %}
-                  {%for l in conta1 %}
-                  <tr>
-                     <td></td>
-                     <td class="m-0 font-weight-bold text-primary">Total</td>
-                  <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
-                  </tr>
-   
-                  {% endfor %}
-                        
-
                </tbody>
             </table>
          </div>
       </div>
 
-      {%if leitura %}
-
-         <div class="card shadow mb-4">
-
-            <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
-               {%for l in leitura %}
-                  <h6 class="m-30 font-weight-bold text-primary">Leitura de {{ l.conta }} - Valor do m3: {{ l.valor_m3 }} --> Data leitura: {{ l.dt_leitura }}--> Referente Mês/Ano: {{ l.mes_ano }}</h6>
-               {% endfor %}
-            </div>
-            <div class="card-body">
-               <div class="table-responsive">
-                  <table class="table table-bordered">
-                     <thead>
-                        <th>Leitura Inicial</th>
-                        <th>Leitura Final</th>
-                        <th>Consumo M3</th>
-                        <th>Valor Consumo</th>
-                     </thead>
-      
-                     <tbody>
-                        {%for lista in leitura %}
-                           <tr>
-                              <td>{{ lista.leitura_inicial }}</td>
-                              <td>{{ lista.leitura_final }}</td>
-                              <td>{{ lista.consumo_m3|floatformat:3|intcomma }}</td>
-                              <td>{{ lista.vl_consumo|floatformat:2|intcomma }}</td>
-                           </tr>
-                        {% endfor %}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-                           
-
-                  </tbody>
-               </table>
-            </div>
-         </div>
-      {% endif %}   
-
       <div class="text-right">
-
-         {%for lista in conta1  %}
-         <a href={% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano  %} class="btn btn-secondary text-white" type="button">
+         {%for lista in leitura %}
+         <a href={% url 'listaconta' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador %} class="btn btn-secondary text-white" type="button">
             <span class="text"><center>Voltar</center>
             </a>      
             {% endfor %}
-         </div>
-
-
 
 
 
