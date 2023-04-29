@@ -52,6 +52,9 @@ class Calculos(models.Model):
         db_table = 'calculos'
         verbose_name = 'Calculo'
         verbose_name_plural = 'Calculos'
+        ordering = [
+            'mesano', 'id_morador', 'id_contas'
+        ]
 
 
 class Leituras(models.Model):
@@ -67,7 +70,7 @@ class Leituras(models.Model):
     leitura_final = models.FloatField()
 
     def get_formatvalorm3(self):
-        return f'{self.vl_gas_m3:.2f}'.replace('.', ',')
+        return f'{self.valor_m3:.2f}'.replace('.', ',')
     get_formatvalorm3.short_description = 'Valor m3'
 
     def get_contasleitura(self):
