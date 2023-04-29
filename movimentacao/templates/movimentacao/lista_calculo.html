@@ -13,8 +13,8 @@
 
 
 
-<a href="{% url 'movimentacao:relatorio_calculos_pdf' %}">
-    <img data-pdf="icone" src="static/images/PDF_icone.png" alt="Descrição da imagem">
+<a href="#">
+    <img data-pdf="icone" src="templates/static/images/PDF_icone.png" alt="Descrição da imagem">
 </a>
 
 
@@ -66,9 +66,7 @@
 
     </tfoot>
     <div class="=row mt-3">
-        <div class="col">
-            {% include 'parciais/_pagination.html'%}
-        </div>
+
     </div>
     {% bootstrap_javascript jquery='full' %}
 </body>

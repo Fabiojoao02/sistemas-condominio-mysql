@@ -132,7 +132,7 @@
 
             <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
                {%for l in leitura %}
-                  <h6 class="m-30 font-weight-bold text-primary">Leitura de {{ l.conta }} - Valor do m3: {{ l.valor_m3 }} --> Data leitura: {{ l.dt_leitura }}--> Referente Mês/Ano: {{ l.mes_ano }}</h6>
+                  <h6 class="m-30 font-weight-bold text-primary">Leitura de {{ l.conta }} - Valor do m3: {{ l.valor_m3 }} --> Data leitura: {{ l.dt_leitura|date:"d/m/Y"  }} --> Referente Mês/Ano: {{ l.mes_ano }}</h6>
                {% endfor %}
             </div>
             <div class="card-body">

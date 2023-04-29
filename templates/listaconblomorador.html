@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
 {% block conteudo %}
 
 <div class="container-fluid">
@@ -95,6 +96,7 @@
                   <th>Qde Contas</th>
                   <th>Valor Total</th>
                   <th>Mais informações</th>
+                  <th>PDF</th>
                </thead>
 
                <tbody>
@@ -108,6 +110,14 @@
                            <a href="{% url 'listaconta' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador %}">
                               Ver informações
                         </a>
+                        <td>
+
+                           <a href="{% url 'gerarPDF' ma=lista.mesano id_morador=lista.id_morador %}">
+
+                              <img src="{% static 'images/PDF_icone.png' %}" alt="Descrição da imagem">
+
+                          </a>
+                        </a>
                         </td>
                      </tr>
                   {% endfor %}
@@ -117,6 +127,7 @@
                      <td></td>
                      <td class="m-0 font-weight-bold text-primary">Total</td>
                   <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
+                  <td></td>
                   </tr>
    
                   {% endfor %}

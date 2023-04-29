@@ -18,12 +18,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura
+from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura, GerarPDF
+from movimentacao.views import ListaCalculo
 
 urlpatterns = [
     # path('', include('movimentacao.urls')),
-    path('login/', auth_views.LoginView .as_view(template_name='Login.html'), name='login'),
-    path('logout/', auth_views.LogoutView .as_view(template_name='Logout.html'), name='logout'),
+    path('login/', auth_views.LoginView.as_view(template_name='Login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='Logout.html'), name='logout'),
+
+    path('gerarPDF/<str:ma>/<int:id_morador>/',
+         GerarPDF.as_view(), name='gerarPDF'),
+
     path('', index, name='index'),
     path('listacondominio/<int:id>/', listacondominio, name='listacondominio'),
     path('listaconblomov/<int:id>/',
@@ -35,6 +40,10 @@ urlpatterns = [
     path('listaleitura/<int:idb>/<str:ma>/<int:id_morador>/',
          listaleitura, name='listaleitura'),
     path('admin/', admin.site.urls),
+
+    # path('listacalculo/',
+    #    ListaCalculo.as_view(), name='listacalculo'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.AdminSite.site_header = 'Sistemas de Condomínios'
