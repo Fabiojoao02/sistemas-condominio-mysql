@@ -9,6 +9,10 @@ from PIL import Image
 from django.views.generic import View
 from reportlab.lib.colors import red, black, blue, gray, green
 
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import Table, TableStyle
+
 
 @login_required(redirect_field_name='redirect_to')
 def index(request):
@@ -272,6 +276,15 @@ class GerarPDF(View):
         p.setFont('Helvetica-Bold', 14)
         # Adiciona o texto ao cabeçalho
 
+        # Define um estilo para as células da primeira coluna
+        style = TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),  # Define o nome da fonte
+            ('FONTSIZE', (0, 0), (-1, -1), 12),  # Define o tamanho da fonte
+            ('TEXTCOLOR', (0, 0), (-1, -1), black),  # Define a cor do texto
+            # Define o alinhamento das células da primeira coluna
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ])
+
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
             cursor.execute(
@@ -295,6 +308,7 @@ class GerarPDF(View):
 
             )
             rows = cursor.fetchall()
+
             y = 750
             linha = 0
             subtotais = {}
@@ -349,7 +363,9 @@ class GerarPDF(View):
                     y -= 20
                 # Adiciona os dados ao PDF
                 p.drawString(150, y, str(conta))
-                p.drawString(450, y, f'{utils.formata_valor(valor)}')
+                # rows.setStyle(style)  # Aplica o estilo à tabela
+                p.drawString(
+                    450, y, f'{utils.formata_valor(valor)}')
                 y -= 20
                 # Atualiza os subtotais e total geral
                 if apto_sala not in subtotais:

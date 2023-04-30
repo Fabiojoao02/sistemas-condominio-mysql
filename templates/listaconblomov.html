@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
 {% block conteudo %}
 
 <div class="container-fluid">
@@ -92,19 +93,20 @@
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Mês/Ano</th>
-                  <th>Valor Total</th>
-                  <th>Mais informações</th>
+                  <th style="text-align: center;">Mês/Ano</th>
+                  <th style="text-align: center;">Valor Total</th>
+                  <th style="text-align: center;">Mais informações</th>
                </thead>
 
                <tbody>
                   {%for lista in condominio %}
                      <tr>
-                        <td>{{ lista.mes_ano }}</td>
-                        <td>{{ lista.valor_total|floatformat:2|intcomma }}</td>
-                        <td>
+                        <td style="text-align: center;">{{ lista.mes_ano }}</td>
+                        <td style="text-align: right;">{{ lista.valor_total|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center;">
                            <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
-                              Ver informações
+                              <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+
                         </a>
                         </td>
                      </tr>

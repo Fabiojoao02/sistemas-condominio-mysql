@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block  conteudo %}
 
@@ -87,19 +88,19 @@
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
-                        <th>Codigo</th>
-                        <th>Bloco</th>
-                        <th>Mais informações</th>
+                        <th style="text-align: center;">Codigo</th>
+                        <th style="text-align: center;">Bloco</th>
+                        <th style="text-align: center;">Mais informações</th>
                     </thead>
 
                     <tbody>
                         {%for lista in condominio %}
                             <tr>
-                            <td>{{ lista.id_bloco }}</td>
-                            <td>{{ lista.nome_bloco }}</td>
-                            <td>
+                            <td style="text-align: center;">{{ lista.id_bloco }}</td>
+                            <td style="text-align: center;">{{ lista.nome_bloco }}</td>
+                            <td style="text-align: center;">
                                 <a href="{% url 'listaconblomov' id=lista.id_bloco%}">
-                                    Ver informações
+                                    <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
                                 </a>
                             </td>
                         </tr>

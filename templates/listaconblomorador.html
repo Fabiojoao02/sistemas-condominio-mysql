@@ -91,12 +91,12 @@
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Apto/Sala</th>
-                  <th>Morador</th>
-                  <th>Qde Contas</th>
-                  <th>Valor Total</th>
-                  <th>Mais informações</th>
-                  <th>PDF</th>
+                  <th style="text-align: center;">Apto/Sala</th>
+                  <th style="text-align: center;">Morador</th>
+                  <th style="text-align: center;">Qde Contas</th>
+                  <th style="text-align: center;">Valor Total</th>
+                  <th style="text-align: center;">Mais informações</th>
+                  <th style="text-align: center;">PDF</th>
                </thead>
 
                <tbody>
@@ -104,17 +104,17 @@
                      <tr>
                         <td>{{ lista.apto_sala }}</td>
                         <td>{{ lista.morador }}</td>
-                        <td>{{ lista.qde_contas }}</td>
-                        <td>{{ lista.valor|floatformat:2|intcomma }}</td>
-                        <td>
+                        <td style="text-align: center;">{{ lista.qde_contas }}</td>
+                        <td style="text-align: right;">{{ lista.valor|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center;">
                            <a href="{% url 'listaconta' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador %}">
-                              Ver informações
+                              <img src="{% static 'images/relatorios.png' %}" alt="Descrição da imagem">
                         </a>
-                        <td>
-
+                        <td
+                           style="text-align: center;">
                            <a href="{% url 'gerarPDF' ma=lista.mesano id_morador=lista.id_morador %}">
 
-                              <img src="{% static 'images/PDF_icone.png' %}" alt="Descrição da imagem">
+                              <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
 
                           </a>
                         </a>
@@ -125,8 +125,9 @@
                   <tr>
                      <td></td>
                      <td></td>
-                     <td class="m-0 font-weight-bold text-primary">Total</td>
-                  <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
+                     <td style="text-align: center;" class="m-0 font-weight-bold text-primary">Total</td>
+                  <td style="text-align: right;" class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
+                  <td></td>
                   <td></td>
                   </tr>
    

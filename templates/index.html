@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block  conteudo %}
 <div class="container-fluid">
@@ -83,25 +84,25 @@
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
-                        <th>Codigo</th>
-                        <th>Nome Condomínio</th>
-                        <th>Cidade</th>
-                        <th>Bairro</th>
-                        <th>Estado</th>
-                        <th>Mais informações</th>
+                        <th style="text-align: center;">Codigo</th>
+                        <th style="text-align: center;">Nome Condomínio</th>
+                        <th style="text-align: center;">Cidade</th>
+                        <th style="text-align: center;">Bairro</th>
+                        <th style="text-align: center;">Estado</th>
+                        <th style="text-align: center;">Mais informações</th>
                     </thead>
 
                     <tbody>
                         {%for lista in listcondo %}
                             <tr>
-                                <td>{{ lista.id_condominio }}</td>
+                            <td style="text-align: center;">{{ lista.id_condominio }}</td>
                             <td>{{ lista.nome_condominio }}</td>
                             <td>{{ lista.cidade }}</td>
                             <td>{{ lista.bairro }}</td>
                             <td>{{ lista.estado }}</td>
-                            <td>
+                            <td style="text-align: center;">
                                 <a href="{% url 'listacondominio' id=lista.id_condominio%}">
-                                    Ver informações
+                                    <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
                                 </a>
                             </td>
                         </tr>

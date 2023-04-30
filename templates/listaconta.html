@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
 {% block conteudo %}
 
 <div class="container-fluid">
@@ -91,31 +92,31 @@
          <div class="table-responsive">
             <table class="table table-bordered">
                <thead>
-                  <th>Codigo</th>
-                  <th>Conta</th>
-                  <th>Valor</th>
+                  <th style="text-align: center;">Codigo</th>
+                  <th style="text-align: center;">Conta</th>
+                  <th style="text-align: center;">Valor</th>
                </thead>
 
                <tbody>
                   {%for lista in conta %}
-                     <tr>
+                     <tr  style="text-align: center;">
                         {% if lista.tem_leitura %}
                               <td><a href="{% url 'listaleitura' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador%}">
                                  {{ lista.id_conta }}
                               </td>
                         </a>
                         {%else%}
-                           <td>{{ lista.id_conta }}</td>
+                           <td  style="text-align: center;">{{ lista.id_conta }}</td>
                         {%endif%}   
-                        <td>{{ lista.nome_conta }}</td>
-                        <td>{{ lista.valor|floatformat:2|intcomma }}</td>
+                        <td  style="text-align: left;">{{ lista.nome_conta }}</td>
+                        <td  style="text-align: right;">{{ lista.valor|floatformat:2|intcomma }}</td>
                      </tr>
                   {% endfor %}
                   {%for l in conta1 %}
                   <tr>
                      <td></td>
-                     <td class="m-0 font-weight-bold text-primary">Total</td>
-                  <td class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
+                     <td  style="text-align: right;" class="m-0 font-weight-bold text-primary">Total</td>
+                  <td  style="text-align: right;" class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
                   </tr>
    
                   {% endfor %}
@@ -139,19 +140,19 @@
                <div class="table-responsive">
                   <table class="table table-bordered">
                      <thead>
-                        <th>Leitura Inicial</th>
-                        <th>Leitura Final</th>
-                        <th>Consumo M3</th>
-                        <th>Valor Consumo</th>
+                        <th style="text-align: center;">Leitura Inicial</th>
+                        <th style="text-align: center;">Leitura Final</th>
+                        <th style="text-align: center;">Consumo M3</th>
+                        <th style="text-align: center;">Valor Consumo</th>
                      </thead>
       
                      <tbody>
                         {%for lista in leitura %}
                            <tr>
-                              <td>{{ lista.leitura_inicial }}</td>
-                              <td>{{ lista.leitura_final }}</td>
-                              <td>{{ lista.consumo_m3|floatformat:3|intcomma }}</td>
-                              <td>{{ lista.vl_consumo|floatformat:2|intcomma }}</td>
+                              <td style="text-align: right;">{{ lista.leitura_inicial }}</td>
+                              <td style="text-align: right;">{{ lista.leitura_final }}</td>
+                              <td style="text-align: right;">{{ lista.consumo_m3|floatformat:3|intcomma }}</td>
+                              <td style="text-align: right;">{{ lista.vl_consumo|floatformat:2|intcomma }}</td>
                            </tr>
                         {% endfor %}
                      </tbody>
