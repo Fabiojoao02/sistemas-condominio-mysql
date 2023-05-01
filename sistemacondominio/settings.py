@@ -33,6 +33,9 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
+########################################
+# APPS
+########################################
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'widget_tweaks',
     'bootstrap4',
+    'emailer',
     'condominio.apps.CondominioConfig',
     'cadastro.apps.CadastroConfig',
     'conta.apps.ContaConfig',
@@ -60,6 +64,9 @@ INSTALLED_APPS = [
 DECIMAL_SEPARATOR = '.'
 USE_THOUSAND_SEPARATOR = True
 
+########################################
+# MIDDLEWARE
+########################################
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,7 +82,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'sistemacondominio.urls'
-
+########################################
+# TEMPLATES
+########################################
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -99,6 +108,9 @@ WSGI_APPLICATION = 'sistemacondominio.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+########################################
+# DATABASE
+########################################
 
 pymysql.install_as_MySQLdb()
 
@@ -119,6 +131,9 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
+########################################
+# PASSWORD VALIDATION
+########################################
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,6 +153,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
+########################################
+# INTERNATIONALISATION
+########################################
 
 LANGUAGE_CODE = 'pt-BR'
 
@@ -154,6 +172,10 @@ DATE_INPUT_FORMATS = ["%d/%m/%Y"]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
+
+########################################
+# STATIC SETTINGS
+########################################
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -191,9 +213,9 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
 # Salvar a cada requisição
 SESSION_SAVE_EVERY_REQUEST = False
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+# CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+# CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Serializer - Padrão JSON
 # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
@@ -209,5 +231,25 @@ INTERNAL_IPS = [
 # SESSION_ENGINE = "django.contrib.sessions.backends.file"
 # SESSION_FILE_PATH = '/home/luizotavio/Desktop/temp'
 
+########################################
+# AUTHENTICATION
+########################################
+
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'index'
+
+
+# EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+# DEFAULT_FROM_EMAIL = 'yourname@example.com'
+
+
+EMAIL_HOST = 'smtp.sendgrid.net'  # 'smtp.gmail.com'  # 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'
+# SENDGRID_API_KEY = os.getenv(
+#   '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')
+EMAIL_HOST_PASSWORD = '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'
+EMAIL_PORT = 587  # 465 587
+EMAIL_USER_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'fbianastacio@gmail.com'
+FROM_EMAIL = os.getenv('fbianastacio@gmail.com')

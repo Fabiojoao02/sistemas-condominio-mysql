@@ -14,6 +14,16 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle
 
 
+# tlaves eliminar
+# from django.conf import settings
+# from django.core.mail import send_mail
+# from sendgrid import SendGridAPIClient
+# from sendgrid.helpers.mail import Mail
+# from .forms import EmailForm
+# from django.template.loader import get_template
+# from xhtml2pdf import pisa
+
+
 @login_required(redirect_field_name='redirect_to')
 def index(request):
 
