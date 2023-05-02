@@ -245,9 +245,7 @@ LOGIN_REDIRECT_URL = 'index'
 
 EMAIL_HOST = 'smtp.sendgrid.net'  # 'smtp.gmail.com'  # 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'
-# SENDGRID_API_KEY = os.getenv(
-#   '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')
-EMAIL_HOST_PASSWORD = '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'
+
 EMAIL_PORT = 587  # 465 587
 EMAIL_USER_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
