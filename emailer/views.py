@@ -1,5 +1,5 @@
 # Enviando E-mails SMTP com Python
-# import os
+import os
 import pathlib
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -7,62 +7,58 @@ from email.mime.text import MIMEText
 from string import Template
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.conf import settings
 from pathlib import Path
-from os.path import basename
-
-# from email.mime.base import MIMEBase
 from email.mime.application import MIMEApplication
-from email import encoders
-
-# from dotenv import load_dotenv  # type: ignore
-
-# load_dotenv()
-host = "smtp.gmail.com"
-port = 587
-login = 'condodaspalmeiras50@gmail.com'
-senha = 'zsgzaefsocmdtgrm'
-
-server = smtplib.SMTP(host, port)
-server.ehlo()
-server.starttls()
-server.login(login, senha)
-# class SendFormEmail(View):
 
 
-# def sendemail(request, ):
+def sendemail(request, ma, id_morador):
+    host = "smtp.gmail.com"
+    port = 587
+    login = 'condodaspalmeiras50@gmail.com'
+    senha = 'zsgzaefsocmdtgrm'
 
-corpo = '<b>Opa, Blz Garoto</b>'
-email_msg = MIMEMultipart()
-email_msg['From'] = login
-email_msg['To'] = 'fabiojoaoanastacio@hotmail.com'
-email_msg['Subject'] = '<b>Meu Email enviado para teste com condominio</b>'
-email_msg.attach(MIMEText(corpo, 'plain'))
-server.sendmail(email_msg['From'], email_msg['To'], email_msg.as_string())
-server.quit()
+    server = smtplib.SMTP(host, port)
+    server.ehlo()
+    server.starttls()
+    server.login(login, senha)
+    # class SendFormEmail(View):
+
+    CAMINHO_ARQUIVO = Path(__file__).parent
+    # print(CAMINHO_ARQUIVO)
+    mesano = ma
+    # caminho = os.path.join(CAMINHO_ARQUIVO, 'templates\emailer', mesano)
+    # arquivo = '301'+'.PDF'print()
+    caminho = CAMINHO_ARQUIVO / 'templates\emailer' / ma
+    # caminho.touch
+    # caminho.unlink  # apagar
+    caminho.mkdir(exist_ok=True)
+    caminho = CAMINHO_ARQUIVO / 'templates\emailer' / ma / '301.pdf'  # / arquivo
+    # print(caminho)
+    diretorio, nome_arquivo = os.path.split(caminho)
+    print(diretorio, nome_arquivo)
+
+    corpo = 'Opa, Blz Garoto, estamos tendando anexar o email, nada não vai o anexo 2'
+    email_msg = MIMEMultipart()
+    email_msg['From'] = login
+    email_msg['To'] = 'fabiojoaoanastacio@hotmail.com'
+    email_msg['Subject'] = 'Meu Email enviado para teste com condominio'
+
+    with open(caminho, 'rb') as f:
+        attachment = MIMEApplication(f.read(), _subtype='pdf')
+        attachment.add_header('Content-Disposition',
+                              'attachment', filename="301.pdf")
+
+    email_msg.attach(attachment)
+
+    email_msg.attach(MIMEText(corpo, 'plain'))
+    server.sendmail(email_msg['From'], email_msg['To'], email_msg.as_string())
+
+    server.quit()
+    messages.success(request, ('Email sent successfully.'))
+    return redirect('index')
 
 
-CAMINHO_ARQUIVO = Path(__file__).parent
-print(CAMINHO_ARQUIVO)
-mesano = '022023'
-# caminho = os.path.join(CAMINHO_ARQUIVO, 'templates\emailer', mesano)
-# arquivo = '301'+'.PDF'print()
-caminho = CAMINHO_ARQUIVO / 'templates\emailer' / mesano
-# caminho.touch
-# caminho.unlink  # apagar
-caminho.mkdir(exist_ok=True)
-caminho = CAMINHO_ARQUIVO / 'templates\emailer' / mesano / '301.pdf'  # / arquivo
-caminho = "f:\\WorkSpacesCondominio\\emailer\\templates\\emailer\\022023\\301.pdf"
-# caminho = 'Sistema de Condominio.txt'
-print(caminho)
-
-with open(caminho, 'r') as f:
-    attachment = MIMEApplication(f.read())
-    # attachment['application/pdf'] = 'attachment; filename="{}"'.format(
-    #  basename(caminho))
-
-# email_msg.attach(attachment)
-email_msg.attach("301.pdf", attachment, "application/pdf")
+# email_msg.attach("301.pdf", attachment, "application/pdf")
 
 '''
     # Mensagem de texto
@@ -128,4 +124,19 @@ email_msg.attach("301.pdf", attachment, "application/pdf")
 """
 # messages.success(request, ('Email sent successfully.'))
 # return redirect('index')
+
+#leitura documentos em anexo
+for attachment in folder.iterdir():
+    #envio de e-mail
+    mail = outlook.CreateItem(0)
+    mail.SentOnBehalfOfName = 'test@gmail.com.br'
+    mail.HTMLBody = "<p>Olá,</p><p>Segue documentos em anexo.</p><p>Atenciosamente.</p>"
+    mail.Attachments.Add(str(attachment))
+    # coloca o nome do arquivo, sem a extnsão, como endereço do email antes do "@"
+    mail.To = f'{attachment.stem}@gmail.com.br'
+    mail.Subject = str(attachment)
+    mail.display()
+    time.sleep(5)
+    mail.Send()    
+
 '''

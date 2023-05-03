@@ -241,12 +241,3 @@ LOGIN_REDIRECT_URL = 'index'
 
 # EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_API_KEY')
 # DEFAULT_FROM_EMAIL = 'yourname@example.com'
-
-
-EMAIL_HOST = 'smtp.sendgrid.net'  # 'smtp.gmail.com'  # 'smtp.sendgrid.net'
-EMAIL_HOST_USER = 'apikey'
-EMAIL_PORT = 587  # 465 587
-EMAIL_USER_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-DEFAULT_FROM_EMAIL = 'fabioanastacio40@gmail.com'
-FROM_EMAIL = os.getenv('fabioanastacio40@gmail.com')
