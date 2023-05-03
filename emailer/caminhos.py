@@ -1,8 +1,23 @@
 from pathlib import Path
 import shutil
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 # caminho = r'c:\\user\\fabio\\desktop\\exemplo'
 # home do meu usuario
+
+# load_dotenv()
+host = "smtp.gmail.com"
+port = 587
+login = 'condodaspalmeiras50@gmail.com'
+senha = 'zsgzaefsocmdtgrm'
+
+server = smtplib.SMTP(host, port)
+server.ehlo()
+server.starttls()
+server.login(login, senha)
+
+'''
 print(Path.home())
 
 CAMINHO_ARQUIVO = Path(__file__).parent
@@ -23,3 +38,4 @@ print(caminho)
 # print(os.path.exists(caminho))
 # if not os.path.exists(caminho):
 #    print('Caminho nao existe, entao vou criar')
+'''
