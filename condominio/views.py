@@ -1,3 +1,4 @@
+import os
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,7 +13,7 @@ from reportlab.lib.colors import red, black, blue, gray, green
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle
-
+from pathlib import Path
 
 # tlaves eliminar
 # from django.conf import settings
@@ -275,12 +276,16 @@ class GerarPDF(View):
 
     def get(self, request, ma, id_morador):
 
+        caminho = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/'
+        caminho1 = 'F:/WorkSpacesCondominio/condominio/relatoriocalculospdf1.pdf'
+
         # Cria um objeto HttpResponse com o tipo de conteúdo PDF
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="relatoriocalculospdf.pdf"'
 
         # Cria o objeto canvas com o objeto HttpResponse
-        p = canvas.Canvas(response)
+        # p = canvas.Canvas(response)
+        p = canvas.Canvas('relatoriocalculospdf1.pdf')
 
         # Define a fonte e o tamanho da fonte
         p.setFont('Helvetica-Bold', 14)
@@ -499,6 +504,15 @@ class GerarPDF(View):
 
             # Finaliza o PDF e retorna o objeto HttpResponse
             # p.showPage()
+
             p.save()
+
+        caminho_completo = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/relatoriocalculospdf.pdf'
+        arquivo = 'relatoriocalculospdf.pdf'
+       # caminho_completo.mkdir(exist_ok=True)
+        # diretorio, nome_arquivo = os.path.split(caminho)arquivo
+        # nome_arquivo.unlink  # apagar
+        os.rename('relatoriocalculospdf1.pdf', caminho_completo)
+        print(caminho_completo)
 
         return response
