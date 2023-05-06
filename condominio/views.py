@@ -1,6 +1,7 @@
 import os
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
+from movimentacao.models import Calculos
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -9,7 +10,7 @@ from utils import utils
 from PIL import Image
 from django.views.generic import View
 from reportlab.lib.colors import red, black, blue, gray, green
-
+from django.contrib import messages
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle
@@ -276,16 +277,24 @@ class GerarPDF(View):
 
     def get(self, request, ma, id_morador):
 
-        caminho = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/'
-        caminho1 = 'F:/WorkSpacesCondominio/condominio/relatoriocalculospdf1.pdf'
+       # ma = '032023'
+       # Define o caminho do arquivo
+        caminho_arquivo = Path(__file__).parent.parent
+        arquivo = caminho_arquivo / 'emailer' / \
+            'templates' / 'emailer' / f'{ma}'
+
+        # cria a pasta do mes/ano corespondente
+        arquivo.mkdir(exist_ok=True)
 
         # Cria um objeto HttpResponse com o tipo de conteúdo PDF
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="relatoriocalculospdf.pdf"'
+        # nesse comando abaixo abre um pop para definir o local para salvar
+        # response['Content-Disposition'] = 'attachment; filename="relatoriocalculospdf.pdf"'
 
         # Cria o objeto canvas com o objeto HttpResponse
+        # case usar o comando acima abre um pop para definir o local para salvar
         # p = canvas.Canvas(response)
-        p = canvas.Canvas('relatoriocalculospdf1.pdf')
+        p = canvas.Canvas('relatoriocalculospdf.pdf')
 
         # Define a fonte e o tamanho da fonte
         p.setFont('Helvetica-Bold', 14)
@@ -388,6 +397,7 @@ class GerarPDF(View):
                 subtotais[apto_sala] += valor
                 total_geral += valor
                 linha += 1
+
             # Adiciona o total geral
             p.setFont('Helvetica-Bold', 14)
             # 310, y, f'Total geral..........: {utils.formata_valor(total_geral)}')
@@ -506,13 +516,60 @@ class GerarPDF(View):
             # p.showPage()
 
             p.save()
+            # diretorio, nome_arquivo = os.path.split(arquivo)
+            print(arquivo)
+            nome_arquivo = arquivo / f'{apto_sala_anterior}.pdf'
+            print(nome_arquivo)
+            if nome_arquivo.exists():
+                nome_arquivo.unlink()  # apagar
 
-        caminho_completo = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/relatoriocalculospdf.pdf'
-        arquivo = 'relatoriocalculospdf.pdf'
+        # caminho_completo = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/relatoriocalculospdf.pdf'
+        # arquivo = 'relatoriocalculospdf.pdf'
        # caminho_completo.mkdir(exist_ok=True)
         # diretorio, nome_arquivo = os.path.split(caminho)arquivo
-        # nome_arquivo.unlink  # apagar
-        os.rename('relatoriocalculospdf1.pdf', caminho_completo)
-        print(caminho_completo)
+        os.rename('relatoriocalculospdf.pdf', nome_arquivo)
+        # arquivo.unlink  # apagar
+       # print(arquivo)
 
-        return response
+        messages.success(request, ('Email sent successfully.'))
+        return redirect('index')
+
+
+@login_required(redirect_field_name='redirect_to')
+def geradorPDFgeral(request, idb, ma):
+
+    # Filtrando com dois parâmetros
+    context = Condominio.objects.raw('''
+          select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
+                b.nome nome_bloco, 
+                concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                cal.mesano,
+                m.apto_sala,
+                cad.nome morador,m.id_morador,
+                ROUND(sum(valor),2) valor
+            from calculos cal
+                join contas c on
+                    c.id_conta=cal.id_contas
+                join morador m on
+                    m.id_morador=cal.id_morador
+                join cadastro cad on
+                    cad.id_cadastro=case when responsavel='I' 
+                        then id_inquilino else id_proprietario end
+                join bloco b on
+                    b.id_bloco = m.id_bloco
+                join condominio cd on
+                cd.id_condominio = b.id_condominio
+            where m.id_bloco = %s and cal.mesano = %s 
+            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,
+                m.apto_sala,cad.nome
+        ''', [idb, ma]
+    )
+
+    for lista in context:
+        print(f'{lista.mesano}, {lista.id_bloco}, {lista.id_morador}')
+        GerarPDF.get(None, request, ma=lista.mesano,
+                     id_morador=lista.id_morador)
+
+    # url = reverse('relatorio_calculos_pdf')
+    return redirect('index')
+    # return render(request, 'listaconblomorador.html', context)
