@@ -16,7 +16,6 @@ import re
 from utils.validacpf import valida_cpf
 
 
-
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 
@@ -130,6 +129,9 @@ class Condominio(models.Model):
     foto = models.ImageField(
         upload_to='condominio_imagens', blank=True, null=True)
     mostrar = models.BooleanField(default=True)
+    responsavel_pix = models.CharField(max_length=50)
+    chave_pix = models.CharField(max_length=50)
+    txtid_pix = models.CharField(max_length=500)
 
     class Meta:
         managed = False

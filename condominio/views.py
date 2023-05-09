@@ -7,13 +7,13 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from django.db import connection
 from utils import utils
-from PIL import Image
+# from PIL import Image
 from django.views.generic import View
 from reportlab.lib.colors import red, black, blue, gray, green
 from django.contrib import messages
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
-from reportlab.platypus import Table, TableStyle
+from reportlab.platypus import Table, TableStyle, Image
 from pathlib import Path
 from emailer.views import sendemail
 from pixqrcodegen import Payload
@@ -272,16 +272,16 @@ def listaleitura(request, idb, ma, id_morador):
     return render(request, 'listaleitura.html', context)
 
 
-# @login_required(redirect_field_name='redirect_to')
-# def geraPDF(request, idb, ma, id_morador):
-
 class GerarPDF(View):
 
     def get(self, request, ma, id_morador):
 
-       # ma = '032023'
+        caminho_imagem = Path(__file__).parent
        # Define o caminho do arquivo
         caminho_arquivo = Path(__file__).parent.parent
+        caminho_imagem = caminho_arquivo / 'pixqrcodegen.png'
+        # imagem = Image(caminho_imagem)
+        # print(caminho_imagem)
         arquivo = caminho_arquivo / 'emailer' / \
             'templates' / 'emailer' / f'{ma}'
 
@@ -315,7 +315,7 @@ class GerarPDF(View):
         with connection.cursor() as cursor:
             cursor.execute(
                 '''
-                select cal.mesano, 
+                select b.id_condominio, cal.mesano, 
                     concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
                     m.apto_sala, cad.nome morador, c.nome conta,
                     ROUND(valor,2) valor
@@ -328,6 +328,8 @@ class GerarPDF(View):
                     cad.id_cadastro = case when responsavel='I' 
                                             then id_inquilino 
                                             else id_proprietario end
+					join bloco b on
+                    b.id_bloco = m.id_bloco                                            
                 where cal.mesano = %s and m.id_morador = %s
                 order by mesano,m.apto_sala,id_contas                
             ''', [ma, id_morador]
@@ -343,7 +345,7 @@ class GerarPDF(View):
             apto_sala_anterior = None
             morador_anterior = None
             for row in rows:
-                mesano, mes_ano, apto_sala, morador, conta, valor = row
+                id_condominio, mesano, mes_ano, apto_sala, morador, conta, valor = row
                 if apto_sala != apto_sala_anterior:
                     # Adiciona um subtotal para a categoria anterior
                     if apto_sala_anterior:
@@ -365,7 +367,7 @@ class GerarPDF(View):
                 if linha % 25 == 0 and linha != 0:
                     p.setFont('Helvetica-Bold', 14)
                     p.drawString(
-                        150, 765, 'Relatório da Movimentação de contas Mês Ano: '+mes_ano)
+                        150, 765, 'Demonstrativo das contas Mês Ano: '+mes_ano)
                     # p.drawString(100, 100, '\n\n')
                     p.setFont('Helvetica', 14)
                     # Define a cor do texto do cabeçalho
@@ -380,7 +382,7 @@ class GerarPDF(View):
                     # p.drawString(100, 100, '\n\n')
                     p.setFont('Helvetica-Bold', 14)
                     p.drawString(
-                        150, 765, 'Relatório da Movimentação de contas Mês Ano: '+mes_ano)
+                        150, 765, 'Demonstrativo das contas Mês Ano: '+mes_ano)
                     # p.drawString(100, 100, '\n\n')
 #                    y -= 20
                     p.drawString(150, y, 'Conta')
@@ -410,8 +412,15 @@ class GerarPDF(View):
             )
             p.setFont('Helvetica', 14)
 
+            # Adiciona a imagem ao conteúdo do PDF
+            # adiv=cina o valor correspondente
+            qrcode(request, f'{round(total_geral,2)}', id_condominio)
+            # Adicionando a imagem
+
+            p.drawImage(caminho_imagem,
+                        x=200, y=200, width=200, height=200)
             p.showPage()
-# Movimentação das Leituras
+        # Movimentação das Leituras
 
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
@@ -515,23 +524,14 @@ class GerarPDF(View):
                     linha += 1
 
             # Finaliza o PDF e retorna o objeto HttpResponse
-            # p.showPage()
 
             p.save()
-            # diretorio, nome_arquivo = os.path.split(arquivo)
-            print(arquivo)
             nome_arquivo = arquivo / f'{apto_sala_anterior}.pdf'
-            print(nome_arquivo)
+           # print(nome_arquivo)
             if nome_arquivo.exists():
                 nome_arquivo.unlink()  # apagar
 
-        # caminho_completo = 'F:/WorkSpacesCondominio/emailer/templates/emailer/022023/relatoriocalculospdf.pdf'
-        # arquivo = 'relatoriocalculospdf.pdf'
-       # caminho_completo.mkdir(exist_ok=True)
-        # diretorio, nome_arquivo = os.path.split(caminho)arquivo
         os.rename('relatoriocalculospdf.pdf', nome_arquivo)
-        # arquivo.unlink  # apagar
-       # print(arquivo)
 
         messages.success(request, ('Email sent successfully.'))
         return redirect('index')
@@ -615,8 +615,19 @@ def enviaremail(request, idb, ma):
     return redirect('index')
 
 
-def qrcode(request):
-    payload = Payload(nome='Fabio Joao Anastacio', chavepix='73608467904',
-                      valor=1.00, cidade='Gavatal', txtId='LOJA01')
-    payload.gerarPayload()
+def qrcode(request, valor, id_condominio):
+
+    # Filtrando com dois parâmetros
+    context = Condominio.objects.raw('''
+            select id_condominio, cidade, responsavel_pix,chave_pix,txtid_pix
+            from condominio
+            where id_condominio = %s
+        ''', [id_condominio]
+    )
+    for lista in context:
+        payload = Payload(nome=lista.responsavel_pix, chavepix=lista.chave_pix,
+                          valor=f'{valor}', cidade=lista.cidade, txtId=lista.txtid_pix)
+        # pix_ = payload.gerarPayload()
+        payload.gerarPayload()
+        # print(pix_)
     return payload

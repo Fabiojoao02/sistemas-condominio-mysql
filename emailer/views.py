@@ -12,49 +12,67 @@ from email.mime.application import MIMEApplication
 
 
 def sendemail(request, ma, email, apto):
-    host = "smtp.gmail.com"
-    port = 587
-    login = 'condodaspalmeiras50@gmail.com'
-    senha = 'zsgzaefsocmdtgrm'
 
-    server = smtplib.SMTP(host, port)
-    server.ehlo()
-    server.starttls()
-    server.login(login, senha)
-    # class SendFormEmail(View):
+    try:
+        host = "smtp.gmail.com"
+        port = 587
+        login = 'condodaspalmeiras50@gmail.com'
+        senha = 'zsgzaefsocmdtgrm'
+        server = smtplib.SMTP(host, port)
+        server.ehlo()
+        server.starttls()
+        server.login(login, senha)
+        CAMINHO_ARQUIVO = Path(__file__).parent
+        caminho = CAMINHO_ARQUIVO / 'templates\emailer' / ma
+        # caminho.touch #criar
+        # caminho.unlink  # apagar
+        caminho.mkdir(exist_ok=True)
+        caminho = CAMINHO_ARQUIVO / 'templates\emailer' / \
+            ma / f'{apto}.pdf'  # / arquivo
+        # print(caminho)
+        diretorio, nome_arquivo = os.path.split(caminho)
 
-    CAMINHO_ARQUIVO = Path(__file__).parent
-    # print(CAMINHO_ARQUIVO)
-    # mesano = ma
-    # caminho = os.path.join(CAMINHO_ARQUIVO, 'templates\emailer', mesano)
-    # arquivo = '301'+'.PDF'print()
-    caminho = CAMINHO_ARQUIVO / 'templates\emailer' / ma
-    # caminho.touch
-    # caminho.unlink  # apagar
-    caminho.mkdir(exist_ok=True)
-    caminho = CAMINHO_ARQUIVO / 'templates\emailer' / \
-        ma / f'{apto}.pdf'  # / arquivo
-    # print(caminho)
-    diretorio, nome_arquivo = os.path.split(caminho)
-    # print(diretorio, nome_arquivo, email)
+        corpo = f'Olá caro condômino {apto}. segue anexo o demonstrativo do condominio do Mês Ano: {ma}'
+        email_msg = MIMEMultipart()
+        email_msg['From'] = login
+        email_msg['To'] = email
+        email_msg['Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {ma}'
 
-    corpo = f'Olá caro condômino {apto}. segue anexo o demonstrativo do condominio do Mês Ano: {ma}'
-    email_msg = MIMEMultipart()
-    email_msg['From'] = login
-    email_msg['To'] = email
-    email_msg['Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {ma}'
+        with open(caminho, 'rb') as f:
+            attachment = MIMEApplication(f.read(), _subtype='pdf')
+            attachment.add_header('Content-Disposition',
+                                  'attachment', filename=f'{apto}.pdf')
 
-    with open(caminho, 'rb') as f:
-        attachment = MIMEApplication(f.read(), _subtype='pdf')
-        attachment.add_header('Content-Disposition',
-                              'attachment', filename=f'{apto}.pdf')
+        email_msg.attach(attachment)
 
-    email_msg.attach(attachment)
+        email_msg.attach(MIMEText(corpo, 'plain'))
+        server.sendmail(email_msg['From'],
+                        email_msg['To'], email_msg.as_string())
 
-    email_msg.attach(MIMEText(corpo, 'plain'))
-    server.sendmail(email_msg['From'], email_msg['To'], email_msg.as_string())
+        server.quit()
+        messages.success(request, ('Email sent successfully.'))
 
-    server.quit()
-    messages.success(request, ('Email sent successfully.'))
+    except smtplib.SMTPException as e:
+        # Exceção genérica do SMTP
+        messages.error(
+            request, ('Ocorreu um erro ao enviar o email: 'f'{e}'))
+
+    except smtplib.SMTPServerDisconnected as e:
+        # Servidor SMTP desconectado inesperadamente
+        messages.error(
+            request, ('O servidor SMTP foi desconectado inesperadamente:: 'f'{e}'))
+
+    except smtplib.SMTPResponseException as e:
+        # Exceção de resposta do servidor SMTP
+        messages.error(
+            request, ('O servidor SMTP retornou um erro: 'f'{e.smtp_code},{e.smtp_error}'))
+
+    except Exception as e:
+        # Outras exceções
+        messages.error(
+            request, ('Ocorreu um erro inesperado: 'f'{e}'))
+        print('Ocorreu um erro inesperado: ', e)
+
+    # finally:
 
     return redirect('index')
