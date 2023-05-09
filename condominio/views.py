@@ -16,6 +16,7 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle
 from pathlib import Path
 from emailer.views import sendemail
+from pixqrcodegen import Payload
 
 # tlaves eliminar
 # from django.conf import settings
@@ -605,8 +606,17 @@ def enviaremail(request, idb, ma):
     )
 
     for lista in context:
-        sendemail(None, request, ma=lista.mesano,
+       # print(lista.mesano, lista.email, lista.apto_sala)
+
+        sendemail(request, ma=lista.mesano,
                   email=lista.email, apto=lista.apto_sala)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')
+
+
+def qrcode(request):
+    payload = Payload(nome='Fabio Joao Anastacio', chavepix='73608467904',
+                      valor=1.00, cidade='Gavatal', txtId='LOJA01')
+    payload.gerarPayload()
+    return payload

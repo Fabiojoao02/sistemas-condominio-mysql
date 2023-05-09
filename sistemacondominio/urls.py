@@ -43,11 +43,10 @@ urlpatterns = [
          listaconta, name='listaconta'),
     path('listaleitura/<int:idb>/<str:ma>/<int:id_morador>/',
          listaleitura, name='listaleitura'),
-    # path('sendemail/',
-    # sendemail, name='sendemail'),
+    path('sendemail/<str:ma>/<str:email>/<str:apto>/',
+         sendemail, name='sendemail'),
     path('enviaremail/<int:idb>/<str:ma>/',
          enviaremail, name='enviaremail'),
-
 
     path('admin/', admin.site.urls),
 

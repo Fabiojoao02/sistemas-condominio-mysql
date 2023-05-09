@@ -36,21 +36,18 @@ def sendemail(request, ma, email, apto):
         ma / f'{apto}.pdf'  # / arquivo
     # print(caminho)
     diretorio, nome_arquivo = os.path.split(caminho)
-    print(diretorio, nome_arquivo)
+    # print(diretorio, nome_arquivo, email)
 
-    corpo = 'Opa, Blz Garoto, estamos tendando anexar o email, nada não vai o anexo 2'
+    corpo = f'Olá caro condômino {apto}. segue anexo o demonstrativo do condominio do Mês Ano: {ma}'
     email_msg = MIMEMultipart()
     email_msg['From'] = login
     email_msg['To'] = email
-    email_msg['Subject'] = 'Meu Email enviado para teste com condominio'
-    return redirect('index')
+    email_msg['Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {ma}'
 
-
-'''
     with open(caminho, 'rb') as f:
         attachment = MIMEApplication(f.read(), _subtype='pdf')
         attachment.add_header('Content-Disposition',
-                              'attachment', filename="301.pdf")
+                              'attachment', filename=f'{apto}.pdf')
 
     email_msg.attach(attachment)
 
@@ -59,4 +56,5 @@ def sendemail(request, ma, email, apto):
 
     server.quit()
     messages.success(request, ('Email sent successfully.'))
-   '''
+
+    return redirect('index')
