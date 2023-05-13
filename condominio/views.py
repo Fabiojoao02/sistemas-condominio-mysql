@@ -18,6 +18,18 @@ from pathlib import Path
 from emailer.views import sendemail
 from pixqrcodegen import Payload
 
+# graficos
+# import math
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.graphics.shapes import Drawing, String
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+
 # tlaves eliminar
 # from django.conf import settings
 # from django.core.mail import send_mail
@@ -274,7 +286,7 @@ def listaleitura(request, idb, ma, id_morador):
 
 class GerarPDF(View):
 
-    def get(self, request, ma, id_morador):
+    def get(self, request, ma, id_morador, idb):
 
         caminho_imagem = Path(__file__).parent
        # Define o caminho do arquivo
@@ -351,7 +363,7 @@ class GerarPDF(View):
                     if apto_sala_anterior:
                         subtotal = subtotais[apto_sala_anterior]
                         p.setFont('Helvetica-Bold', 14)
-                        p.drawString(
+                        p.drawAlignedString(
                             210, y, f'Subtotal...............: {subtotal:.2f}')
                         y -= 20
                     # Adiciona o cabeçalho da categoria
@@ -373,7 +385,7 @@ class GerarPDF(View):
                     # Define a cor do texto do cabeçalho
                     # Adiciona uma nova página depois de cada quatro linhas
                     p.drawString(150, y, 'Conta')
-                    p.drawString(450, y, 'Valor')
+                    p.drawAlignedString(450, y, 'Valor')
                     p.showPage()
                     p.setFont('Helvetica', 14)
                     y = 750
@@ -386,13 +398,13 @@ class GerarPDF(View):
                     # p.drawString(100, 100, '\n\n')
 #                    y -= 20
                     p.drawString(150, y, 'Conta')
-                    p.drawString(450, y, 'Valor')
+                    p.drawAlignedString(450, y, 'Valor')
                     p.setFont('Helvetica', 14)
                     y -= 20
                 # Adiciona os dados ao PDF
                 p.drawString(150, y, str(conta))
                 # rows.setStyle(style)  # Aplica o estilo à tabela
-                p.drawString(
+                p.drawAlignedString(
                     450, y, f'{utils.formata_valor(valor)}')
                 y -= 20
                 # Atualiza os subtotais e total geral
@@ -407,21 +419,162 @@ class GerarPDF(View):
             # 310, y, f'Total geral..........: {utils.formata_valor(total_geral)}')
             p.drawString(
                 150, y, f'Total geral')
-            p.drawString(
+            p.drawAlignedString(
                 450, y, f'{utils.formata_valor(total_geral)}'
             )
             p.setFont('Helvetica', 14)
 
+        # Detalhamento das conta no mesano - Movimentação
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                '''
+                select m.mesano, id_bloco , id_contas, nome, valor, mensagem,
+                    concat(left(m.mesano,2),'/',right(m.mesano,4)) as mes_ano
+                from movimento m
+                join movimento_msg msg on
+                    msg.mesano = m.mesano
+                join  contas c on
+                    c.id_conta = m.id_contas
+                where id_bloco = %s and m.mesano = %s
+                ''', [idb, ma]
+            )
+            rowsm = cursor.fetchall()
+
+            if len(rowsm) > 0:
+                y -= 20
+               # y = 950
+                linha = 0
+                subtotais = {}
+                # margem = 50
+                total_geral_mov = 0
+                mesano_anterior = None
+                for row in rowsm:
+                    mesano, id_bloco, id_contas, nome, valor, mensagem, mes_ano = row
+                    if mesano != mesano_anterior:
+                        # Adiciona um subtotal para a categoria anterior
+                        if mesano_anterior:
+                            subtotal = subtotais[mesano_anterior]
+                            p.setFont('Helvetica-Bold', 12)
+                            p.drawAlignedString(
+                                210, y, f'Subtotal...............: {subtotal:.2f}')
+                            y -= 10
+                        # Adiciona o cabeçalho da categoria
+                        p.drawString(
+                            250, y, str(''))
+                        y -= 15
+                        p.setFont('Helvetica', 12)
+                        mesano_anterior = mesano
+                    if linha % 25 == 0 and linha != 0:
+                        p.setFont('Helvetica-Bold', 12)
+                        p.drawString(
+                            150, y, 'Relação das despesas geral')
+                        p.setFont('Helvetica', 12)
+                        y -= 20
+                        # Define a cor do texto do cabeçalho
+                        # Adiciona uma nova página depois de cada quatro linhas
+                        # dt_leitura, valor_m3, leitura_final, leitura_inicial, consumo_m3, vl_consumo
+                        p.drawString(155, y, 'Conta')
+                        p.drawAlignedString(380, y, 'valor')
+                        p.showPage()
+                        p.setFont('Helvetica', 12)
+                        # y = 750
+                    if linha % 25 == 0:
+                        # Desenha o cabeçalho com fundo colorido
+                        p.setFont('Helvetica-Bold', 12)
+                        p.drawString(
+                            150, y, 'Relação das despesas geral')
+                        y -= 20
+                        p.setFont('Helvetica-Bold', 9)
+                        p.drawString(155, y, 'Conta')
+                        p.drawAlignedString(380, y, 'Valor')
+                    #  p.showPage()
+                        y -= 15
+                    # Adiciona os dados ao PDF
+                    p.setFont('Helvetica', 9)
+                    p.drawString(155, y, str(nome))
+                    p.drawAlignedString(
+                        380, y, f'{utils.formata_valor(valor)}')
+                    # p.drawRightString(300, y, f'{utils.formata_valor(valor)}')
+                    # p.drawString(300, y, f'{utils.formata_valor(valor)}')
+
+                    y -= 15
+                    # Atualiza os subtotais e total geral
+                    if mesano not in subtotais:
+                        subtotais[mesano] = 0
+                    subtotais[mesano] += valor
+                    total_geral_mov += valor
+                    linha += 1
+
+                p.drawAlignedString(
+                    350, y, f'{utils.formata_valor(total_geral_mov)}')
+
+            # Finaliza o PDF e retorna o objeto HttpResponse
+            # finaliza o detalhamento
+
             # Adiciona a imagem ao conteúdo do PDF
-            # adiv=cina o valor correspondente
+            # adiciona o QRCODE
             qrcode(request, f'{round(total_geral,2)}', id_condominio)
             # Adicionando a imagem
 
             p.drawImage(caminho_imagem,
-                        x=200, y=200, width=200, height=200)
+                        x=400, y=y, width=150, height=150)
+            # final do QRCODE
+            y -= 15
+            if mensagem:
+                p.setFont('Helvetica-Bold', 12)
+                p.drawString(150, y, 'Mensagem aos condôminos')
+                p.setFont('Helvetica', 12)
+                y -= 15
+                p.drawString(150, y, str(mensagem))
+
+        # graficos
+        # Executa a consulta SQL bruta e itera sobre os resultados
+        separador = '%'
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                    select concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                        ROUND(valor,2) valor
+                    from calculos cal
+                    join contas c on
+                        c.id_conta = cal.id_contas
+                    where cal.id_morador = %s   and
+                        concat(right(cal.mesano,4),left(cal.mesano,2)) >= 
+                        replace(left(cast(date_add(now(), INTERVAL -12 MONTH) as date),7),'-','')
+                    group by mesano
+            """, [id_morador]
+
+            )
+            dados = cursor.fetchall()
+            # Extrair rótulos e valores dos dados
+            labels = [label for label, _ in dados]
+            values = [value for _, value in dados]
+
+            # Configurações do gráfico de barras
+            x_start = 50  # Posição inicial do eixo x
+            y_start = 50  # Posição inicial do eixo y
+            bar_width = 30  # Largura de cada barra
+            max_value = max(values)  # Valor máximo dos dados
+
+            # Cria o arquivo PDF
+            pdf_filename = "output.pdf"
+            c = canvas.Canvas(pdf_filename, pagesize=letter)
+
+            # Desenha as barras do gráfico
+            for i, value in enumerate(values):
+                x = x_start + i * bar_width  # Posição x da barra
+                # Altura proporcional à escala máxima
+                height = (value / max_value) * 300
+
+                c.rect(x, y_start, bar_width, height, fill=True)
+
+                # Adiciona o rótulo abaixo da barra
+                c.setFont("Helvetica", 10)
+                c.drawCentredString(x + bar_width / 2, y_start - 10, labels[i])
+
             p.showPage()
         # Movimentação das Leituras
-
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
             cursor.execute(
@@ -464,7 +617,7 @@ class GerarPDF(View):
                         if conta_anterior:
                             subtotal = subtotais[conta_anterior]
                             p.setFont('Helvetica-Bold', 14)
-                            p.drawString(
+                            p.drawAlignedString(
                                 210, y, f'Subtotal...............: {subtotal:.2f}')
                             y -= 20
                         # Adiciona o cabeçalho da categoria
@@ -509,11 +662,13 @@ class GerarPDF(View):
                     p.setFont('Helvetica', 9)
                     p.drawString(10, y, str(mes_ano))
                     p.drawString(80, y, str(dt_leitura))
-                    p.drawString(155, y, str(valor_m3))
-                    p.drawString(243, y, str(leitura_inicial))
-                    p.drawString(335, y, str(leitura_final))
-                    p.drawString(460, y, str(consumo_m3))
-                    p.drawString(545, y, f'{utils.formata_valor(vl_consumo)}')
+                    p.drawAlignedString(
+                        175, y, f'{utils.formata_valor(valor_m3)}')
+                    p.drawAlignedString(270, y, str(leitura_inicial))
+                    p.drawAlignedString(365, y, str(leitura_final))
+                    p.drawAlignedString(470, y, str(consumo_m3))
+                    p.drawRightString(
+                        575, y, f'{utils.formata_valor(vl_consumo)}')
 
                     y -= 20
                     # Atualiza os subtotais e total geral
@@ -524,6 +679,7 @@ class GerarPDF(View):
                     linha += 1
 
             # Finaliza o PDF e retorna o objeto HttpResponse
+            # finaliza o detalhamento
 
             p.save()
             nome_arquivo = arquivo / f'{apto_sala_anterior}.pdf'
@@ -569,7 +725,7 @@ def geradorPDFgeral(request, idb, ma):
 
     for lista in context:
         GerarPDF.get(None, request, ma=lista.mesano,
-                     id_morador=lista.id_morador)
+                     id_morador=lista.id_morador, idb=lista.id_bloco)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')

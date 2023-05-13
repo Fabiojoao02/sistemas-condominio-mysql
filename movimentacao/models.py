@@ -111,6 +111,7 @@ class Movimento(models.Model):
     id_tipo_calculo = models.ForeignKey(
         TipoCalculo, models.DO_NOTHING, db_column='id_tipo_calculo')
     dt_lancamento = models.DateTimeField()
+    # mensagem = models.CharField(max_length=4000)
 
     def get_contasmovimento(self):
         return '%s' % (self.id_contas.nome)
@@ -137,3 +138,18 @@ class Movimento(models.Model):
         unique_together = (('mesano', 'id_contas'),)
         verbose_name = 'Movimento'
         verbose_name_plural = 'Movimentos'
+
+
+class MovimentoMSG(models.Model):
+    id_movimento_msg = models.AutoField(primary_key=True)
+    mesano = models.CharField(max_length=6)
+    mensagem = models.CharField(max_length=100)
+
+    def __str__(self) -> str:
+        return self.mesano
+
+    class Meta:
+        managed = False
+        db_table = 'movimento_msg'
+        verbose_name = 'Messagem'
+        verbose_name_plural = 'Mensagens'

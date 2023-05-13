@@ -112,7 +112,7 @@
                         </a>
                         <td
                            style="text-align: center;">
-                           <a href="{% url 'gerarPDF' ma=lista.mesano id_morador=lista.id_morador %}">
+                           <a href="{% url 'gerarPDF' ma=lista.mesano id_morador=lista.id_morador idb=lista.id_bloco%}">
 
                               <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
 

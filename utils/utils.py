@@ -1,5 +1,7 @@
 def formata_valor(val):
-    return f'{val:.2f}'.replace('.', ',')
+    texto_valor = f'{val:_.2f}'
+    texto_valor = texto_valor.replace('.', ',').replace('_', '.')
+    return texto_valor
 
 
 def formata_mesano(texto):

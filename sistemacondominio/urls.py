@@ -28,7 +28,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='Login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='Logout.html'), name='logout'),
 
-    path('gerarPDF/<str:ma>/<int:id_morador>/',
+    path('gerarPDF/<str:ma>/<int:id_morador>/<int:idb>/',
          GerarPDF.as_view(), name='gerarPDF'),
 
     path('', index, name='index'),
