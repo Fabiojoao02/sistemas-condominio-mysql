@@ -20,15 +20,22 @@ from pixqrcodegen import Payload
 
 # graficos
 # import math
+import random
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.graphics.shapes import Drawing, String
+from reportlab.graphics.shapes import Drawing, String, Line, Wedge
 from reportlab.graphics.charts.barcharts import VerticalBarChart
+# from reportlab.graphics.charts.barcharts import BarChart
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+from reportlab.graphics import renderPDF
+from reportlab.lib.colors import Color, PCMYKColor
+from reportlab.graphics.charts.barcharts import HorizontalBarChart
+from reportlab.graphics.shapes import Drawing, String
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 # tlaves eliminar
 # from django.conf import settings
@@ -370,7 +377,7 @@ class GerarPDF(View):
                     # p.drawString(100, 100, '\n\n')
                     p.setFillColor(blue)
                     p.drawString(
-                        220, y, f'Apto/Sala: {apto_sala} - {morador} ')
+                        150, y, f'Apto/Sala: {apto_sala} - {morador} ')
                     p.setFillColor(black)
                     y -= 20
                     p.setFont('Helvetica', 14)
@@ -440,7 +447,7 @@ class GerarPDF(View):
                 ''', [idb, ma]
             )
             rowsm = cursor.fetchall()
-
+            p.setFillColor(green)
             if len(rowsm) > 0:
                 y -= 20
                # y = 950
@@ -506,25 +513,35 @@ class GerarPDF(View):
                     total_geral_mov += valor
                     linha += 1
 
+                p.setFont('Helvetica-Bold', 9)
+                p.drawString(
+                    150, y, f'Total geral')
                 p.drawAlignedString(
                     350, y, f'{utils.formata_valor(total_geral_mov)}')
+                p.setFont('Helvetica', 9)
 
             # Finaliza o PDF e retorna o objeto HttpResponse
             # finaliza o detalhamento
-
+            p.setFillColor(black)
             # Adiciona a imagem ao conteúdo do PDF
             # adiciona o QRCODE
             qrcode(request, f'{round(total_geral,2)}', id_condominio)
             # Adicionando a imagem
 
             p.drawImage(caminho_imagem,
-                        x=400, y=y, width=150, height=150)
+                        x=10, y=700, width=130, height=130)
+
+            # p.drawImage(caminho_imagem,
+            #           x=400, y=y, width=150, height=150)
+
             # final do QRCODE
-            y -= 15
+            y -= 25
             if mensagem:
+                p.setFillColor(red)
                 p.setFont('Helvetica-Bold', 12)
                 p.drawString(150, y, 'Mensagem aos condôminos')
-                p.setFont('Helvetica', 12)
+                p.setFillColor(black)
+                p.setFont('Helvetica', 10)
                 y -= 15
                 p.drawString(150, y, str(mensagem))
 
@@ -534,46 +551,99 @@ class GerarPDF(View):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                    select concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+				      select concat(c.nome,'-',
+                        CAST(ROUND((valor/
+                        (select sum(valor) from calculos c1
+                            where c1.mesano = cal.mesano  and c1.id_morador = cal.id_morador)*100),0) 
+                            as varchar(50)),%s) Conta,
                         ROUND(valor,2) valor
-                    from calculos cal
-                    join contas c on
+                	    from calculos cal
+                    	join contas c on
                         c.id_conta = cal.id_contas
-                    where cal.id_morador = %s   and
-                        concat(right(cal.mesano,4),left(cal.mesano,2)) >= 
-                        replace(left(cast(date_add(now(), INTERVAL -12 MONTH) as date),7),'-','')
-                    group by mesano
-            """, [id_morador]
+                		where cal.mesano = %s and cal.id_morador = %s
+            """, [([separador]), ma, id_morador]
 
             )
             dados = cursor.fetchall()
-            # Extrair rótulos e valores dos dados
+            # *********************************Grafica de Barras
+            # Cria o gráfico de barras verticais
+            y -= 200
+            # Criando o objeto Drawing para conter o gráfico
+            # Criando a lista de labels e valores a partir dos dados da query
             labels = [label for label, _ in dados]
-            values = [value for _, value in dados]
+            valores = [valor for _, valor in dados]
 
-            # Configurações do gráfico de barras
-            x_start = 50  # Posição inicial do eixo x
-            y_start = 50  # Posição inicial do eixo y
-            bar_width = 30  # Largura de cada barra
-            max_value = max(values)  # Valor máximo dos dados
+            # Criando o objeto Drawing para conter o gráfico
+            d = Drawing(400, 200)
 
-            # Cria o arquivo PDF
-            pdf_filename = "output.pdf"
-            c = canvas.Canvas(pdf_filename, pagesize=letter)
+            # Configurando o gráfico de barras verticais
+            chart = VerticalBarChart()
+            chart.x = 50
+            chart.y = 30
+            chart.height = 100
+            chart.width = 300
+            chart.data = [valores]
+            chart.categoryAxis.categoryNames = labels
+            chart.valueAxis.valueMin = 0
+            chart.valueAxis.valueMax = max(valores) + 10
+            chart.valueAxis.valueStep = 50
+            chart.bars.strokeColor = colors.black
+            # Girar os rótulos verticalmente
+            chart.categoryAxis.labels.angle = 90
 
-            # Desenha as barras do gráfico
-            for i, value in enumerate(values):
-                x = x_start + i * bar_width  # Posição x da barra
-                # Altura proporcional à escala máxima
-                height = (value / max_value) * 300
+            # Função para gerar uma cor aleatória
+            # Definindo as cores aleatórias para as barras
+            for i, data in enumerate(chart.data):
+                for j, value in enumerate(data):
+                    bar = chart.bars[(i, j)]
+                    bar.fillColor = colors.Color(
+                        random.random(), random.random(), random.random())
 
-                c.rect(x, y_start, bar_width, height, fill=True)
+            # Adicionando os valores sobre os rótulos de barra
+            for i, data in enumerate(chart.data):
+                for j, value in enumerate(data):
+                    x = chart.x + j * (chart.width / len(data)) + \
+                        (chart.width / len(data)) / 2
+                    y = chart.y + chart.height + 10
+                    # label = String(x, y, str(value))
+                    label = String(x, y, f'{utils.formata_valor(value)}')
 
-                # Adiciona o rótulo abaixo da barra
-                c.setFont("Helvetica", 10)
-                c.drawCentredString(x + bar_width / 2, y_start - 10, labels[i])
+                    label.fontName = 'Helvetica'
+                    label.fontSize = 10
+                    label.textAnchor = 'middle'
+                    d.add(label)
 
-            p.showPage()
+                    # Adicionando o gráfico ao objeto Drawing
+            d.add(chart)
+            renderPDF.draw(d, p, 100, y)
+            # *********************************FIM Grafica de Barras
+            # *********************************Grafica de Pizza
+            # Cria o gráfico de barras verticais
+            y -= 20
+            pc = Pie()
+            pc.x = 100  # 65
+            pc.y = 400
+            pc.width = 110
+            pc.height = 110
+            pc.data = [value for _, value in dados]
+            pc.labels = [label for label, _ in dados]
+            pc.slices.strokeWidth = 0.5
+            pc.slices[0].popout = 10
+            pc.slices[0].strokeWidth = 2
+            pc.slices[0].strokeDashArray = [2, 2]
+            pc.slices[0].labelRadius = 0.25
+            pc.slices.fontName = "Helvetica"
+            pc.slices.fontSize = 9
+            pc.slices[0].fontColor = colors.black
+
+            drawing = Drawing(100, y)
+            drawing.add(pc)
+
+            renderPDF.draw(drawing, p, 330, 1)
+
+            # *********************************FIM Grafico de Pizza
+
+           # p.showPage()
         # Movimentação das Leituras
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
@@ -598,12 +668,13 @@ class GerarPDF(View):
                         con.id_conta = l.id_contas
                     where l.id_morador = %s 
                     and l.dt_leitura >= cast(date_add(now(), INTERVAL -12 MONTH) as date) 
-                    order by l.id_morador, conta 
+                    order by l.mesano, l.id_morador, conta 
                 ''', [id_morador]
             )
             rowsl = cursor.fetchall()
 
             if len(rowsl) > 0:
+                p.showPage()
                 y = 750
                 linha = 0
                 subtotais = {}
@@ -677,6 +748,184 @@ class GerarPDF(View):
                     subtotais[conta] += vl_consumo
                     total_geral += vl_consumo
                     linha += 1
+
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        select concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
+                                ROUND((l.leitura_final - l.leitura_inicial),2) consumo_m3
+                            from leituras l
+                            join morador m on
+                                m.id_morador = l.id_morador
+                            join contas con on
+                                con.id_conta = l.id_contas
+                            where l.id_morador = %s
+                            and l.dt_leitura >= cast(date_add(now(), INTERVAL -12 MONTH) as date) 
+                            order by l.mesano, l.id_morador
+                    """, [id_morador]
+
+                    )
+                    dados = cursor.fetchall()
+
+                    # dados = [('01/2023', 50)  # , ('02/2023', 30),
+                    # ('03/2023', 20), ('04/2023', 40),
+                    # ('05/2023', 10), ('06/2023', 40),
+                    # ('07/2023', 25), ('08/2023', 80),
+                    # ('09/2023', 15), ('10/2023', 20),
+                    # ('11/2023', 20), ('12/2023', 90),
+                    # ]
+                    # *********************************Grafica de Barras
+                    # Cria o gráfico de barras verticais
+                    y -= 300
+                    # Criando o objeto Drawing para conter o gráfico
+                    # Criando a lista de labels e valores a partir dos dados da query
+                    labels = [label for label, _ in dados]
+                    valores = [valor for _, valor in dados]
+
+                    # len(dados)
+                    print(len(dados))
+                    print(valores)
+                    # Criando o objeto Drawing para conter o gráfico
+                    d = Drawing(400, 200)
+
+                    # Configurando o gráfico de barras verticais
+                    chart = VerticalBarChart()
+                    chart.x = 50
+                    chart.y = 130
+                    chart.height = 100
+                    chart.width = 400
+                    chart.data = [valores]
+                    chart.categoryAxis.categoryNames = labels
+                    chart.valueAxis.valueMin = 0
+                    chart.valueAxis.valueMax = max(valores) + 10
+                    chart.valueAxis.valueStep = 50
+                    chart.bars.strokeColor = colors.black
+                    # Girar os rótulos verticalmente
+                    if len(dados) <= 10:
+                        chart.categoryAxis.labels.angle = 0
+                    else:
+                        chart.categoryAxis.labels.angle = 90
+
+                    # Função para gerar uma cor aleatória
+                    # Definindo as cores aleatórias para as barras
+                    for i, data in enumerate(chart.data):
+                        for j, value in enumerate(data):
+                            bar = chart.bars[(i, j)]
+                            bar.fillColor = colors.Color(
+                                random.random(), random.random(), random.random())
+
+                    # Adicionando os valores sobre os rótulos de barra
+                    for i, data in enumerate(chart.data):
+                        for j, value in enumerate(data):
+                            x = chart.x + j * (chart.width / len(data)) + \
+                                (chart.width / len(data)) / 2
+                            y = chart.y + chart.height + 10
+                            # label = String(x, y, str(value))
+                            label = String(
+                                x, y, f'{utils.formata_valor(value)}')
+
+                            label.fontName = 'Helvetica'
+                            label.fontSize = 10
+                            label.textAnchor = 'middle'
+                            d.add(label)
+
+                            # Adicionando o gráfico ao objeto Drawing
+                    d.add(chart)
+                    renderPDF.draw(d, p, 80, y)
+                # fim controle grafico leituras
+
+            # 3 pagina do PDF caso o condômino tenha movimentação de leituras
+            p.showPage()
+            p.setFont('Helvetica-Bold', 16)
+            p.drawString(
+                180, 765, 'Analise dos 12 meses anteriores')
+
+            # inicio grafica analise geral de meses 12 do condômino
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    select concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                        ROUND(sum(valor),2) valor
+                    from calculos cal
+                    join contas con on
+                        con.id_conta = cal.id_contas
+                    where cal.id_morador = %s and
+                        concat(right(cal.mesano,4),left(cal.mesano,2)) >= 
+                    replace(left(cast(date_add(now(), INTERVAL -12 MONTH) as date),7),'-','')
+                    group by cal.mesano
+                    order by cal.mesano
+                """, [id_morador]
+
+                )
+                dados = cursor.fetchall()
+
+                # dados = [('01/2023', 50), ('02/2023', 30),
+                #         ('03/2023', 20), ('04/2023', 40),
+                #         ('05/2023', 10), ('06/2023', 40),
+                #         ('07/2023', 25), ('08/2023', 80),
+                #         ('09/2023', 15), ('10/2023', 20),
+                #         ('11/2023', 20), ('12/2023', 90),
+                #         ]
+                # *********************************Grafica de Barras
+                # Cria o gráfico de barras verticais
+                y -= 300
+                # Criando o objeto Drawing para conter o gráfico
+                # Criando a lista de labels e valores a partir dos dados da query
+                labels = [label for label, _ in dados]
+                valores = [valor for _, valor in dados]
+
+                # len(dados)
+                print(len(dados))
+                print(valores)
+                # Criando o objeto Drawing para conter o gráfico
+                d = Drawing(400, 200)
+
+                # Configurando o gráfico de barras verticais
+                chart = VerticalBarChart()
+                chart.x = 50
+                chart.y = 130
+                chart.height = 150
+                chart.width = 500
+                chart.data = [valores]
+                chart.categoryAxis.categoryNames = labels
+                chart.valueAxis.valueMin = 0
+                chart.valueAxis.valueMax = max(valores) + 10
+                chart.valueAxis.valueStep = 50
+                chart.bars.strokeColor = colors.black
+                # Girar os rótulos verticalmente
+                # if len(dados) <= 10:
+                #   chart.categoryAxis.labels.angle = 0
+                # else:
+                chart.categoryAxis.labels.angle = 0
+
+                # Função para gerar uma cor aleatória
+                # Definindo as cores aleatórias para as barras
+                for i, data in enumerate(chart.data):
+                    for j, value in enumerate(data):
+                        bar = chart.bars[(i, j)]
+                        bar.fillColor = colors.Color(
+                            random.random(), random.random(), random.random())
+
+                # Adicionando os valores sobre os rótulos de barra
+                for i, data in enumerate(chart.data):
+                    for j, value in enumerate(data):
+                        x = chart.x + j * (chart.width / len(data)) + \
+                            (chart.width / len(data)) / 2
+                        y = chart.y + chart.height + 10
+                        # label = String(x, y, str(value))
+                        label = String(
+                            x, y, f'{utils.formata_valor(value)}')
+
+                        label.fontName = 'Helvetica'
+                        label.fontSize = 10
+                        label.textAnchor = 'middle'
+                        d.add(label)
+
+                        # Adicionando o gráfico ao objeto Drawing
+                d.add(chart)
+                renderPDF.draw(d, p, 10, y)
+
+            # fim controle grafico de 12 meses do condômino
 
             # Finaliza o PDF e retorna o objeto HttpResponse
             # finaliza o detalhamento
