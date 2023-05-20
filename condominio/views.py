@@ -1,7 +1,7 @@
 import os
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
-from movimentacao.models import Calculos
+from movimentacao.models import Calculos, Leituras
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -113,6 +113,17 @@ def listaconblomov(request, id):
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome
             order by b.id_bloco
+        '''),
+        'proc':  Condominio.objects.raw('''
+         select distinct mov.mesano,c.id_condominio
+            from condominio c
+            join bloco b on
+            b.id_condominio = c.id_condominio 
+            join movimento mov on
+            mov.id_bloco = b.id_bloco
+            join calculos cal on
+            cal.mesano = mov.mesano
+            where b.id_bloco = ''' + str(id) + '''
         '''),
     }
     # url = reverse('relatorio_calculos_pdf')
@@ -289,6 +300,68 @@ def listaleitura(request, idb, ma, id_morador):
     }
     # url = reverse('relatorio_calculos_pdf')
     return render(request, 'listaleitura.html', context)
+
+
+@login_required(redirect_field_name='redirect_to')
+def calcularmovimentacao(request, idb, ma):
+
+    # condominio = get_object_or_404(Condominio, id=id)
+
+    context = {
+        'calcmov':  Condominio.objects.raw('''
+                select distinct c.id_condominio, mov.mesano,
+                    concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,
+                    mov.id_contas, ct.nome conta, valor,
+                    (select count(m.id_morador) qde
+                    FROM bloco b1
+                    JOIN morador m ON m.id_bloco = b1.id_bloco
+                    where m.situacao = 'A'  and b1.id_bloco = b.id_bloco) nr_condomiminos,
+                    (select sum(m.qt_moradores) soma
+                    FROM bloco b1
+                    JOIN morador m ON m.id_bloco = b1.id_bloco
+                    where m.situacao = 'A' and b1.id_bloco = b.id_bloco) qde_moradores
+                    from condominio c
+                    join bloco b on
+                    b.id_condominio = c.id_condominio 
+                    join movimento mov on
+                    mov.id_bloco = b.id_bloco
+                    join contas ct on
+                    ct.id_conta = mov.id_contas
+                    where b.id_bloco = %s and mesano = %s
+                order by conta
+        ''', [idb, ma]),
+
+        'calcmov1':  Condominio.objects.raw('''
+                select distinct c.id_condominio, c.nome nome_condominio,
+                    b.id_bloco, b.nome nome_bloco, mov.mesano,
+                    concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,
+                    ROUND(sum(valor),2) valor_total,
+                    (select count(m.id_morador) qde
+                    FROM bloco b1
+                    JOIN morador m ON m.id_bloco = b1.id_bloco
+                    where m.situacao = 'A'  and b1.id_bloco = b.id_bloco) nr_condomiminos,
+                    (select sum(m.qt_moradores) soma
+                    FROM bloco b1
+                    JOIN morador m ON m.id_bloco = b1.id_bloco
+                    where m.situacao = 'A' and b1.id_bloco = b.id_bloco) qde_moradores
+                    from condominio c
+                    join bloco b on
+                    b.id_condominio = c.id_condominio 
+                    join movimento mov on
+                    mov.id_bloco = b.id_bloco
+                    where b.id_bloco = %s and mesano = %s
+                    group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano
+             ''', [idb, ma]),
+        'lei':  Leituras.objects.raw('''
+                SELECT id_leituras, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as valor_total 
+                from leituras l
+                join contas ct on
+                    ct.id_conta = l.id_contas
+                where mesano = %s
+             ''', [ma]),
+    }
+    # url = reverse('relatorio_calculos_pdf')
+    return render(request, 'calcularmovimentacao.html', context)
 
 
 class GerarPDF(View):

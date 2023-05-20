@@ -105,24 +105,36 @@
                      <tr>
                         <td style="text-align: center;">{{ lista.mes_ano }}</td>
                         <td style="text-align: right;">{{ lista.valor_total|floatformat:2|intcomma }}</td>
-                        <td style="text-align: center;">
-                           <a href="{% url 'geradorPDFgeral' idb=lista.id_bloco ma=lista.mesano %}">
-                              <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
+                        {%for p in proc %}
+                           {% if p.mesano == lista.mesano  %}
+                              <td style="text-align: center;">
+                                 <a href="{% url 'geradorPDFgeral' idb=lista.id_bloco ma=lista.mesano %}">
+                                    <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
 
-                        </a>
-                        </td>
-                        <td style="text-align: center;">
-                           <a href="{% url 'enviaremail' idb=lista.id_bloco ma=lista.mesano %}">
-                              <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
+                              </a>
+                              </td>
+                              <td style="text-align: center;">
+                                 <a href="{% url 'enviaremail' idb=lista.id_bloco ma=lista.mesano %}">
+                                    <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
 
-                        </a>
-                        </td>
-                        <td style="text-align: center;">
-                           <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
-                              <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                              </a>
+                           </td>
+                           <td style="text-align: center;">
+                              <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
 
-                        </a>
-                        </td>
+                           </a>
+                           </td>
+                           {% else %}   
+                           <td style="text-align: center;">
+                              <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+
+                           </a>
+
+
+                           {% endif %}                           
+                        {% endfor %}   
                      </tr>
                   {% endfor %}
                </tbody>
