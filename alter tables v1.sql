@@ -1,11 +1,18 @@
+alter table movimento add id_bloco int not null
+CONSTRAINT `id_bloco_mov_fk` FOREIGN KEY (`id_bloco`) REFERENCES `bloco` (`id_bloco`) ON DELETE CASCADE ON UPDATE CASCADE
+
 alter table condominio add responsavel_pix varchar(50) null
 alter table condominio add chave_pix varchar(50) null
 alter table condominio add txtid_pix varchar(50) null
 
+alter table contas add leituras tinyint(1) not null default 0
+update contas SET leituras=1 where id_conta = 3
+select * from contas
+
+#alter table movimento drop column mov_gerado tinyint(1) not null default 0
+
 ##alter table movimento drop column mensagem varchar(4000) null
 
-alter table movimento add id_bloco int not null
-CONSTRAINT `id_bloco_mov_fk` FOREIGN KEY (`id_bloco`) REFERENCES `bloco` (`id_bloco`) ON DELETE CASCADE ON UPDATE CASCADE
 
 create table movimento_msg
 (

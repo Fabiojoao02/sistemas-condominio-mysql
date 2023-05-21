@@ -14,12 +14,22 @@
             <div class="card-body">
                <div class="row no-gutters align-items-center">
                   <div class="col mr-2">
-                     <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras </div>
-                     <div class="h5 mb-0 font-weight-bold text-gray-800">
-                        {%for l in lei %}
-                           {{ l.valor_total }}
+                     {% if lei1 %}
+                        {%for l in lei1 %}
+                           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras - {{ l.agrupador }}</div>
+                           <div class="h5 mb-0 font-weight-bold text-gray-800">
+                              {{ l.total_leituras }}</div>
                         {% endfor %}
-                     </div>
+                     {% else %}      
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                           <a href="#">
+                              Não tem leituras
+                        </a>                           
+                        
+                        </div>
+                    {% endif %}      
+                    
                   </div>
 
                   <div class="col-auto">
@@ -35,11 +45,11 @@
             <div class="card-body">
                <div class="row no-gutters align-items-center">
                   <div class="col mr-2">
-                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Valor total das despesas do mês referente
+                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Valor total das despesas do mês
                      </div>
                      <div class="h5 mb-0 font-weight-bold text-gray-800">
                         {%for l in calcmov1 %}
-                           {{ l.valor_total }}
+                           {{ l.valor_total_leitura }}
                         {% endfor %}
                      </div>
                   </div>
@@ -134,6 +144,45 @@
             </table>
          </div>
       </div>
+
+      {%if lei %}
+
+         <div class="card shadow mb-4">
+
+            <div class="card-header py-3 d-sm-flex align-items-center justify-content-between mb-4">
+               {%for l in lei %}
+                  <h6 class="m-30 font-weight-bold text-primary">Leituras referente Mês/Ano: {{ l.mes_ano }}</h6>
+               {% endfor %}
+            </div>
+            <div class="card-body">
+               <div class="table-responsive">
+                  <table class="table table-bordered">
+                     <thead>
+                        <th style="text-align: center;">Conta</th>
+                        <th style="text-align: center;">Valor do m3</th>
+                        <th style="text-align: center;">Data leitura</th>
+                        <th style="text-align: center;">Valor total</th>
+                     </thead>
+      
+                     <tbody>
+                        {%for lista in lei %}
+                           <tr>
+                              <td style="text-align: left;">{{ lista.conta }}</td>
+                              <td style="text-align: right;">{{ lista.valor_m3 }}</td>
+                              <td style="text-align: center;">{{ lista.dt_leitura|date:"d/m/Y"  }}</td>
+                              <td style="text-align: right;">{{ lista.total_leituras|floatformat:2|intcomma }}</td>
+                           </tr>
+                        {% endfor %}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      {% endif %} 
+
 
 
       <div class="text-right">

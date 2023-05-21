@@ -335,7 +335,13 @@ def calcularmovimentacao(request, idb, ma):
                 select distinct c.id_condominio, c.nome nome_condominio,
                     b.id_bloco, b.nome nome_bloco, mov.mesano,
                     concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,
-                    ROUND(sum(valor),2) valor_total,
+                    ROUND(sum(valor),2)  valor_total,
+                    ROUND(sum(valor),2)  +
+					ifnull((SELECT  sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as valor_total_leitura 
+                            from leituras l
+                            join contas ct on
+                                ct.id_conta = l.id_contas
+                            where mesano = mov.mesano),0) valor_total_leitura,  
                     (select count(m.id_morador) qde
                     FROM bloco b1
                     JOIN morador m ON m.id_bloco = b1.id_bloco
@@ -353,11 +359,25 @@ def calcularmovimentacao(request, idb, ma):
                     group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano
              ''', [idb, ma]),
         'lei':  Leituras.objects.raw('''
-                SELECT id_leituras, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as valor_total 
+                SELECT id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+                ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
                 from leituras l
                 join contas ct on
-                    ct.id_conta = l.id_contas
+                ct.id_conta = l.id_contas and leituras = 1
                 where mesano = %s
+                group by mesano, id_contas ,nome
+             ''', [ma]),
+        'lei1':  Leituras.objects.raw('''
+                SELECT id_leituras, mesano, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+                ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
+                ,(SELECT GROUP_CONCAT(nome SEPARATOR ', ') AS leituras
+                    FROM contas where leituras=1 
+                    GROUP BY leituras) agrupador
+                from leituras l
+                join contas ct on
+                ct.id_conta = l.id_contas and leituras = 1
+                where mesano = %s
+                group by mesano
              ''', [ma]),
     }
     # url = reverse('relatorio_calculos_pdf')
