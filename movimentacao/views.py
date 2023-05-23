@@ -23,6 +23,7 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from django.urls import reverse
 from django.db.models import Q
+from movimentacao.forms import LeiturasForm
 
 
 # def index(request):
@@ -30,6 +31,16 @@ from django.db.models import Q
 #        'nome_pagina': 'Início da dashboard',
 #    }
 #    return render(request, 'index.html', context)
+
+def lancar_leituras(request):
+
+    form = LeiturasForm()
+    context = {
+        "nome_pagina": "Lancar leituras",
+        "form": form
+    }
+
+    return render(request, "lancar_leituras.hmtl", context)
 
 
 class RelatorioCalculosPDF(View):

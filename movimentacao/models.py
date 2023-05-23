@@ -62,8 +62,9 @@ class Leituras(models.Model):
     mesano = models.CharField(max_length=6, verbose_name='MES/ANO')
     id_morador = models.ForeignKey(
         Morador, models.DO_NOTHING, db_column='id_morador')
+    # id_contas = models.IntegerField()
     id_contas = models.ForeignKey(
-        Contas, models.DO_NOTHING, db_column='id_contas')
+        Contas, models.DO_NOTHING, db_column='id_contas', related_name='Leituras')
     dt_leitura = models.DateField()
     valor_m3 = models.FloatField()
     leitura_inicial = models.FloatField()

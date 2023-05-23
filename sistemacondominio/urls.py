@@ -20,7 +20,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura, GerarPDF, geradorPDFgeral, enviaremail, calcularmovimentacao
 from emailer.views import sendemail
-# from movimentacao.views import ListaCalculo
+from movimentacao.views import lancar_leituras
 # from emailer.views import SendFormEmail
 
 urlpatterns = [
@@ -48,6 +48,8 @@ urlpatterns = [
     path('enviaremail/<int:idb>/<str:ma>/',
          enviaremail, name='enviaremail'),
 
+    path('lancar_leituras/',
+         lancar_leituras, name='lancar_leituras'),
     path('calcularmovimentacao/<int:idb>/<str:ma>/',
          calcularmovimentacao, name='calcularmovimentacao'),
 
