@@ -28,22 +28,52 @@ from movimentacao.forms import LeiturasForm
 
 def lancar_leituras(request, idb, ma):
 
-   # form = LeiturasForm()
+    # query = '''select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala
+    #    , cad.nome morador,  max(l.leitura_final) leitura_final, 0 leitura_final
+    #    from morador m
+    #        join cadastro cad on
+    # cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+    #        left join leituras l on
+    #        m.id_morador = l.id_morador
+    #        where m.id_bloco =   ''' + str(idb) + '''
+    #        group by  m.apto_sala, cad.nome
+    #        order by apto_sala'''
+    # registros = Leituras.objects.raw(query)
+    # print(registros)
+    registros = Leituras.objects.filter(
+        mesano='022023')
+
+    if request.method == 'POST':
+        form = LeiturasForm(request.POST)
+        if form.is_valid():
+            leitura_final = form.cleaned_data['leitura_final']
+            leituras = Leituras.objects.filter(mesano='022023')
+            for leitura in leituras:
+                leitura.leitura_final = form.cleaned_data['leitura_final']
+                leitura.save()
+
+        return redirect('index')
+    else:
+        form = LeiturasForm()
+    # form = LeiturasForm()
     context = {
         'formulario':  Leituras.objects.raw('''
-     select l.id_leituras,l.mesano, m.apto_sala, cad.nome morador,  l.leitura_final leitura_inicial, 0 leitura_final
-			,concat(right(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),2),
-            left(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),4)) mesano_ant
+         select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final,
+            case when ''' + str(ma[0:2]) + ''' <=9 then concat('0',''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''') else 
+            concat(''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''')  end
+              mes_ano,
+            ''' + str(ma[0:2]) + ''' mesano
 
             from morador m
             join cadastro cad on
 			cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
             left join leituras l on
-            m.id_morador = l.id_morador and l.mesano=concat(right(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),2),
-            left(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),4))
+            m.id_morador = l.id_morador 
             where m.id_bloco =   ''' + str(idb) + '''
+            group by  m.apto_sala, cad.nome 
             order by apto_sala
         '''),
+        'form': form
     }
 
     return render(request, "lancar_leituras.html", context)
@@ -77,7 +107,7 @@ class RelatorioCalculosPDF(View):
         # p.rect(0, 750, 612, 50, fill=True)
 
         # Executa a consulta SQL bruta e itera sobre os resultados
-        mesano_pk = '022023'
+        mesano_pk = ''' + str(ma) + '''
         with connection.cursor() as cursor:
             cursor.execute('''select cal.mesano, m.apto_sala, cad.nome morador,
                 c.nome conta,

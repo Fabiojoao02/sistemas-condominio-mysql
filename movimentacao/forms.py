@@ -3,6 +3,13 @@ from movimentacao.models import Leituras
 
 
 class LeiturasForm(forms.ModelForm):
+    leitura_final = forms.CharField(required=False)
+
     class Meta:
         model = Leituras
-        fields = '__all__'
+        fields = [
+            'mesano',
+            'id_morador',
+            'id_contas',
+            'leitura_final',
+        ]
