@@ -26,21 +26,27 @@ from django.db.models import Q
 from movimentacao.forms import LeiturasForm
 
 
-# def index(request):
-#    context = {
-#        'nome_pagina': 'Início da dashboard',
-#    }
-#    return render(request, 'index.html', context)
+def lancar_leituras(request, idb, ma):
 
-def lancar_leituras(request):
-
-    form = LeiturasForm()
+   # form = LeiturasForm()
     context = {
-        "nome_pagina": "Lancar leituras",
-        "form": form
+        'formulario':  Leituras.objects.raw('''
+     select l.id_leituras,l.mesano, m.apto_sala, cad.nome morador,  l.leitura_final leitura_inicial, 0 leitura_final
+			,concat(right(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),2),
+            left(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),4)) mesano_ant
+
+            from morador m
+            join cadastro cad on
+			cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+            left join leituras l on
+            m.id_morador = l.id_morador and l.mesano=concat(right(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),2),
+            left(cast(cast(date_add(concat(right('022023',4),left('022023',2),'01'),INTERVAL -1 MONTH) as date) as varchar(7)),4))
+            where m.id_bloco =   ''' + str(idb) + '''
+            order by apto_sala
+        '''),
     }
 
-    return render(request, "lancar_leituras.hmtl", context)
+    return render(request, "lancar_leituras.html", context)
 
 
 class RelatorioCalculosPDF(View):

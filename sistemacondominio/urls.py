@@ -48,8 +48,9 @@ urlpatterns = [
     path('enviaremail/<int:idb>/<str:ma>/',
          enviaremail, name='enviaremail'),
 
-    path('lancar_leituras/',
+    path('lancar_leituras/<int:idb>/<str:ma>/',
          lancar_leituras, name='lancar_leituras'),
+
     path('calcularmovimentacao/<int:idb>/<str:ma>/',
          calcularmovimentacao, name='calcularmovimentacao'),
 

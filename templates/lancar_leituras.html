@@ -1,4 +1,6 @@
-{% extends "bases.html"%}
+{% extends "base.html"%}
+
+{% load widget_tweaks %}
 
 {%  block conteudo %}
 
@@ -13,16 +15,20 @@
                Formulário para registro de novo visitante
            </h4>
 
-           <form method="post" enctype="multipart/form-data">
-               <div class="form-row">
-                   <p class="ml-2">Aqui deveria ter um formulário</p>
-               </div>
+           <form method="post">
+                <div class="form-row">
+                    {% csrf_token %}
 
-               <div class="text-right">
-                   <button class="btn btn-primary" type="submit">
-                       <span class="text">Registrar visitante</span>
-                   </button>
-               </div>
+                    {% for field in formulario %}
+                        <div class="form-group col-md-12">
+                            {{ field.apto_sala }}
+                            {{ field.morador}}
+                            {{ field.leitura_inicial}}
+                            {{ field.leitura_final}}
+
+                        </div>    
+                    {% endfor %}    
+                </div>    
            </form>
        </div>
    </div>

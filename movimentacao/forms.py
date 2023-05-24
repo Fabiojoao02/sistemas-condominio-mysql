@@ -3,6 +3,6 @@ from movimentacao.models import Leituras
 
 
 class LeiturasForm(forms.ModelForm):
-    class meta:
+    class Meta:
         model = Leituras
-        fields = "__all__"
+        fields = '__all__'
