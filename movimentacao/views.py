@@ -3,9 +3,11 @@ from django.views.generic import TemplateView
 # from django.views.generic.detail import deltail
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.views.generic import View
 from . models import Leituras, Calculos
+from condominio.models import Morador
 from django.db import connection
 # from django.db.models import
 from io import BytesIO
@@ -28,52 +30,22 @@ from movimentacao.forms import LeiturasForm
 
 def lancar_leituras(request, idb, ma):
 
-    # query = '''select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala
-    #    , cad.nome morador,  max(l.leitura_final) leitura_final, 0 leitura_final
-    #    from morador m
-    #        join cadastro cad on
-    # cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-    #        left join leituras l on
-    #        m.id_morador = l.id_morador
-    #        where m.id_bloco =   ''' + str(idb) + '''
-    #        group by  m.apto_sala, cad.nome
-    #        order by apto_sala'''
-    # registros = Leituras.objects.raw(query)
-    # print(registros)
-    registros = Leituras.objects.filter(
-        mesano='022023')
-
+    # registros = Morador.objects.filter(id_bloco=idb)
+    submitted = False
     if request.method == 'POST':
         form = LeiturasForm(request.POST)
         if form.is_valid():
-            leitura_final = form.cleaned_data['leitura_final']
-            leituras = Leituras.objects.filter(mesano='022023')
-            for leitura in leituras:
-                leitura.leitura_final = form.cleaned_data['leitura_final']
-                leitura.save()
-
-        return redirect('index')
+            form.save()
+            return redirect('/listaconblomov/'+str(idb))
     else:
-        form = LeiturasForm()
+        form = LeiturasForm
+        if submitted in request.GET:
+            submitted = True
+
     # form = LeiturasForm()
     context = {
-        'formulario':  Leituras.objects.raw('''
-         select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final,
-            case when ''' + str(ma[0:2]) + ''' <=9 then concat('0',''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''') else 
-            concat(''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''')  end
-              mes_ano,
-            ''' + str(ma[0:2]) + ''' mesano
-
-            from morador m
-            join cadastro cad on
-			cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-            left join leituras l on
-            m.id_morador = l.id_morador 
-            where m.id_bloco =   ''' + str(idb) + '''
-            group by  m.apto_sala, cad.nome 
-            order by apto_sala
-        '''),
-        'form': form
+        'form': form,
+        'submitted': submitted
     }
 
     return render(request, "lancar_leituras.html", context)

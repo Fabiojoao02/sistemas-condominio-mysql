@@ -1,5 +1,6 @@
 {% extends "base.html"%}
 
+
 {%  block conteudo %}
 
 <div class="container">
@@ -13,40 +14,23 @@
                Formulário para registro de novas leituras
            </h4>
 
-           <div class="card-body">
-            <div class="table-responsive">
-               <table class="table table-bordered">
-                  <thead>
-                    <th style="text-align: center;">Apto/Sala</th>
-                    <th style="text-align: center;">Morador</th>
-                    <th style="text-align: center;">leitura Inicial</th>
-                    <th style="text-align: center;">leitura Final</th>
-                 </thead>
-   
-                  <tbody>
-                    {%for lista in formulario %}
-                        <tr>
-                            <form method="post" action="">
-                            {% csrf_token %}
-                            <td style="text-align: center;">{{ lista.apto_sala }}</td>
-                            <td>{{ lista.morador }}</td>
-                            <td style="text-align: right;">{{ lista.leitura_inicial }}</td>
-                            <td>{{ form.leitura_final}} </td>
 
-                                
-                        </tr>
-                    {% endfor %}
-                    </tbody>
+           {% if submitted %}
+                Formulário preenchido com sucesso!!!
+
+           {% else %}
+                <form action ="" method=POST>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
                     <div class= "text-right">
                         <button class="btn btn-primary" type="submit">
                             <span class="text">Registrar lançamento</span>
                         </button>
-                    </div>
-                    </form>
-
-               </table>
-            </div>
-         </div>
+                    </div>   
+                </form>                     
+           {% endif %}
+        </div>
    </div>
 </div>
 {% endblock conteudo %}

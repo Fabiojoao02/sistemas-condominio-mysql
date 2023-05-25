@@ -60,6 +60,8 @@ class Calculos(models.Model):
 class Leituras(models.Model):
     id_leituras = models.AutoField(primary_key=True)
     mesano = models.CharField(max_length=6, verbose_name='MES/ANO')
+    id_bloco = models.ForeignKey(
+        Bloco, models.DO_NOTHING, db_column='id_bloco')
     id_morador = models.ForeignKey(
         Morador, models.DO_NOTHING, db_column='id_morador')
     # id_contas = models.IntegerField()
