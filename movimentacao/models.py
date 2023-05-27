@@ -11,6 +11,10 @@ from django.shortcuts import render
 
 class Calculos(models.Model):
     id_calculos = models.AutoField(primary_key=True)
+    mesano = models.CharField(max_length=6)
+    id_bloco = models.ForeignKey(
+        Bloco, models.DO_NOTHING, db_column='id_bloco')
+
     id_morador = models.ForeignKey(
         Morador, models.DO_NOTHING, db_column='id_morador')
 
@@ -21,7 +25,6 @@ class Calculos(models.Model):
     valor = models.FloatField()
     publica = models.BooleanField(default=True)
     dt_lancamento = models.DateTimeField()
-    mesano = models.CharField(max_length=6)
 
     def get_formatvalorCal(self):
         return f'{self.valor:.2f}'.replace('.', ',')
@@ -114,6 +117,8 @@ class Movimento(models.Model):
     id_tipo_calculo = models.ForeignKey(
         TipoCalculo, models.DO_NOTHING, db_column='id_tipo_calculo')
     dt_lancamento = models.DateTimeField()
+    situacao = models.CharField(max_length=1)
+    responsavel = models.CharField(max_length=100)
     # mensagem = models.CharField(max_length=4000)
 
     def get_contasmovimento(self):

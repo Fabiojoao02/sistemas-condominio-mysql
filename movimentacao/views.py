@@ -30,13 +30,16 @@ from movimentacao.forms import LeiturasForm
 
 def lancar_leituras(request, idb, ma):
 
-    # registros = Morador.objects.filter(id_bloco=idb)
+    registros = Morador.objects.filter(id_bloco=idb)
     submitted = False
     if request.method == 'POST':
-        form = LeiturasForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/listaconblomov/'+str(idb))
+        for registro in registros:
+            prefixo = f'registro-{registro.id_morador}'
+            form = LeiturasForm(
+                request.POST, prefix=prefixo, instance=registro)
+            if form.is_valid():
+                form.save()
+        return redirect('/listaconblomov/'+str(idb))
     else:
         form = LeiturasForm
         if submitted in request.GET:
@@ -44,10 +47,28 @@ def lancar_leituras(request, idb, ma):
 
     # form = LeiturasForm()
     context = {
+        'formulario':  Leituras.objects.raw('''
+         select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
+         dt_leitura,id_contas,
+            case when ''' + str(ma[0:2]) + ''' <=9 then concat('0',''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''') else 
+            concat(''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''')  end
+              mes_ano,
+            ''' + str(ma) + ''' mesano
+
+            from morador m
+            join cadastro cad on
+			cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+            left join leituras l on
+            m.id_morador = l.id_morador 
+            left join contas ct on
+            ct.id_conta = l.id_contas 
+            where m.id_bloco =   ''' + str(idb) + '''
+            group by  m.apto_sala, cad.nome 
+            order by apto_sala
+        '''),
         'form': form,
         'submitted': submitted
     }
-
     return render(request, "lancar_leituras.html", context)
 
 

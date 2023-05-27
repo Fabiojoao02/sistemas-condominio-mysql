@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from movimentacao.models import Leituras
+from movimentacao.models import Leituras, Movimento
 
 
 class LeiturasForm(ModelForm):
@@ -19,3 +19,20 @@ class LeiturasForm(ModelForm):
             'leitura_inicial',
             'leitura_final',
         ]
+
+
+class AutrizaCalculoForm(ModelForm):
+    responsavel = forms.CharField(required=True)
+
+    class Meta:
+        model = Movimento
+        fields = [
+            'responsavel',
+        ]
+
+        error_messages = {
+            "responsavel": {
+                "required": "Por favor, informe o nome do responsável pelo calculo referênte"
+            }
+
+        }

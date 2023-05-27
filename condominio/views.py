@@ -1,7 +1,7 @@
 import os
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
-from movimentacao.models import Calculos, Leituras
+from movimentacao.models import Calculos, Leituras, Movimento
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -36,6 +36,7 @@ from reportlab.lib.colors import Color, PCMYKColor
 from reportlab.graphics.charts.barcharts import HorizontalBarChart
 from reportlab.graphics.shapes import Drawing, String
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from movimentacao.forms import AutrizaCalculoForm
 
 # tlaves eliminar
 # from django.conf import settings
@@ -92,7 +93,8 @@ def listaconblomov(request, id):
 
     context = {
         'condominio':  Condominio.objects.raw('''
-            select c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
+            select ROW_NUMBER() OVER (PARTITION BY mov.id_bloco  ORDER BY mov.mesano,mov.id_bloco  ASC) id,
+            c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
             , concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
             , mesano
             , ROUND(sum(valor),2) valor_total
@@ -103,7 +105,7 @@ def listaconblomov(request, id):
             mov.id_bloco = b.id_bloco
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome ,mov.mesano
-            order by b.id_bloco
+            order by mov.mesano
         '''),
         'condominio1':  Condominio.objects.raw('''
             select c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
@@ -115,7 +117,8 @@ def listaconblomov(request, id):
             order by b.id_bloco
         '''),
         'proc':  Condominio.objects.raw('''
-         select distinct mov.mesano,c.id_condominio
+         select distinct ROW_NUMBER() OVER (PARTITION BY mov.id_bloco  ORDER BY mov.mesano,mov.id_bloco  ASC) id,
+         mov.mesano,c.id_condominio
             from condominio c
             join bloco b on
             b.id_condominio = c.id_condominio 
@@ -124,6 +127,8 @@ def listaconblomov(request, id):
             join calculos cal on
             cal.mesano = mov.mesano
             where b.id_bloco = ''' + str(id) + '''
+            group by mov.mesano,c.id_condominio 
+            order by  mov.mesano
         '''),
     }
     # url = reverse('relatorio_calculos_pdf')
@@ -334,6 +339,9 @@ def calcularmovimentacao(request, idb, ma):
         'calcmov1':  Condominio.objects.raw('''
                 select distinct c.id_condominio, c.nome nome_condominio,
                     b.id_bloco, b.nome nome_bloco, mov.mesano,
+                    case when mov.situacao='A' then 'Aberto'
+                        when mov.situacao='M' then 'Movimentação'
+                        when mov.situacao='F' then 'Fechado' end situacao,
                     concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,
                     ROUND(sum(valor),2)  valor_total,
                     ROUND(sum(valor),2)  +
@@ -380,7 +388,21 @@ def calcularmovimentacao(request, idb, ma):
                 group by mesano
              ''', [ma]),
     }
-    # url = reverse('relatorio_calculos_pdf')
+
+    # movimento = get_object_or_404(movimento, idb=idb, ma=ma)
+    # movimento = get_object_or_404(movimento, id=id)
+
+    form = AutrizaCalculoForm()
+    if request.method == 'POST':
+        form = AutrizaCalculoForm(request.POST)
+        with connection.cursor() as cursor:
+            cursor.callproc('prc_calcula_movimento', [ma, idb])
+            cursor.execute('COMMIT')
+
+            messages.success(
+                request, 'Calculo gerado com sucesso'
+            )
+
     return render(request, 'calcularmovimentacao.html', context)
 
 
