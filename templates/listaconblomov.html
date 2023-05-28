@@ -106,37 +106,34 @@
                      <tr>
                         <td style="text-align: center;">{{ lista.mes_ano }}</td>
                         <td style="text-align: right;">{{ lista.valor_total|floatformat:2|intcomma }}</td>
-                        {%for p in proc %}
-                        {{ p.id  }}/{{ lista.id  }}
-                        {% if p.mesano == lista.mesano  %}
-                              <td style="text-align: center;">
-                                 <a href="{% url 'geradorPDFgeral' idb=lista.id_bloco ma=lista.mesano %}">
-                                    <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
-                              </a>
-                              </td>
-                              <td style="text-align: center;">
-                                 <a href="{% url 'enviaremail' idb=lista.id_bloco ma=lista.mesano %}">
-                                    <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
-                              </a>
-                              </td>
-                              <td style="text-align: center;">
-                                 <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
-                                    <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
-                              </a>
-                              </td>
-                              <td style="text-align: center;">
-                                 <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
-                                    <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
-                              </a>
-                              </td>
-                           {% elif  p.id == lista.id %}   
-                              <td style="text-align: center;">
-                                 <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
-                                    <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
-                              </a>
-                              </td>
-                           {% endif %}                           
-                        {% endfor %}   
+                        {% if lista.mesano_cal != None  %}
+                           <td style="text-align: center;">
+                              <a href="{% url 'geradorPDFgeral' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
+                           </a>
+                           </td>
+                           <td style="text-align: center;">
+                              <a href="{% url 'enviaremail' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/iconepdf.png' %}" alt="Descrição da imagem">
+                           </a>
+                           </td>
+                           <td style="text-align: center;">
+                              <a href="{% url 'listaconblomorador' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                           </a>
+                           </td>
+                           <td style="text-align: center;">
+                              <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                           </a>
+                           </td>
+                        {% else %}   
+                           <td style="text-align: center;">
+                              <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
+                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                           </a>
+                           </td>
+                        {% endif %}                           
                      </tr>
                   {% endfor %}
                </tbody>

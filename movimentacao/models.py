@@ -117,8 +117,7 @@ class Movimento(models.Model):
     id_tipo_calculo = models.ForeignKey(
         TipoCalculo, models.DO_NOTHING, db_column='id_tipo_calculo')
     dt_lancamento = models.DateTimeField()
-    situacao = models.CharField(max_length=1)
-    responsavel = models.CharField(max_length=100)
+    situacao = models.CharField(max_length=1, default='A')
     # mensagem = models.CharField(max_length=4000)
 
     def get_contasmovimento(self):

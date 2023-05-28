@@ -227,7 +227,7 @@ class Morador(models.Model):
     id_bloco = models.ForeignKey(
         Bloco, models.DO_NOTHING, db_column='id_bloco')
     qt_moradores = models.IntegerField()
-    situacao = models.CharField(max_length=1)
+    situacao = models.CharField(max_length=1, default='A')
     responsavel = models.CharField(max_length=1)
     foto = models.ImageField(
         upload_to='morador_imagens', blank=True, null=True)

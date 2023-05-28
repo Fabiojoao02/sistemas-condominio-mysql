@@ -38,15 +38,6 @@ from reportlab.graphics.shapes import Drawing, String
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from movimentacao.forms import AutrizaCalculoForm
 
-# tlaves eliminar
-# from django.conf import settings
-# from django.core.mail import send_mail
-# from sendgrid import SendGridAPIClient
-# from sendgrid.helpers.mail import Mail
-# from .forms import EmailForm
-# from django.template.loader import get_template
-# from xhtml2pdf import pisa
-
 
 @login_required(redirect_field_name='redirect_to')
 def index(request):
@@ -93,18 +84,21 @@ def listaconblomov(request, id):
 
     context = {
         'condominio':  Condominio.objects.raw('''
-            select ROW_NUMBER() OVER (PARTITION BY mov.id_bloco  ORDER BY mov.mesano,mov.id_bloco  ASC) id,
+            select 
             c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
-            , concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
-            , mesano
-            , ROUND(sum(valor),2) valor_total
+            , concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano
+            , cal.mesano mesano_cal, mov.mesano mesano
+            , (select ROUND(sum(m.valor),2) from movimento m where m.id_bloco = mov.id_bloco and m.mesano = mov.mesano) valor_total  
             from condominio c
             join bloco b on
             b.id_condominio = c.id_condominio 
             join movimento mov on
             mov.id_bloco = b.id_bloco
+            left join calculos cal on
+            cal.mesano = mov.mesano and
+            cal.id_bloco = mov.id_bloco
             where b.id_bloco = ''' + str(id) + '''
-            group by c.id_condominio, c.nome , b.id_bloco, b.nome ,mov.mesano
+            group by c.id_condominio, c.nome , b.id_bloco, b.nome ,cal.mesano
             order by mov.mesano
         '''),
         'condominio1':  Condominio.objects.raw('''
@@ -115,20 +109,6 @@ def listaconblomov(request, id):
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome
             order by b.id_bloco
-        '''),
-        'proc':  Condominio.objects.raw('''
-         select distinct ROW_NUMBER() OVER (PARTITION BY mov.id_bloco  ORDER BY mov.mesano,mov.id_bloco  ASC) id,
-         mov.mesano,c.id_condominio
-            from condominio c
-            join bloco b on
-            b.id_condominio = c.id_condominio 
-            join movimento mov on
-            mov.id_bloco = b.id_bloco
-            join calculos cal on
-            cal.mesano = mov.mesano
-            where b.id_bloco = ''' + str(id) + '''
-            group by mov.mesano,c.id_condominio 
-            order by  mov.mesano
         '''),
     }
     # url = reverse('relatorio_calculos_pdf')
@@ -368,25 +348,29 @@ def calcularmovimentacao(request, idb, ma):
              ''', [idb, ma]),
         'lei':  Leituras.objects.raw('''
                 SELECT id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
-                ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
+                ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,l.id_bloco
                 from leituras l
                 join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
-                where mesano = %s
-                group by mesano, id_contas ,nome
-             ''', [ma]),
+                where l.id_bloco = %s and l.mesano = %s
+                group by l.mesano, id_contas ,nome,l.id_bloco 
+             ''', [idb, ma]),
         'lei1':  Leituras.objects.raw('''
-                SELECT id_leituras, mesano, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
-                ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano
+                 SELECT id_leituras, mov.mesano, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+				,mov.id_bloco id_bloco_mov
+                ,concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano
                 ,(SELECT GROUP_CONCAT(nome SEPARATOR ', ') AS leituras
                     FROM contas where leituras=1 
                     GROUP BY leituras) agrupador
-                from leituras l
-                join contas ct on
+                from movimento mov
+                left join leituras l on
+                l.id_bloco = mov.id_bloco and
+                l.mesano = mov.mesano
+                left join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
-                where mesano = %s
-                group by mesano
-             ''', [ma]),
+                where mov.id_bloco = %s and mov.mesano = %s
+                group by mov.mesano,mov.id_bloco
+             ''', [idb, ma]),
     }
 
     # movimento = get_object_or_404(movimento, idb=idb, ma=ma)

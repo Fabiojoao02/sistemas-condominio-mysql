@@ -28,24 +28,25 @@
             <div class="card-body">
                <div class="row no-gutters align-items-center">
                   <div class="col mr-2">
-                     {% if lei1 %}
-                        {%for l in lei1 %}
-                           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1 fs-1">Valores das leituras - {{ l.agrupador }}</div>
+                     {%for le in lei1 %}
+                        {% if le.id_leituras != None  %}
+                           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1 fs-1">Valores das leituras - {{ le.agrupador }}</div>
                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                              {{ l.total_leituras }}</div>
-                        {% endfor %}
-                     {% else %}      
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                           <a href="#">
-                              Não tem leituras
-                        </a>                           
-                        
-                        </div>
-                    {% endif %}      
-                    
+                              {{ le.total_leituras }}</div>
+                        {% else %}      
+                           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                 <h6 class="m-0 font-weight-bold text-primary">Situação do Calculo: {{ le.situacao }}
+                                    <a href="{% url 'lancar_leituras' idb=le.id_bloco_mov ma=le.mesano %}" class="btn btn-info btn-icon-split btn-sm">
+                                       <span class="text">Não tem leituras</span>
+                                       <span class="icon text-white-10">
+                                          <i class="fa-solid fa-info"></i>
+                                       </span>
+                                    </a>   
+                              </div>
+                       {% endif %}      
+                    {% endfor %}
                   </div>
-
                   <div class="col-auto">
                      <i class="fas fa-user-lock fa-2x text-gray-300"></i>
                   </div>

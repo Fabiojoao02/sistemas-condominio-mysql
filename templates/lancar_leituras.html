@@ -14,37 +14,44 @@
                Formulário para registro de novas leituras
            </h4>
            <table class="table table-bordered">
-           <thead>
-            <th style="text-align: center;">Apto/Sala</th>
-            <th style="text-align: center;">Morador</th>
-            <th style="text-align: center;">Leitura Inicial</th>
-            <th style="text-align: center;">Leitura Inicial</th>
-         </thead>
-         <tbody>
-           {% if submitted %}
-                Formulário preenchido com sucesso!!!
+                <thead>
+                    <th style="text-align: center;">Apto/Sala</th>
+                    <th style="text-align: center;">Morador</th>
+                    <th style="text-align: center;">Leitura Inicial</th>
+                    <th style="text-align: center;">Leitura Inicial</th>
+               </thead>
+                <tbody>
+                    {% if submitted %}
+                        Formulário preenchido com sucesso!!!
 
-           {% else %}
-                <form action ="" method=POST>
-                    {% csrf_token %}
-                    {%for lista in formulario %}
-                    <tr>
-                        <td style="text-align: center;">{{lista.apto_sala }}</td>
-                        <td style="text-align: left;">{{lista.morador }}</td>
-                        <td style="text-align: center;">{{lista.leitura_inicial }}</td>
-                        <td style="text-align: center;">{{form.leitura_final }}</td>
-                    </tr>
-                    {% endfor %}
-                    <div class= "text-right">
-                        <button class="btn btn-primary" type="submit">
-                            <span class="text">Registrar lançamento</span>
-                        </button>
-                    </div>   
-           {% endif %}
-        </form>                     
-    </tbody>
-        </table>
+                    {% else %}
+                        <form action ="" method=POST>
+                            {% csrf_token %}
+                            {%for lista in formulario %}
+                            <tr>
+                                <td style="text-align: center;">{{lista.apto_sala }}</td>
+                                <td style="text-align: left;">{{lista.morador }}</td>
+                                <td style="text-align: center;">{{lista.leitura_inicial }}</td>
+                                <td style="text-align: center;">{{form.leitura_final }}</td>
+                            </tr>
+                            {% endfor %}
+                            <div class= "text-right">
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="text">Registrar lançamento</span>
+                                </button>
+                            </div>   
+                        </form>                     
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
-   </div>
+    </div>
+    <div class="text-right">
+        {%for lista in calculo1  %}
+        <a href={% url 'listaconblomov' id=lista.id_bloco %} class="btn btn-secondary text-white" type="button">
+            <span class="text"><center>Voltar</center>
+            </a>      
+            {% endfor %}
+        </div>   
 </div>
 {% endblock conteudo %}
