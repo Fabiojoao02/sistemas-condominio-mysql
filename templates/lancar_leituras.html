@@ -18,7 +18,7 @@
                     <th style="text-align: center;">Apto/Sala</th>
                     <th style="text-align: center;">Morador</th>
                     <th style="text-align: center;">Leitura Inicial</th>
-                    <th style="text-align: center;">Leitura Inicial</th>
+                    <th style="text-align: center;">Leitura Final</th>
                </thead>
                 <tbody>
                     {% if submitted %}
@@ -28,12 +28,12 @@
                         <form action ="" method=POST>
                             {% csrf_token %}
                             {%for lista in formulario %}
-                            <tr>
-                                <td style="text-align: center;">{{lista.apto_sala }}</td>
-                                <td style="text-align: left;">{{lista.morador }}</td>
-                                <td style="text-align: center;">{{lista.leitura_inicial }}</td>
-                                <td style="text-align: center;">{{form.leitura_final }}</td>
-                            </tr>
+                                <tr>
+                                    <td style="text-align: center;">{{lista.apto_sala }}</td>
+                                    <td style="text-align: left;">{{lista.morador }}</td>
+                                    <td style="text-align: center;">{{lista.leitura_inicial }}</td>
+                                    <td style="text-align: center;">{{form.leitura_final }}</td>
+                                </tr>
                             {% endfor %}
                             <div class= "text-right">
                                 <button class="btn btn-primary" type="submit">
@@ -43,15 +43,20 @@
                         </form>                     
                     {% endif %}
                 </tbody>
-            </table>
-        </div>
+             </table>
+         </div>
+
+         <div class="text-right">
+            {%for lista in lei  %}
+            <a href="{% url 'calcularmovimentacao' id=lista.id_bloco ma=lista.mesano %}" class="btn btn-secondary text-white" type="button">
+                <span class="text"><center>Voltar</center>
+                </a>      
+                {% endfor %}
+            </div>
+
+
+
     </div>
-    <div class="text-right">
-        {%for lista in calculo1  %}
-        <a href={% url 'listaconblomov' id=lista.id_bloco %} class="btn btn-secondary text-white" type="button">
-            <span class="text"><center>Voltar</center>
-            </a>      
-            {% endfor %}
-        </div>   
+   
 </div>
 {% endblock conteudo %}

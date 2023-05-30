@@ -21,7 +21,7 @@ class LeiturasForm(ModelForm):
         ]
 
 
-class AutrizaCalculoForm(ModelForm):
+class AutorizaCalculoForm(ModelForm):
     responsavel = forms.CharField(required=True)
 
     class Meta:

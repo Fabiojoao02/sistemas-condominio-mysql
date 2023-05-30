@@ -32,16 +32,30 @@ def lancar_leituras(request, idb, ma):
 
     registros = Morador.objects.filter(id_bloco=idb)
     submitted = False
+    form = LeiturasForm()
     if request.method == 'POST':
-        for registro in registros:
-            prefixo = f'registro-{registro.id_morador}'
-            form = LeiturasForm(
-                request.POST, prefix=prefixo, instance=registro)
-            if form.is_valid():
-                form.save()
-        return redirect('/listaconblomov/'+str(idb))
+        form = LeiturasForm(request.POST)
+        print(
+            'ioioioioioioioioioioioioioioiofisofisodfiodfidofidsosiKKKKKKKKKKKKKK', form)
+        if form.is_valid():
+            mesa = form.cleaned_data['mesano']
+            id_bl = form.cleaned_data['mesano']
+            id_mor = form.cleaned_data['id_morador']
+            id_con = form.cleaned_data['id_contas']
+            dt_leia = form.cleaned_data['dt_leitura']
+            vlr_m3 = form.cleaned_data['valor_m3']
+            leinicial = form.cleaned_data['leitura_inicial']
+            leifinal = form.cleaned_data['leitura_final']
+            reg = Leituras(mesano=mesa, id_bloco=id_bl, id_morador=id_mor, id_contas=id_con,
+                           dt_leitura=dt_leia, valor_m3=vlr_m3, leitura_inicial=leinicial, leitura_final=leifinal)
+            reg.save()
+            messages.success(
+                request, 'Calculo gerado com sucesso'
+            )
+        # return redirect('/listaconblomov/'+str(idb))
+        return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
     else:
-        form = LeiturasForm
+        form = LeiturasForm()
         if submitted in request.GET:
             submitted = True
 

@@ -22,6 +22,7 @@ from pixqrcodegen import Payload
 # import math
 import random
 from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.legends import Legend
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
@@ -36,7 +37,7 @@ from reportlab.lib.colors import Color, PCMYKColor
 from reportlab.graphics.charts.barcharts import HorizontalBarChart
 from reportlab.graphics.shapes import Drawing, String
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from movimentacao.forms import AutrizaCalculoForm
+from movimentacao.forms import AutorizaCalculoForm
 
 
 @login_required(redirect_field_name='redirect_to')
@@ -376,9 +377,9 @@ def calcularmovimentacao(request, idb, ma):
     # movimento = get_object_or_404(movimento, idb=idb, ma=ma)
     # movimento = get_object_or_404(movimento, id=id)
 
-    form = AutrizaCalculoForm()
+    form = AutorizaCalculoForm()
     if request.method == 'POST':
-        form = AutrizaCalculoForm(request.POST)
+        form = AutorizaCalculoForm(request.POST)
         with connection.cursor() as cursor:
             cursor.callproc('prc_calcula_movimento', [ma, idb])
             cursor.execute('COMMIT')
@@ -536,9 +537,10 @@ class GerarPDF(View):
             cursor.execute(
                 '''
                 select m.mesano, id_bloco , id_contas, nome, valor, mensagem,
-                    concat(left(m.mesano,2),'/',right(m.mesano,4)) as mes_ano
+                concat(cast(id_contas as char(30)),'-', nome) cod_nome,
+                concat(left(m.mesano,2),'/',right(m.mesano,4)) as mes_ano
                 from movimento m
-                join movimento_msg msg on
+                left join movimento_msg msg on
                     msg.mesano = m.mesano
                 join  contas c on
                     c.id_conta = m.id_contas
@@ -556,7 +558,7 @@ class GerarPDF(View):
                 total_geral_mov = 0
                 mesano_anterior = None
                 for row in rowsm:
-                    mesano, id_bloco, id_contas, nome, valor, mensagem, mes_ano = row
+                    mesano, id_bloco, id_contas, nome, valor, mensagem, cod_nome, mes_ano = row
                     if mesano != mesano_anterior:
                         # Adiciona um subtotal para a categoria anterior
                         if mesano_anterior:
@@ -576,7 +578,7 @@ class GerarPDF(View):
                         p.drawString(
                             150, y, 'Relação das despesas geral')
                         p.setFont('Helvetica', 12)
-                        y -= 20
+                        y -= 15
                         # Define a cor do texto do cabeçalho
                         # Adiciona uma nova página depois de cada quatro linhas
                         # dt_leitura, valor_m3, leitura_final, leitura_inicial, consumo_m3, vl_consumo
@@ -590,7 +592,7 @@ class GerarPDF(View):
                         p.setFont('Helvetica-Bold', 12)
                         p.drawString(
                             150, y, 'Relação das despesas geral')
-                        y -= 20
+                        y -= 15
                         p.setFont('Helvetica-Bold', 9)
                         p.drawString(155, y, 'Conta')
                         p.drawAlignedString(380, y, 'Valor')
@@ -598,8 +600,8 @@ class GerarPDF(View):
                         y -= 15
                     # Adiciona os dados ao PDF
                     p.setFont('Helvetica', 9)
-                    p.drawString(155, y, str(nome))
-                    p.drawAlignedString(
+                    p.drawString(155, y, str(cod_nome))
+                    p.drawRightString(
                         380, y, f'{utils.formata_valor(valor)}')
                     # p.drawRightString(300, y, f'{utils.formata_valor(valor)}')
                     # p.drawString(300, y, f'{utils.formata_valor(valor)}')
@@ -717,6 +719,20 @@ class GerarPDF(View):
             renderPDF.draw(d, p, 100, y)
             # *********************************FIM Grafica de Barras
             # *********************************Grafica de Pizza
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+				      select distinct cast(c.id_conta as char(3)) conta,
+                        ROUND(valor,2) valor
+                	    from calculos cal
+                    	join contas c on
+                        c.id_conta = cal.id_contas
+                		where cal.mesano = %s and cal.id_morador = %s
+            """, [ma, id_morador]
+
+            )
+            dados = cursor.fetchall()
+
             # Cria o gráfico de barras verticais
             y -= 20
             pc = Pie()
@@ -728,17 +744,11 @@ class GerarPDF(View):
             pc.labels = [label for label, _ in dados]
             pc.slices.strokeWidth = 0.5
             pc.slices[0].popout = 10
-            pc.slices[0].strokeWidth = 2
-            pc.slices[0].strokeDashArray = [2, 2]
-            pc.slices[0].labelRadius = 0.25
-            pc.slices.fontName = "Helvetica"
-            pc.slices.fontSize = 9
             pc.slices[0].fontColor = colors.black
 
-            drawing = Drawing(100, y)
-            drawing.add(pc)
-
-            renderPDF.draw(drawing, p, 330, 1)
+            d = Drawing(100, y)
+            d.add(pc)
+            renderPDF.draw(d, p, 330, 1)
 
             # *********************************FIM Grafico de Pizza
 
@@ -882,8 +892,6 @@ class GerarPDF(View):
                     valores = [valor for _, valor in dados]
 
                     # len(dados)
-                    print(len(dados))
-                    print(valores)
                     # Criando o objeto Drawing para conter o gráfico
                     d = Drawing(400, 200)
 
@@ -974,8 +982,6 @@ class GerarPDF(View):
                 valores = [valor for _, valor in dados]
 
                 # len(dados)
-                print(len(dados))
-                print(valores)
                 # Criando o objeto Drawing para conter o gráfico
                 d = Drawing(400, 200)
 
