@@ -5,7 +5,7 @@
 
 <div class="container">
    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-       <h1 class="h3 mb-0 text-gray-800">{{ nome_pagina }}</h1>
+       <h1 class="h3 mb-0 text-gray-800">lança leituras</h1>
    </div>
 
    <div class="card shadow mb-4">
@@ -13,6 +13,10 @@
            <h4 class="mb-3 text-primary">
                Formulário para registro de novas leituras
            </h4>
+           <form action ="" method=POST>
+           <td style="text-align: center;">{{form.id_contas }}</td>
+           <td style="text-align: center;">{{form.dt_leitura }}</td>
+           <td style="text-align: center;">{{form.valor_m3 }}</td>
            <table class="table table-bordered">
                 <thead>
                     <th style="text-align: center;">Apto/Sala</th>
@@ -25,11 +29,11 @@
                         Formulário preenchido com sucesso!!!
 
                     {% else %}
-                        <form action ="" method=POST>
+            
                             {% csrf_token %}
                             {%for lista in formulario %}
                                 <tr>
-                                    <td style="text-align: center;">{{lista.apto_sala }}</td>
+                                    <td style="text-align: center;">{{lista.apto_sala }}{{form.apto_sala }}</td>
                                     <td style="text-align: left;">{{lista.morador }}</td>
                                     <td style="text-align: center;">{{lista.leitura_inicial }}</td>
                                     <td style="text-align: center;">{{form.leitura_final }}</td>
@@ -48,7 +52,7 @@
 
          <div class="text-right">
             {%for lista in lei  %}
-            <a href="{% url 'calcularmovimentacao' id=lista.id_bloco ma=lista.mesano %}" class="btn btn-secondary text-white" type="button">
+            <a href="{% url 'calcularmovimentacao' id=lista.id_bloco mas=lista.mesano %}" class="btn btn-secondary text-white" type="button">
                 <span class="text"><center>Voltar</center>
                 </a>      
                 {% endfor %}

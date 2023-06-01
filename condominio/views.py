@@ -357,26 +357,25 @@ def calcularmovimentacao(request, idb, ma):
                 group by l.mesano, id_contas ,nome,l.id_bloco 
              ''', [idb, ma]),
         'lei1':  Leituras.objects.raw('''
-                 SELECT id_leituras, mov.mesano, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+                 SELECT  id_leituras, mov.mesano #,SUM(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
 				,mov.id_bloco id_bloco_mov
-                ,concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano
+                ,(select sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) totl from leituras le  where le.id_bloco = mov.id_bloco and le.mesano =mov.mesano )as total_leituras
+                ,concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano
                 ,(SELECT GROUP_CONCAT(nome SEPARATOR ', ') AS leituras
                     FROM contas where leituras=1 
                     GROUP BY leituras) agrupador
-                from movimento mov
+                from movimento mov 
                 left join leituras l on
-                l.id_bloco = mov.id_bloco and
-                l.mesano = mov.mesano
+                mov.mesano = l.mesano and
+                mov.id_bloco = l.id_bloco
                 left join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
                 where mov.id_bloco = %s and mov.mesano = %s
                 group by mov.mesano,mov.id_bloco
-             ''', [idb, ma]),
+        ''', [idb, ma]),
     }
 
-    # movimento = get_object_or_404(movimento, idb=idb, ma=ma)
-    # movimento = get_object_or_404(movimento, id=id)
-
+    # executa a proc para calcular os rateios
     form = AutorizaCalculoForm()
     if request.method == 'POST':
         form = AutorizaCalculoForm(request.POST)
@@ -384,9 +383,7 @@ def calcularmovimentacao(request, idb, ma):
             cursor.callproc('prc_calcula_movimento', [ma, idb])
             cursor.execute('COMMIT')
 
-            messages.success(
-                request, 'Calculo gerado com sucesso'
-            )
+            messages.success(request, 'Calculo gerado com sucesso')
 
     return render(request, 'calcularmovimentacao.html', context)
 

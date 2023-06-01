@@ -30,59 +30,71 @@ from movimentacao.forms import LeiturasForm
 
 def lancar_leituras(request, idb, ma):
 
-    registros = Morador.objects.filter(id_bloco=idb)
+   # registros_origem = Morador.objects.filter(id_bloco=idb)
+    # Executa a consulta SQL bruta e itera sobre os resultados
+    with connection.cursor() as cursor:
+        cursor.execute(
+            '''
+            select  max(id_leituras) id_leituras, max(l.mesano),m.id_morador, m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
+                dt_leitura,id_contas
+                from morador m
+                join cadastro cad on
+                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+                left join leituras l on
+                m.id_morador = l.id_morador 
+                left join contas ct on
+                ct.id_conta = l.id_contas 
+                where m.id_bloco =   ''' + str(idb) + '''
+                group by  m.apto_sala, cad.nome ,m.id_morador
+                order by apto_sala
+        '''
+        )
+        registros_origem = cursor.fetchall()
+    # print(registros_origem)
     submitted = False
     form = LeiturasForm()
     if request.method == 'POST':
-        form = LeiturasForm(request.POST)
-        print(
-            'ioioioioioioioioioioioioioioiofisofisodfiodfidofidsosiKKKKKKKKKKKKKK', form)
-        if form.is_valid():
-            mesa = form.cleaned_data['mesano']
-            id_bl = form.cleaned_data['mesano']
-            id_mor = form.cleaned_data['id_morador']
-            id_con = form.cleaned_data['id_contas']
-            dt_leia = form.cleaned_data['dt_leitura']
-            vlr_m3 = form.cleaned_data['valor_m3']
-            leinicial = form.cleaned_data['leitura_inicial']
-            leifinal = form.cleaned_data['leitura_final']
-            reg = Leituras(mesano=mesa, id_bloco=id_bl, id_morador=id_mor, id_contas=id_con,
-                           dt_leitura=dt_leia, valor_m3=vlr_m3, leitura_inicial=leinicial, leitura_final=leifinal)
-            reg.save()
-            messages.success(
-                request, 'Calculo gerado com sucesso'
-            )
-        # return redirect('/listaconblomov/'+str(idb))
+        for registro_origem in registros_origem:
+            form = LeiturasForm(request.POST)
+            lt = request.POST
+            if registro_origem[0]:
+                # with connection.cursor() as cursor:
+                #    cursor.execute(
+                #        '''
+                #    insert into leituras (mesano, id_morador, id_contas, leitura_inicial, leitura_final, id_bloco)
+                #    values (''' + str(ma) + ''',''' + str(registro_origem[2]) + ''' ,''' + str(3) + ''' ,''' + str(registro_origem[5]) + ''' ,''' + str(registro_origem[6]) + ''' ,''' + str(idb) + '''  )
+                #    '''
+                #    )
+                #    # insert = cursor.fetchall()
+                print(lt)
+
+            messages.success(request, 'Leitura gerado com sucesso')
+    # return redirect('/listaconblomov/'+str(idb))
         return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
     else:
         form = LeiturasForm()
         if submitted in request.GET:
             submitted = True
 
-    # form = LeiturasForm()
-    context = {
-        'formulario':  Leituras.objects.raw('''
-         select  max(id_leituras) id_leituras, max(l.mesano), m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
-         dt_leitura,id_contas,
-            case when ''' + str(ma[0:2]) + ''' <=9 then concat('0',''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''') else 
-            concat(''' + str(ma[0:2]) + ''','/',''' + str(ma[2:6]) + ''')  end
-              mes_ano,
-            ''' + str(ma) + ''' mesano
-
-            from morador m
-            join cadastro cad on
-			cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-            left join leituras l on
-            m.id_morador = l.id_morador 
-            left join contas ct on
-            ct.id_conta = l.id_contas 
-            where m.id_bloco =   ''' + str(idb) + '''
-            group by  m.apto_sala, cad.nome 
-            order by apto_sala
-        '''),
-        'form': form,
-        'submitted': submitted
-    }
+        # form = LeiturasForm()
+        context = {
+            'formulario':  Leituras.objects.raw('''
+            select  max(id_leituras) id_leituras, max(l.mesano), m.id_morador, m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
+            dt_leitura,id_contas
+                from morador m
+                join cadastro cad on
+                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
+                left join leituras l on
+                m.id_morador = l.id_morador 
+                left join contas ct on
+                ct.id_conta = l.id_contas 
+                where m.id_bloco =   ''' + str(idb) + '''
+                group by  m.apto_sala, cad.nome 
+                order by apto_sala
+            '''),
+            'form': form,
+            'submitted': submitted
+        }
     return render(request, "lancar_leituras.html", context)
 
 
