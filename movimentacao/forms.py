@@ -1,22 +1,46 @@
 from django import forms
 from django.forms import ModelForm
 from movimentacao.models import Leituras, Movimento
+from conta.models import Contas
+from tempus_dominus.widgets import DatePicker
 
 
 class LeiturasForm(ModelForm):
+
+    # registros_origem = Contas.objects.filter(Leituras__valor=1)
+
+    # print(registros_origem)
     leitura_final = forms.CharField(required=False)
     leitura_inicial = forms.CharField(required=Leituras.leitura_inicial)
+    id_contas = forms.ModelChoiceField(
+        queryset=Contas.objects.filter(leituras=1),
+        empty_label=None,
+        widget=forms.Select(
+            attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'})
+    )
+
+    # dt_leitura = forms.DateField(
+    #    widget=DatePicker(
+    #        attrs={'class': 'form-control', 'placeholder': 'Selecione a data'},
+    #        options={
+    #            'format': 'YYYY-MM-DD',
+    #            'useCurrent': True,
+    #            'showClear': True,
+    #            'showClose': True,
+    #        }
+    #    )
+    # )
 
     class Meta:
         model = Leituras
-        fields = [
+        fields = (
             'id_morador',
             'id_contas',
             'dt_leitura',
             'valor_m3',
             'leitura_inicial',
             'leitura_final',
-        ]
+        )
         labels = {
             'id_morador': '',
             'id_contas': '',
@@ -28,7 +52,7 @@ class LeiturasForm(ModelForm):
 
         widgets = {
             'id_morador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Codigo Morador'}),
-            'id_contas': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'}),
+            # 'id_contas': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'}),
             'dt_leitura': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Data Leitura'}),
             'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor metros cubicos'}),
             'leitura_inicial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Inicial'}),
