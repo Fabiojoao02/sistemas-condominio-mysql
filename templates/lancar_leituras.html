@@ -14,9 +14,12 @@
                Formulário para registro de novas leituras
            </h4>
            <form action ="" method=POST>
-           <td style="text-align: center;">{{form.id_contas }}</td>
-           <td style="text-align: center;">{{form.dt_leitura }}</td>
-           <td style="text-align: center;">{{form.valor_m3 }}</td>
+            
+            <div class="card-body col-2 col-mb-3">
+                <td style="text-align: center;">{{form.id_contas }}</td>
+                <td style="text-align: center;">{{form.dt_leitura }}</td>
+                <td style="text-align: center;">{{form.valor_m3 }}</td>
+            </div>
            <table class="table table-bordered">
                 <thead>
                     <th style="text-align: center;">Apto/Sala</th>

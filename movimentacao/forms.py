@@ -3,6 +3,7 @@ from django.forms import ModelForm
 from movimentacao.models import Leituras, Movimento
 from conta.models import Contas
 from tempus_dominus.widgets import DatePicker
+from datetime import datetime
 
 
 class LeiturasForm(ModelForm):
@@ -19,17 +20,8 @@ class LeiturasForm(ModelForm):
             attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'})
     )
 
-    # dt_leitura = forms.DateField(
-    #    widget=DatePicker(
-    #        attrs={'class': 'form-control', 'placeholder': 'Selecione a data'},
-    #        options={
-    #            'format': 'YYYY-MM-DD',
-    #            'useCurrent': True,
-    #            'showClear': True,
-    #            'showClose': True,
-    #        }
-    #    )
-    # )
+    dt_leitura = forms.DateField(widget=forms.DateInput(
+        attrs={'type': 'date', 'max': datetime.now()}))
 
     class Meta:
         model = Leituras
@@ -53,8 +45,8 @@ class LeiturasForm(ModelForm):
         widgets = {
             'id_morador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Codigo Morador'}),
             # 'id_contas': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'}),
-            'dt_leitura': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Data Leitura'}),
-            'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor metros cubicos'}),
+            # 'dt_leitura': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Data Leitura'}),
+            'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor M3'}),
             'leitura_inicial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Inicial'}),
             'leitura_final': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Final'}),
         }
