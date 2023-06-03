@@ -55,8 +55,10 @@ def lancar_leituras(request, idb, ma):
     form = LeiturasForm()
     if request.method == 'POST':
         for registro_origem in registros_origem:
-            form = LeiturasForm(request.POST)
-            lt = request.POST
+            form = LeiturasForm(request.POST, instance=Leituras)
+            lt = request
+
+            # lei = form.cleaned_data['id_morador']
             if registro_origem[0]:
                 # with connection.cursor() as cursor:
                 #    cursor.execute(

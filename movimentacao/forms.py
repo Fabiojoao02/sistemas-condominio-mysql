@@ -46,7 +46,7 @@ class LeiturasForm(ModelForm):
             'id_morador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Codigo Morador'}),
             # 'id_contas': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Codigo Conta'}),
             # 'dt_leitura': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Data Leitura'}),
-            'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor M3'}),
+            # 'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor M3'}),
             'leitura_inicial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Inicial'}),
             'leitura_final': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Final'}),
         }
