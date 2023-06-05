@@ -1,4 +1,5 @@
 # from django.views.generic.list import ListView
+from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 # from django.views.generic.detail import deltail
 from django.shortcuts import render, redirect, reverse
@@ -28,76 +29,33 @@ from django.db.models import Q
 from movimentacao.forms import LeiturasForm
 
 
+@login_required(redirect_field_name='redirect_to')
 def lancar_leituras(request, idb, ma):
 
-   # registros_origem = Morador.objects.filter(id_bloco=idb)
-    # Executa a consulta SQL bruta e itera sobre os resultados
-    with connection.cursor() as cursor:
-        cursor.execute(
-            '''
-            select  max(id_leituras) id_leituras, max(l.mesano),m.id_morador, m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
-                dt_leitura,id_contas
-                from morador m
-                join cadastro cad on
-                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-                left join leituras l on
-                m.id_morador = l.id_morador 
-                left join contas ct on
-                ct.id_conta = l.id_contas 
-                where m.id_bloco =   ''' + str(idb) + '''
-                group by  m.apto_sala, cad.nome ,m.id_morador
-                order by apto_sala
-        '''
-        )
-        registros_origem = cursor.fetchall()
-    # print(registros_origem)
-    submitted = False
-    form = LeiturasForm()
+    context = {'form': LeiturasForm(
+    ), 'leitura': Morador.objects.filter(id_bloco=idb).order_by('apto_sala')}
+    return render(request, 'lancar_leituras.html', context)
+
+# @login_required(redirect_field_name='redirect_to')
+
+
+def create_contact(request, idb):
+    print('ioioioioioioioioioioio')
     if request.method == 'POST':
-        for registro_origem in registros_origem:
-            form = LeiturasForm(request.POST, instance=Leituras)
-            lt = request
+        morador = Morador.objects.get(pk=idb)
+        form = LeiturasForm(request.POST or None)
+        if form.is_valid():
+            leitura = form.save()
+            context = {'leitura': leitura}
+            # return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
+            return render(request, 'partials/lanca.html',  context)
 
-            # lei = form.cleaned_data['id_morador']
-            if registro_origem[0]:
-                # with connection.cursor() as cursor:
-                #    cursor.execute(
-                #        '''
-                #    insert into leituras (mesano, id_morador, id_contas, leitura_inicial, leitura_final, id_bloco)
-                #    values (''' + str(ma) + ''',''' + str(registro_origem[2]) + ''' ,''' + str(3) + ''' ,''' + str(registro_origem[5]) + ''' ,''' + str(registro_origem[6]) + ''' ,''' + str(idb) + '''  )
-                #    '''
-                #    )
-                #    # insert = cursor.fetchall()
-                print(lt)
-
-            messages.success(request, 'Leitura gerado com sucesso')
-    # return redirect('/listaconblomov/'+str(idb))
-        return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
-    else:
-        form = LeiturasForm()
-        if submitted in request.GET:
-            submitted = True
-
-        # form = LeiturasForm()
         context = {
-            'formulario':  Leituras.objects.raw('''
-            select  max(id_leituras) id_leituras, max(l.mesano), m.id_morador, m.apto_sala, cad.nome morador,  max(l.leitura_final) leitura_inicial, 0 leitura_final, valor_m3,
-            dt_leitura,id_contas
-                from morador m
-                join cadastro cad on
-                cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-                left join leituras l on
-                m.id_morador = l.id_morador 
-                left join contas ct on
-                ct.id_conta = l.id_contas 
-                where m.id_bloco =   ''' + str(idb) + '''
-                group by  m.apto_sala, cad.nome 
-                order by apto_sala
-            '''),
-            'form': form,
-            'submitted': submitted
+            'formset': form,
+            'morador': morador
         }
-    return render(request, "lancar_leituras.html", context)
+
+    return render(request, 'partials/form.html',  context)
 
 
 class RelatorioCalculosPDF(View):
