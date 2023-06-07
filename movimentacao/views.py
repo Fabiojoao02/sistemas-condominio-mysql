@@ -31,18 +31,19 @@ from movimentacao.forms import LeiturasForm
 
 @login_required(redirect_field_name='redirect_to')
 def lancar_leituras(request, idb, ma):
+    context = {'form': LeiturasForm(),
+               'leituras': Leituras.objects.filter(id_bloco=idb, mesano=ma)
+               }
 
-    context = {'form': LeiturasForm(
-    ), 'leitura': Morador.objects.filter(id_bloco=idb).order_by('apto_sala')}
     return render(request, 'lancar_leituras.html', context)
 
 # @login_required(redirect_field_name='redirect_to')
 
 
-def create_contact(request, idb):
-    print('ioioioioioioioioioioio')
+def create_contact(request):
+    # morador = Morador.objects.get(pk=idb)
+    print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP')
     if request.method == 'POST':
-        morador = Morador.objects.get(pk=idb)
         form = LeiturasForm(request.POST or None)
         if form.is_valid():
             leitura = form.save()
@@ -50,9 +51,14 @@ def create_contact(request, idb):
             # return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
             return render(request, 'partials/lanca.html',  context)
 
+      #  context = {
+       #     'form': form,
+            # 'morador': morador
+       # }
+    else:
         context = {
-            'formset': form,
-            'morador': morador
+            'form': LeiturasForm(),
+            # 'morador': morador
         }
 
     return render(request, 'partials/form.html',  context)

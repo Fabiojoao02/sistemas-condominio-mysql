@@ -11,16 +11,7 @@ email: fbianastacio@gmail.com
 senha: condominio
 -----------------------------
 
-call prc_calcula_movimento('022023');
-
-
-select cal.*, c.nome
-, cad.nome
-from calculos cal
-join contas c on
-c.id_conta = cal.id_contas
-join morador m on
-m.id_morador = cal.id_morador
-join cadastro cad on
-cad.id_cadastro = case when responsavel='I' then id_inquilino else id_proprietario end
-where cal.id_morador=1
+USUARIO email
+condodaspalmeiras50@gmail.com
+senha: Palmeira@s
+-----------------------------

@@ -1,7 +1,7 @@
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-
-<form hx-post="{% url 'create-contact' %}" hx-target="#contact-list" hx-swap="beforeend">
-    {% csrf_token %}
+<form hx-post="{% url 'create-contact'  %}" hx-target="#contact-list" hx-swap="beforeend"
+    hx-on="htmx:afterRequest: this.remove()">
    <div class="row">
        <div class="col-4 col-md-3">
            <label for="{{ form.id_morador.id_for_label}}">{{ form.id_Morador.label}}</label>
@@ -16,3 +16,4 @@
        </div>   
    </div>
 </form>
+</body>

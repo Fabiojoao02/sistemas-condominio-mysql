@@ -72,7 +72,7 @@ class LeiturasForm(ModelForm):
             # 'dt_leitura': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Data Leitura'}),
             # 'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor M3'}),
             # 'leitura_inicial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Inicial'}),
-            'leitura_final': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Leitura Final'}),
+            'leitura_final': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Leituras'}),
         }
 
 

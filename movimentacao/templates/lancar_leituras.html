@@ -14,9 +14,9 @@
 <!-- Link para o arquivo JavaScript do Bootstrap -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
+ 
 <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-<!-- have a button POST a click via AJAX -->
+<!--have a button POST a click via AJAX -->
 
 
 
@@ -43,7 +43,7 @@
         </div>    
 
         <ul id="contact-list">
-            {% for lei in leitura%}
+            {% for leitura in leituras%}
                 {% include 'partials/lanca.html'%}
 
             {% endfor %}
@@ -53,42 +53,6 @@
 
 
 
-
-
-
-
-
-    <div class="modal fade" id="confirmacaoModal" tabindex="-1" role="dialog" aria-labelledby="confirmacaoModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmacaoModalLabel">Confirma os lançamentos</h5>
-                    
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="valor_m3" class="col-form-label">Valor m3:</label>
-                            {% render_field form.valor_m3 placeholder="Valor do metro cúbico" class="form-control" %}
-                            <label for="id_contas" class="col-form-label">Conta:</label>
-                            {% render_field form.id_contas placeholder="Conta da leitura" class="form-control" %}
-                            <label for="dt_leitura" class="col-form-label">Data da Leitura:</label>
-                            {% render_field form.dt_leitura placeholder="Data da Leitura" class="form-control" %}
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="confirmarModalButton">Registrar Lançamento</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-  
 
 
    
