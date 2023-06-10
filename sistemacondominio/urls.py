@@ -20,13 +20,14 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura, GerarPDF, geradorPDFgeral, enviaremail, calcularmovimentacao
 from emailer.views import sendemail
-from movimentacao.views import lancar_leituras, create_contact
+from movimentacao.views import lancar_leituras  # , create_contact
 
 
 # from emailer.views import SendFormEmail
 
 urlpatterns = [
-    # path('', include('movimentacao.urls')),
+    # path('create/<int:idb><str:ma>/', include('movimentacao.urls')),
+    path('create/', include('movimentacao.urls')),
     path('login/', auth_views.LoginView.as_view(template_name='Login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='Logout.html'), name='logout'),
 
@@ -59,9 +60,8 @@ urlpatterns = [
     path('calcularmovimentacao/<int:idb>/<str:ma>/',
          calcularmovimentacao, name='calcularmovimentacao'),
 
-    path('create-form/',
-         create_contact, name='create-contact'),
-
+    # path('create-form/',
+    #     create_contact, name='create-contact'),
 
     path('admin/', admin.site.urls),
 

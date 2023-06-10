@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.views.generic import View
-from . models import Leituras, Calculos
+from . models import Leituras, Calculos, Bloco
 from condominio.models import Morador
 from django.db import connection
 # from django.db.models import
@@ -27,41 +27,48 @@ from reportlab.lib.utils import ImageReader
 from django.urls import reverse
 from django.db.models import Q
 from movimentacao.forms import LeiturasForm
+from django.views.decorators.http import require_http_methods
 
 
-@login_required(redirect_field_name='redirect_to')
+# def expense_list(request):
 def lancar_leituras(request, idb, ma):
-    context = {'form': LeiturasForm(),
-               'leituras': Leituras.objects.filter(id_bloco=idb, mesano=ma)
-               }
+    form = LeiturasForm(request.POST or None, instance=Bloco)
+
+    expenses = Leituras.objects.filter(id_bloco=idb, mesano=ma)
+    print('**************************************************************', idb, ma)
+    print(expenses, idb, ma)
+
+    context = {'object': expenses, 'form': form}
+
+   # context = {'form': form,
+    #           'leituras': Leituras.objects.filter(id_bloco=idb, mesano=ma)
+    #          }
 
     return render(request, 'lancar_leituras.html', context)
 
-# @login_required(redirect_field_name='redirect_to')
 
+# def expense_create(request):
+@require_http_methods(['POST'])
+def expense_create(request, idb, ma):
+    form = LeiturasForm(request.POST or None)
+    bloco = Bloco.objects.get(id=idb)
+    print('ooooooooooooooooooooooooooooooooooooooooooooooooo', bloco, idb, ma)
 
-def create_contact(request):
-    # morador = Morador.objects.get(pk=idb)
-    print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP')
-    if request.method == 'POST':
-        form = LeiturasForm(request.POST or None)
-        if form.is_valid():
-            leitura = form.save()
-            context = {'leitura': leitura}
-            # return redirect('/calcularmovimentacao/'+str(idb)+'/'+str(ma))
-            return render(request, 'partials/lanca.html',  context)
+    # expense = form
 
-      #  context = {
-       #     'form': form,
-            # 'morador': morador
-       # }
-    else:
-        context = {
-            'form': LeiturasForm(),
-            # 'morador': morador
-        }
+    if form.is_valid():
 
-    return render(request, 'partials/form.html',  context)
+        expense = form.save(commit=False)
+        expense.id_bloco = bloco  # idb
+        expense.mesano = '032023'  # ma
+        expense = form.save()
+
+    context = {'object': expense}
+    # return render(request, 'expense/hx/expense_hx.html', context)
+    # print(context)
+    return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
+
+# fim do outro processo
 
 
 class RelatorioCalculosPDF(View):
