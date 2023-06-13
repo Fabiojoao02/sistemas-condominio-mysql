@@ -28,45 +28,50 @@ from django.urls import reverse
 from django.db.models import Q
 from movimentacao.forms import LeiturasForm
 from django.views.decorators.http import require_http_methods
-
+from datetime import datetime, timedelta
 
 # def expense_list(request):
 def lancar_leituras(request, idb, ma):
-    form = LeiturasForm(request.POST or None, instance=Bloco)
+ #   bloco = Bloco.objects.get(id_bloco=idb)
+#    form = LeiturasForm(request.POST or None, instance=bloco)
+    form = LeiturasForm(request.POST or None)
 
     expenses = Leituras.objects.filter(id_bloco=idb, mesano=ma)
+    #expenses = Morador.objects.get(id_bloco=idb)
     print('**************************************************************', idb, ma)
     print(expenses, idb, ma)
 
-    context = {'object': expenses, 'form': form}
-
-   # context = {'form': form,
-    #           'leituras': Leituras.objects.filter(id_bloco=idb, mesano=ma)
-    #          }
-
+    context = {'objec_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
     return render(request, 'lancar_leituras.html', context)
 
 
 # def expense_create(request):
 @require_http_methods(['POST'])
-def expense_create(request, idb, ma):
+def expense_create(request, idb, ma ):
+    #ma = '032023'
+    data_atual = datetime.strptime(ma, '%m%Y')
+    data_anterior = data_atual - timedelta(days=1)
+    mes_anterior = data_anterior.strftime('%m%Y')
     form = LeiturasForm(request.POST or None)
-    bloco = Bloco.objects.get(id=idb)
-    print('ooooooooooooooooooooooooooooooooooooooooooooooooo', bloco, idb, ma)
-
-    # expense = form
-
     if form.is_valid():
-
+        print('ooooooooooooooooooooooooooooooooooooooooooooooooo', idb, ma)
         expense = form.save(commit=False)
-        expense.id_bloco = bloco  # idb
-        expense.mesano = '032023'  # ma
-        expense = form.save()
+        id_morador = request.POST.get('id_morador')
+        leitura_inicial = Leituras.objects.filter(id_bloco=idb, mesano=mes_anterior, id_morador=id_morador).first()
+        if leitura_inicial:
+            #expense.id_bloco =  idb
+            expense.leitura_inicial=leitura_inicial.leitura_final
+        else:
+            expense.leitura_inicial = 0    
+        print(expense.leitura_inicial)
+        expense.mesano = ma
+        #expense = form.save()
 
     context = {'object': expense}
     # return render(request, 'expense/hx/expense_hx.html', context)
     # print(context)
-    return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
+    #return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
+    return render(request, 'movimentacao/hx/expense_hx.html',  context)
 
 # fim do outro processo
 

@@ -6,8 +6,8 @@
 <div class="row">
   <div class="col">
     <form
-      class="form-inline p-3"
-      hx-post="{% url 'movimentacao:expense_create' object.id_bloco 032023 %}"
+    class="form-inline p-3"
+      hx-post="{% url 'movimentacao:expense_create' idb ma %}"
       hx-target="#expenseTbody"
       hx-swap="afterbegin"  
       >
@@ -15,9 +15,10 @@
       {% for field in form %}
       <div class="form-group p-2">
         {{ field }}
+        {{ field.id_bloco }}
         {{ field.errors }}
         {% if field.help_text %}
-        <small class="text-muted">{{ field.help_text|safe }}</small>
+          <small class="text-muted">{{ field.help_text|safe }}</small>
         {% endif %}
       </div>
       {% endfor %}
@@ -40,10 +41,15 @@
       <thead>
         <tr>
           <th></th>
-          <th>Descrição</th>
-          <th>Valor</th>
-          <th class="text-center">Pago</th>
-          <th class="text-center">Ações</th>
+          <th>Bloco</th>
+          <th>Morador</th>
+          <th>Conta</th>
+          <th>Data Leitura</th>
+          <th>Valor M3</th>
+          <th>Leitura inicial</th>
+          <th>Leitura final</th>
+<!--          <th class="text-center">Pago</th>
+          <th class="text-center">Ações</th>-->
         </tr>
       </thead>
       <tbody id="expenseTbody">

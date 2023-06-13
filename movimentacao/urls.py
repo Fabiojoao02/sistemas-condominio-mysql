@@ -13,7 +13,8 @@ urlpatterns = [
     path('relatorio_calculos_pdf/', RelatorioCalculosPDF.as_view(),
          name='relatorio_calculos_pdf'),
     path('busca/', Busca.as_view(), name='busca'),
-    path('<int:idb><str:ma>/', views.expense_create, name='expense_create'),
+    #path('create/', views.expense_create, name='expense_create'),
+    path('create/<int:idb>/<str:ma>', views.expense_create, name='expense_create'),
     # path('movimentacao/', include('movimentacao.urls', namespace='movimetnacao')),
 
 ]
