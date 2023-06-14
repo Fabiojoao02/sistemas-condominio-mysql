@@ -64,8 +64,13 @@ def expense_create(request, idb, ma ):
         else:
             expense.leitura_inicial = 0    
         print(expense.leitura_inicial)
+        bloco = Bloco.objects.get(id_bloco=idb)
+        if bloco:
+            expense.id_bloco = bloco
+        else:
+            expense.id_bloco = 0
         expense.mesano = ma
-        #expense = form.save()
+        expense = form.save()
 
     context = {'object': expense}
     # return render(request, 'expense/hx/expense_hx.html', context)

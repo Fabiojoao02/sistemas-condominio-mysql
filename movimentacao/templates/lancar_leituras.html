@@ -11,6 +11,16 @@
       hx-target="#expenseTbody"
       hx-swap="afterbegin"  
       >
+      <table class="table">
+        <thead>
+          <th style="text-align: center;">Morador</th>
+          <th style="text-align: center;">Conta</th>
+          <th style="text-align: left;">Data Leitura</th>
+          <th style="text-align: left;">Valor M3</th>
+          <th style="text-align: left;">Leitura final       </th>
+       </thead>
+      </table>
+  
       {% csrf_token %}
       {% for field in form %}
       <div class="form-group p-2">
@@ -41,14 +51,14 @@
       <thead>
         <tr>
           <th></th>
-          <th>Bloco</th>
           <th>Morador</th>
           <th>Conta</th>
           <th>Data Leitura</th>
           <th>Valor M3</th>
           <th>Leitura inicial</th>
           <th>Leitura final</th>
-<!--          <th class="text-center">Pago</th>
+  <!--        <th>Valor Consumo m3</th>
+          <th class="text-center">Pago</th>
           <th class="text-center">Ações</th>-->
         </tr>
       </thead>
@@ -56,8 +66,17 @@
         {% include "./expense_table.html" %}
       </tbody>
     </table>
+
+    <div class="text-right">
+      <a href={% url 'calcularmovimentacao' idb ma  %} class="btn btn-secondary text-white" type="button">
+         <span class="text"><center>Voltar</center>
+         </a>      
+      </div>  
+
+
   </form>
 </div>
+
 
 {% endblock content %}
 

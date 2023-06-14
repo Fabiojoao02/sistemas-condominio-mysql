@@ -233,7 +233,7 @@ class Morador(models.Model):
         upload_to='morador_imagens', blank=True, null=True)
 
     def __str__(self) -> str:
-        return self.apto_sala
+        return f'{self.apto_sala} - {self.id_inquilino.nome}'
 
     # @property
     def get_nome_bloco(self):
