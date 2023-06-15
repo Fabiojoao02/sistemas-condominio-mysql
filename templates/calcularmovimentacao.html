@@ -205,6 +205,14 @@
                   <h6 class="m-30 font-weight-bold text-primary">Leituras referente Mês/Ano: {{ l.mes_ano }}</h6>
                {% endfor %}
             </div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              <a href="{% url 'lancar_leituras' idb ma %}" class="btn btn-info btn-icon-user btn-sm">
+                  <span class="text">Edita leituras</span>
+                  <span class="icon text-white-10">
+                     <i class="fa-solid fa-info"></i>
+                  </span>
+               </a>   
+              </div>
             <div class="card-body">
                <div class="table-responsive">
                   <table class="table table-bordered">

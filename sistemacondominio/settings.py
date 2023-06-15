@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'widget_tweaks',
-    # 'bootstrap4',
     'emailer',
     'condominio.apps.CondominioConfig',
     'cadastro.apps.CadastroConfig',

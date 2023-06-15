@@ -373,6 +373,7 @@ def calcularmovimentacao(request, idb, ma):
                 where mov.id_bloco = %s and mov.mesano = %s
                 group by mov.mesano,mov.id_bloco
         ''', [idb, ma]),
+         'idb': idb, 'ma': ma
     }
 
     # executa a proc para calcular os rateios
@@ -385,7 +386,7 @@ def calcularmovimentacao(request, idb, ma):
 
             messages.success(request, 'Calculo gerado com sucesso')
 
-    return render(request, 'calcularmovimentacao.html', context)
+    return render(request, 'calcularmovimentacao.html', context )
 
 
 class GerarPDF(View):

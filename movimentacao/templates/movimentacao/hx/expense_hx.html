@@ -1,5 +1,6 @@
 <!-- hx/expense_hx.html linha que vai preenchendo a tabela -->
 {% load humanize %}
+{% load custom_tags %}
 <tr
   hx-target="this"
   hx-swap="outerHTML"
@@ -16,4 +17,10 @@
   <td>{{ object.dt_leitura|date:"d/m/Y" }}</td>
   <td>{{ object.valor_m3|floatformat:2|intcomma }}</td>
   <td>{{ object.leitura_inicial|floatformat:3|intcomma }}</td>
+  <td>{{ object.leitura_final|floatformat:3|intcomma }}</td>
+  <td>Resultado: {{ object.leitura_final|floatformat:3 }} - {{ object.leitura_inicial|floatformat:3 }} * {{ object.valor_m3|floatformat:3 }} = 
+    {{ object.leitura_final|floatformat:3|subtract:object.leitura_inicial|mul:object.valor_m3|floatformat:2 }}</td>
+  </td>
 </tr>
+
+

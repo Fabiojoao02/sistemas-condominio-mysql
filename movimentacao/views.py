@@ -70,7 +70,7 @@ def expense_create(request, idb, ma ):
         else:
             expense.id_bloco = 0
         expense.mesano = ma
-        expense = form.save()
+        #expense = form.save()
 
     context = {'object': expense}
     # return render(request, 'expense/hx/expense_hx.html', context)
