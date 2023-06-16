@@ -32,10 +32,7 @@ from datetime import datetime, timedelta
 
 # def expense_list(request):
 def lancar_leituras(request, idb, ma):
- #   bloco = Bloco.objects.get(id_bloco=idb)
-#    form = LeiturasForm(request.POST or None, instance=bloco)
     form = LeiturasForm(request.POST or None)
-
     expenses = Leituras.objects.filter(id_bloco=idb, mesano=ma)
     #expenses = Morador.objects.get(id_bloco=idb)
     print('**************************************************************', idb, ma)
