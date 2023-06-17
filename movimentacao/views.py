@@ -38,7 +38,7 @@ def lancar_leituras(request, idb, ma):
     print('**************************************************************', idb, ma)
     print(expenses, idb, ma)
 
-    context = {'objec_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
+    context = {'object_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
     return render(request, 'lancar_leituras.html', context)
 
 

@@ -15,9 +15,9 @@
   <td>{{ object.id_morador }}</td>
   <td>{{ object.id_contas }}</td>
   <td>{{ object.dt_leitura|date:"d/m/Y" }}</td>
-  <td>{{ object.valor_m3|floatformat:2|intcomma }}</td>
-  <td>{{ object.leitura_inicial|floatformat:3|intcomma }}</td>
-  <td>{{ object.leitura_final|floatformat:3|intcomma }}</td>
+  <td style="text-align: right;">{{ object.valor_m3|floatformat:2|intcomma }}</td>
+  <td style="text-align: right;">{{ object.leitura_inicial|floatformat:3|intcomma }}</td>
+  <td style="text-align: right;">{{ object.leitura_final|floatformat:3|intcomma }}</td>
 
 </tr>
 
