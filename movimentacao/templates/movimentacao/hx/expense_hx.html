@@ -4,13 +4,13 @@
 <tr
   hx-target="this"
   hx-swap="outerHTML"
-  class="person {% if object.id_leitura %}activate{% else %}deactivate{% endif %}"
+  class="person {% if object.id_leituras %}activate{% else %}deactivate{% endif %}"
 >
   <td>
     <input
       type="checkbox"
       name="ids"
-      value="{{ object.id_leitura }}">
+      value="{{ object.id_leituras }}">
   </td>
   <td>{{ object.id_morador }}</td>
   <td>{{ object.id_contas }}</td>
@@ -18,6 +18,15 @@
   <td style="text-align: right;">{{ object.valor_m3|floatformat:2|intcomma }}</td>
   <td style="text-align: right;">{{ object.leitura_inicial|floatformat:3|intcomma }}</td>
   <td style="text-align: right;">{{ object.leitura_final|floatformat:3|intcomma }}</td>
+  <!-- Ações 
+     <td class="text-center">-->
+     <td style="text-align: right;">
+ 
+
+    <span hx-get="{% url 'movimentacao:expense_detail' object.id_leituras %}">
+      <i class="fa fa-pencil-square-o link span-is-link"></i>
+    </span>
+  </td>
 
 </tr>
 

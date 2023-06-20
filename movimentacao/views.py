@@ -31,12 +31,12 @@ from django.views.decorators.http import require_http_methods
 from datetime import datetime, timedelta
 
 # def expense_list(request):
+
+
 def lancar_leituras(request, idb, ma):
     form = LeiturasForm(request.POST or None)
     expenses = Leituras.objects.filter(id_bloco=idb, mesano=ma)
-    #expenses = Morador.objects.get(id_bloco=idb)
-    print('**************************************************************', idb, ma)
-    print(expenses, idb, ma)
+    # expenses = Morador.objects.get(id_bloco=idb)
 
     context = {'object_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
     return render(request, 'lancar_leituras.html', context)
@@ -44,22 +44,22 @@ def lancar_leituras(request, idb, ma):
 
 # def expense_create(request):
 @require_http_methods(['POST'])
-def expense_create(request, idb, ma ):
-    #ma = '032023'
+def expense_create(request, idb, ma):
+    # ma = '032023'
     data_atual = datetime.strptime(ma, '%m%Y')
     data_anterior = data_atual - timedelta(days=1)
     mes_anterior = data_anterior.strftime('%m%Y')
     form = LeiturasForm(request.POST or None)
     if form.is_valid():
-        print('ooooooooooooooooooooooooooooooooooooooooooooooooo', idb, ma)
         expense = form.save(commit=False)
         id_morador = request.POST.get('id_morador')
-        leitura_inicial = Leituras.objects.filter(id_bloco=idb, mesano=mes_anterior, id_morador=id_morador).first()
+        leitura_inicial = Leituras.objects.filter(
+            id_bloco=idb, mesano=mes_anterior, id_morador=id_morador).first()
         if leitura_inicial:
-            #expense.id_bloco =  idb
-            expense.leitura_inicial=leitura_inicial.leitura_final
+            # expense.id_bloco =  idb
+            expense.leitura_inicial = leitura_inicial.leitura_final
         else:
-            expense.leitura_inicial = 0    
+            expense.leitura_inicial = 0
         print(expense.leitura_inicial)
         bloco = Bloco.objects.get(id_bloco=idb)
         if bloco:
@@ -67,15 +67,38 @@ def expense_create(request, idb, ma ):
         else:
             expense.id_bloco = 0
         expense.mesano = ma
-        #expense = form.save()
+        expense = form.save()
 
     context = {'object': expense}
     # return render(request, 'expense/hx/expense_hx.html', context)
     # print(context)
-    #return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
+    # return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
     return render(request, 'movimentacao/hx/expense_hx.html',  context)
 
 # fim do outro processo
+
+
+def expense_detail(request, pk):
+    obj = Leituras.objects.get(id_leituras=pk)
+    form = LeiturasForm(request.POST or None, instance=obj)
+
+    context = {'object': obj, 'form': form}
+
+    return render(request, 'movimentacao/hx/expense_detail.html',  context)
+
+
+def expense_update(request, pk):
+    obj = Leituras.objects.get(id_leituras=pk)
+    form = LeiturasForm(request.POST or None, instance=obj)
+
+    context = {'object': obj}
+
+    if request.method == "POST":
+        if form.is_valid():
+            print('updateupdateupdateupdateupdateupdateupdate', pk)
+            form.save()
+
+    return render(request, 'movimentacao/hx/expense_hx.html',  context)
 
 
 class RelatorioCalculosPDF(View):

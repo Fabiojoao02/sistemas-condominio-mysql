@@ -1,0 +1,30 @@
+<!--expense_detail.html-->
+<tr id="trExpense">
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td>{{ form.leitura_final}}</td>
+   <td></td>
+   <td class="text-center">
+      <button
+         type="submit"
+         class="btn btn-sucess"
+         hx-post="{%  url 'movimentacao:expense_update' object.id_leituras %}"
+         hx-target="#trExpense"
+         hx-swap="outerHTML"
+         >
+         OK
+      </button>
+      <button 
+         class="btn.btn-danger"
+         hx-get="{%  url 'movimentacao:expense_update' object.id_leituras %}"
+         hx-target="#trExpense"
+         hx-swap="outerHTML"
+      >
+         <i class="fa fa-close"></i>
+      </button>
+</tr>
