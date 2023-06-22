@@ -4,7 +4,6 @@
 <tr
   hx-target="this"
   hx-swap="outerHTML"
-  class="person {% if object.id_leituras %}activate{% else %}deactivate{% endif %}"
 >
   <td>
     <input
@@ -21,10 +20,15 @@
   <!-- Ações 
      <td class="text-center">-->
      <td style="text-align: right;">
- 
-
-    <span hx-get="{% url 'movimentacao:expense_detail' object.id_leituras %}">
+     <span hx-get="{% url 'movimentacao:expense_detail' object.id_leituras %}">
       <i class="fa fa-pencil-square-o link span-is-link"></i>
+    </span>
+    <span hx-delete="{% url 'movimentacao:expense_delete' object.id_leituras %}"
+        hx-confirm="Deseja excluir?"
+        hx-target="closest tr"
+        hx-swap="outerHTML swap:500ms"
+    >
+      <fa class="fa fa-trash no span-is-link pl-2"></fa>
     </span>
   </td>
 

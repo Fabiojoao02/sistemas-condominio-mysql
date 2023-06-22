@@ -13,5 +13,5 @@ senha: condominio
 
 USUARIO email
 condodaspalmeiras50@gmail.com
-senha: Palmeira@s
+senha: Palmeir@s
 -----------------------------

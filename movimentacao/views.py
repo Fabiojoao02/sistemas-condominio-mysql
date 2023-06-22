@@ -35,7 +35,8 @@ from datetime import datetime, timedelta
 
 def lancar_leituras(request, idb, ma):
     form = LeiturasForm(request.POST or None)
-    expenses = Leituras.objects.filter(id_bloco=idb, mesano=ma)
+    expenses = Leituras.objects.filter(
+        id_bloco=idb, mesano=ma).order_by('id_bloco', 'id_morador')
     # expenses = Morador.objects.get(id_bloco=idb)
 
     context = {'object_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
@@ -56,11 +57,9 @@ def expense_create(request, idb, ma):
         leitura_inicial = Leituras.objects.filter(
             id_bloco=idb, mesano=mes_anterior, id_morador=id_morador).first()
         if leitura_inicial:
-            # expense.id_bloco =  idb
             expense.leitura_inicial = leitura_inicial.leitura_final
         else:
             expense.leitura_inicial = 0
-        print(expense.leitura_inicial)
         bloco = Bloco.objects.get(id_bloco=idb)
         if bloco:
             expense.id_bloco = bloco
@@ -78,10 +77,40 @@ def expense_create(request, idb, ma):
 # fim do outro processo
 
 
+@require_http_methods(['POST'])
+def expense_paid(request):
+    ids = request.POST.getlist('ids')
+
+    # edita os calculos selecionados
+    Calculos.objects.filter(id__in=ids).update(paid=True)
+
+    # Retorna todas os calculos novamente.
+    expenses = Calculos.objects.all()
+
+    context = {'object_list': expenses}
+
+    return render(request, 'movimentacao/exepense_table.html', context)
+
+
+@require_http_methods(['POST'])
+def expense_no_paid(request):
+    ids = request.POST.getlist('ids')
+
+    # edita os calculos selecionados
+    Calculos.objects.filter(id__in=ids).update(paid=False)
+
+    # Retorna todas os calculos novamente.
+    expenses = Calculos.objects.all()
+
+    context = {'object_list': expenses}
+
+    return render(request, 'movimentacao/exepense_table.html', context)
+
+
 def expense_detail(request, pk):
     obj = Leituras.objects.get(id_leituras=pk)
     form = LeiturasForm(request.POST or None, instance=obj)
-
+    # print(obj.dt_leitura)
     context = {'object': obj, 'form': form}
 
     return render(request, 'movimentacao/hx/expense_detail.html',  context)
@@ -90,15 +119,34 @@ def expense_detail(request, pk):
 def expense_update(request, pk):
     obj = Leituras.objects.get(id_leituras=pk)
     form = LeiturasForm(request.POST or None, instance=obj)
-
     context = {'object': obj}
 
-    if request.method == "POST":
+    if request.method == 'POST':
         if form.is_valid():
-            print('updateupdateupdateupdateupdateupdateupdate', pk)
+            expense = form.save(commit=False)
+            expense.mesano = obj.mesano
+            expense.id_bloco = obj.id_bloco
+            expense.id_morador = obj.id_morador
+            expense.id_conta = obj.id_contas
+            expense.dt_leitura = obj.dt_leitura
+            expense.valor_m3 = obj.valor_m3
+            expense.leitura_inicial = obj.leitura_inicial
+            expense.leitura_final = obj.leitura_final
+            bloco = Bloco.objects.get(nome=expense.id_bloco)
+            if bloco:
+                expense.id_bloco = bloco
+            else:
+                expense.id_bloco = 0
+
             form.save()
 
     return render(request, 'movimentacao/hx/expense_hx.html',  context)
+
+
+def expense_delete(request, pk):
+    obj = Leituras.objects.get(id_leituras=pk)
+    obj.delete()
+    return render(request, 'expense_table.html')
 
 
 class RelatorioCalculosPDF(View):

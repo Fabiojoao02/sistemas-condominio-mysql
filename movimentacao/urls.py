@@ -17,7 +17,9 @@ urlpatterns = [
     path('create/<int:idb>/<str:ma>', views.expense_create, name='expense_create'),
     path('<int:pk>/', views.expense_detail, name='expense_detail'),
     path('<int:pk>/update', views.expense_update, name='expense_update'),
-
+    path('<int:pk>/delete', views.expense_delete, name='expense_delete'),
+    path('movimentacao/paid/', views.expense_paid, name='expense_paid'),
+    path('movimentacao/no-paid/', views.expense_no_paid, name='expense_no_paid'),
 ]
 
 

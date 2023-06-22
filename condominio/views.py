@@ -373,7 +373,7 @@ def calcularmovimentacao(request, idb, ma):
                 where mov.id_bloco = %s and mov.mesano = %s
                 group by mov.mesano,mov.id_bloco
         ''', [idb, ma]),
-         'idb': idb, 'ma': ma
+        'idb': idb, 'ma': ma
     }
 
     # executa a proc para calcular os rateios
@@ -386,7 +386,7 @@ def calcularmovimentacao(request, idb, ma):
 
             messages.success(request, 'Calculo gerado com sucesso')
 
-    return render(request, 'calcularmovimentacao.html', context )
+    return render(request, 'calcularmovimentacao.html', context)
 
 
 class GerarPDF(View):
@@ -807,7 +807,7 @@ class GerarPDF(View):
                     if linha % 25 == 0 and linha != 0:
                         p.setFont('Helvetica-Bold', 14)
                         p.drawString(
-                            180, 765, 'Extrato leitura de '+conta+' 12 meses anteriores: '+mes_ano)
+                            180, 765, 'Extrato leitura de '+conta+' 12 meses anteriores')
                         p.setFont('Helvetica', 14)
                         # Define a cor do texto do cabeçalho
                         # Adiciona uma nova página depois de cada quatro linhas
@@ -825,7 +825,7 @@ class GerarPDF(View):
                         # Desenha o cabeçalho com fundo colorido
                         p.setFont('Helvetica-Bold', 14)
                         p.drawString(
-                            180, 765, 'Extrato leitura de '+conta+' 12 meses anteriores: '+mes_ano)
+                            180, 765, 'Extrato leitura de '+conta+' 12 meses anteriores')
                         p.setFont('Helvetica-Bold', 9)
                         p.drawString(10, y, 'Mês Ano')
                         p.drawString(80, y, 'Data Leitura')

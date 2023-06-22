@@ -100,14 +100,7 @@
                <tbody>
                   {%for lista in conta %}
                      <tr  style="text-align: center;">
-                        {% if lista.tem_leitura %}
-                              <td><a href="{% url 'listaleitura' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador%}">
-                                 {{ lista.id_conta }}
-                              </td>
-                        </a>
-                        {%else%}
-                           <td  style="text-align: center;">{{ lista.id_conta }}</td>
-                        {%endif%}   
+                        <td  style="text-align: center;">{{ lista.id_conta }}</td>
                         <td  style="text-align: left;">{{ lista.nome_conta }}</td>
                         <td  style="text-align: right;">{{ lista.valor|floatformat:2|intcomma }}</td>
                      </tr>

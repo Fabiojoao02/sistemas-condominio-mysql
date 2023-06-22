@@ -32,7 +32,7 @@
                         {% if le.id_leituras != None  %}
                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1 fs-1">Valores das leituras - {{ le.agrupador }}</div>
                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                              {{ le.total_leituras }}</div>
+                              {{ le.total_leituras|floatformat:2|intcomma  }}</div>
                         {% else %}      
                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Valores das leituras </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -63,7 +63,7 @@
                      </div>
                      <div class="h5 mb-0 font-weight-bold text-gray-800">
                         {%for l in calcmov1 %}
-                           {{ l.valor_total_leitura }}
+                           {{ l.valor_total_leitura|floatformat:2|intcomma  }}
                         {% endfor %}
                      </div>
                   </div>
@@ -204,8 +204,6 @@
                {%for l in lei %}
                   <h6 class="m-30 font-weight-bold text-primary">Leituras referente Mês/Ano: {{ l.mes_ano }}</h6>
                {% endfor %}
-            </div>
-            <div class="h5 mb-0 font-weight-bold text-gray-800">
               <a href="{% url 'lancar_leituras' idb ma %}" class="btn btn-info btn-icon-user btn-sm">
                   <span class="text">Edita leituras</span>
                   <span class="icon text-white-10">
