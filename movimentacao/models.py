@@ -25,6 +25,7 @@ class Calculos(models.Model):
     valor = models.FloatField()
     publica = models.BooleanField(default=True)
     dt_lancamento = models.DateTimeField()
+    pago = models.BooleanField(default=False)
 
     def get_formatvalorCal(self):
         return f'{self.valor:.2f}'.replace('.', ',')

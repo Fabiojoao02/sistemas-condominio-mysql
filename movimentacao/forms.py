@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from movimentacao.models import Leituras, Movimento
+from movimentacao.models import Leituras, Movimento, Calculos
 from conta.models import Contas
 from condominio.models import Morador, Bloco, Cadastro
 # from tempus_dominus.widgets import DatePicker
@@ -58,6 +58,17 @@ class LeiturasForm(ModelForm):
             'valor_m3': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor M3'}),
             'leitura_final': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Leituras'}),
         }
+
+
+class CalculosForm(ModelForm):
+
+    class Meta:
+        model = Calculos
+        fields = (
+            # 'id_morador',
+            'pago',
+
+        )
 
 
 class AutorizaCalculoForm(ModelForm):

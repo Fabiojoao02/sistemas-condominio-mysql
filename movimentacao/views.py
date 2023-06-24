@@ -26,7 +26,7 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from django.urls import reverse
 from django.db.models import Q
-from movimentacao.forms import LeiturasForm
+from movimentacao.forms import LeiturasForm, CalculosForm
 from django.views.decorators.http import require_http_methods
 from datetime import datetime, timedelta
 
@@ -37,7 +37,6 @@ def lancar_leituras(request, idb, ma):
     form = LeiturasForm(request.POST or None)
     expenses = Leituras.objects.filter(
         id_bloco=idb, mesano=ma).order_by('id_bloco', 'id_morador')
-    # expenses = Morador.objects.get(id_bloco=idb)
 
     context = {'object_list': expenses, 'form': form, 'idb': idb, 'ma': ma}
     return render(request, 'lancar_leituras.html', context)
@@ -46,7 +45,6 @@ def lancar_leituras(request, idb, ma):
 # def expense_create(request):
 @require_http_methods(['POST'])
 def expense_create(request, idb, ma):
-    # ma = '032023'
     data_atual = datetime.strptime(ma, '%m%Y')
     data_anterior = data_atual - timedelta(days=1)
     mes_anterior = data_anterior.strftime('%m%Y')
@@ -69,40 +67,48 @@ def expense_create(request, idb, ma):
         expense = form.save()
 
     context = {'object': expense}
-    # return render(request, 'expense/hx/expense_hx.html', context)
-    # print(context)
-    # return render(request, 'movimentacao/hx/expense_hx.html'+str(idb)+str(ma),  context)
     return render(request, 'movimentacao/hx/expense_hx.html',  context)
 
-# fim do outro processo
+
+def calculo_create(request, idb, ma, idm):
+    form = CalculosForm(request.POST or None)
+    expenses = Calculos.objects.filter(
+        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
+    context = {'object_list': expenses, 'form': form,
+               'idb': idb, 'ma': ma, 'idm': idm}
+    print(form, idb, ma, idm)
+    return render(request, 'calculo_create.html',  context)
 
 
 @require_http_methods(['POST'])
-def expense_paid(request):
+def expense_paid(request, idb, ma, idm):
     ids = request.POST.getlist('ids')
+    print('ioioioioioioioioioiioioioioio', idb, ma, idm)
 
     # edita os calculos selecionados
-    Calculos.objects.filter(id__in=ids).update(paid=True)
+    Calculos.objects.filter(id__in=ids).update(pago=True)
 
     # Retorna todas os calculos novamente.
-    expenses = Calculos.objects.all()
+    expenses = Calculos.objects.filter(
+        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
 
-    context = {'object_list': expenses}
+    context = {'object_list': expenses, 'idb': idb, 'ma': ma, 'idm': idm}
 
     return render(request, 'movimentacao/exepense_table.html', context)
 
 
 @require_http_methods(['POST'])
-def expense_no_paid(request):
+def expense_no_paid(request, idb, ma, idm):
     ids = request.POST.getlist('ids')
 
     # edita os calculos selecionados
-    Calculos.objects.filter(id__in=ids).update(paid=False)
+    Calculos.objects.filter(id__in=ids).update(pago=False)
 
     # Retorna todas os calculos novamente.
-    expenses = Calculos.objects.all()
+    expenses = Calculos.objects.filter(
+        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
 
-    context = {'object_list': expenses}
+    context = {'object_list': expenses, 'idb': idb, 'ma': ma, 'idm': idm}
 
     return render(request, 'movimentacao/exepense_table.html', context)
 

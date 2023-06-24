@@ -1,5 +1,5 @@
-<!-- expense_list.html -->
-{% extends "base1.html" %}
+<!-- calculo_create.html -->
+{% extends "movimentacao/base1.html" %}
 
 {% block content %}
   <h1>Lista de Despesas</h1>
@@ -7,7 +7,7 @@
     <div class="col">
       <form
         class="form-inline p-3"
-        hx-post="{% url 'movimentacao:expense_create' %}"
+        hx-post="{% url 'calculo_create' idb ma idm %}"
         hx-target="#expenseTbody"
         hx-indicator=".htmx-indicator"
         hx-swap="afterbegin"
@@ -22,12 +22,7 @@
             {% endif %}
           </div>
         {% endfor %}
-        <div class="form-group">
-          <button
-            type="submit"
-            class="btn btn-primary ml-2"
-          >Adicionar</button>
-        </div>
+
       </form>
     </div>
   </div>
@@ -39,11 +34,11 @@
   >
     <a
       class="btn btn-outline-success"
-      hx-post="{% url 'movimentacao:expense_paid' %}"
+      hx-post="{% url 'movimentacao:expense_paid' 2 '052023' 1 %}"
     >Pago</a>
     <a
       class="btn btn-outline-danger"
-      hx-post="{% url 'movimentacao:expense_no_paid' %}"
+      hx-post="{% url 'movimentacao:expense_no_paid' 2 '052023' 1 %}"
     >Não Pago</a>
     <span class="lead"><strong>Bulk update</strong></span>
   </div>
@@ -57,7 +52,7 @@
         <thead>
           <tr>
             <th></th>
-            <th>Descrição</th>
+            <th>Morador</th>
             <th>Valor</th>
             <th class="text-center">Pago</th>
             <th class="text-center">Ações</th>
