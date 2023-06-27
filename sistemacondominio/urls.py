@@ -60,7 +60,7 @@ urlpatterns = [
     path('calcularmovimentacao/<int:idb>/<str:ma>/',
          calcularmovimentacao, name='calcularmovimentacao'),
 
-    path('calculo_create/<int:idb>/<str:ma>/<int:idm>/',
+    path('calculo_create/<int:idb>/<str:ma>/',
          calculo_create, name='calculo_create'),
 
     # path('create-form/',

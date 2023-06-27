@@ -70,35 +70,35 @@ def expense_create(request, idb, ma):
     return render(request, 'movimentacao/hx/expense_hx.html',  context)
 
 
-def calculo_create(request, idb, ma, idm):
+def calculo_create(request, idb, ma):
     form = CalculosForm(request.POST or None)
     expenses = Calculos.objects.filter(
-        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
+        id_bloco=idb, mesano=ma).order_by('id_bloco', 'mesano', 'id_morador')
     context = {'object_list': expenses, 'form': form,
-               'idb': idb, 'ma': ma, 'idm': idm}
-    print(form, idb, ma, idm)
+               'idb': idb, 'ma': ma}
+    print(form, idb, ma)
     return render(request, 'calculo_create.html',  context)
 
 
 @require_http_methods(['POST'])
-def expense_paid(request, idb, ma, idm):
+def expense_paid(request, idb, ma):
     ids = request.POST.getlist('ids')
-    print('ioioioioioioioioioiioioioioio', idb, ma, idm)
+    print('ioioioioioioioioioiioioioioio', idb, ma)
 
     # edita os calculos selecionados
     Calculos.objects.filter(id__in=ids).update(pago=True)
 
     # Retorna todas os calculos novamente.
     expenses = Calculos.objects.filter(
-        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
+        id_bloco=idb, mesano=ma).order_by('id_bloco', 'mesano', 'id_morador')
 
-    context = {'object_list': expenses, 'idb': idb, 'ma': ma, 'idm': idm}
+    context = {'object_list': expenses, 'idb': idb, 'ma': ma}
 
     return render(request, 'movimentacao/exepense_table.html', context)
 
 
 @require_http_methods(['POST'])
-def expense_no_paid(request, idb, ma, idm):
+def expense_no_paid(request, idb, ma):
     ids = request.POST.getlist('ids')
 
     # edita os calculos selecionados
@@ -106,9 +106,9 @@ def expense_no_paid(request, idb, ma, idm):
 
     # Retorna todas os calculos novamente.
     expenses = Calculos.objects.filter(
-        id_bloco=idb, mesano=ma, id_morador=idm).order_by('id_bloco', 'mesano', 'id_morador')
+        id_bloco=idb, mesano=ma).order_by('id_bloco', 'mesano', 'id_morador')
 
-    context = {'object_list': expenses, 'idb': idb, 'ma': ma, 'idm': idm}
+    context = {'object_list': expenses, 'idb': idb, 'ma': ma}
 
     return render(request, 'movimentacao/exepense_table.html', context)
 

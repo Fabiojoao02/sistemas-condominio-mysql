@@ -2,12 +2,12 @@
 {% extends "movimentacao/base1.html" %}
 
 {% block content %}
-  <h1>Lista de Despesas</h1>
+  <h1>Lista de Despesas !!</h1>
   <div class="row">
     <div class="col">
       <form
         class="form-inline p-3"
-        hx-post="{% url 'calculo_create' idb ma idm %}"
+        hx-post="{% url 'calculo_create' idb ma %}"
         hx-target="#expenseTbody"
         hx-indicator=".htmx-indicator"
         hx-swap="afterbegin"
@@ -34,11 +34,11 @@
   >
     <a
       class="btn btn-outline-success"
-      hx-post="{% url 'movimentacao:expense_paid' 2 '052023' 1 %}"
+      hx-post="{ url 'movimentacao:expense_paid' idb ma %}"
     >Pago</a>
     <a
       class="btn btn-outline-danger"
-      hx-post="{% url 'movimentacao:expense_no_paid' 2 '052023' 1 %}"
+      hx-post="{% url 'movimentacao:expense_no_paid' 2 '052023' %}"
     >Não Pago</a>
     <span class="lead"><strong>Bulk update</strong></span>
   </div>
@@ -59,7 +59,7 @@
           </tr>
         </thead>
         <tbody id="expenseTbody">
-          {% include "./expense_table.html" %}
+          {% include "./calculo_table.html" %}
         </tbody>
       </table>
     </form>

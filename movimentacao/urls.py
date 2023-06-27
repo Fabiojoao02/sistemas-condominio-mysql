@@ -21,7 +21,7 @@ urlpatterns = [
 
     path('movimentacao/paid/<int:idb>/<str:ma>/<int:idm>',
          views.expense_paid, name='expense_paid'),
-    path('movimentacao/no-paid/<int:idb>/<str:ma>/<int:idm>',
+    path('movimentacao/no-paid/<int:idb>/<str:ma>',
          views.expense_no_paid, name='expense_no_paid'),
 
 ]

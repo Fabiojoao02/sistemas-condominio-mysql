@@ -1,0 +1,22 @@
+<!--calculo_detail.html-->
+<tr id="trExpense">
+
+   <td>{{ form.id_morador }}</td>
+   <td>{{ form.id_contas }}</td>
+   <td>{{ form.valor_m3 }}</td>
+   <td>{{ form.pago }}</td>
+
+
+   <td class="text-center">
+      <button type="submit" 
+      class="btn btn-success"
+         hx-post="{  url 'movimentacao:expense_update' object.id_leituras %}" hx-target="#trExpense"
+         hx-swap="outerHTML">
+         OK
+      </button>
+      <button class="btn btn-danger" hx-get="{%  url 'movimentacao:expense_update' object.id_leituras %}"
+         hx-target="#trExpense" hx-swap="outerHTML">
+         <i class="fa fa-close"></i>
+      </button>
+   </td>
+</tr>

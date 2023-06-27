@@ -1,0 +1,16 @@
+<!-- hx/expense_hx.html linha que vai preenchendo a tabela -->
+{% load humanize %}
+{% load custom_tags %}
+<tr hx-target="this" hx-swap="outerHTML">
+
+   <td>
+      <input type="checkbox" name="ids" value="{{ object.id_calculos }}">
+   </td>
+   <td>{{ object.id_morador }}</td>
+   <td>{{ object.id_contas }}</td>
+   <td style="text-align: right;">{{ object.valor|floatformat:2|intcomma }}</td>
+   <!-- Ações 
+     <td class="text-center">-->
+
+
+</tr>

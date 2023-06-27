@@ -144,7 +144,7 @@ def listaconblomorador(request, idb, ma):
         ''', [idb, ma]),
 
         'calculo1':  Condominio.objects.raw('''
-            select b.id_condominio, cd.nome nome_condominio, m.id_bloco, 
+            select b.id_condominio, cd.nome nome_condominio, m.id_bloco, cal.mesano,
             b.nome nome_bloco, concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
                 ROUND(sum(valor), 2) valor 
             from calculos cal
