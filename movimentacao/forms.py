@@ -60,17 +60,6 @@ class LeiturasForm(ModelForm):
         }
 
 
-class CalculosForm(ModelForm):
-
-    class Meta:
-        model = Calculos
-        fields = (
-            # 'id_morador',
-            'pago',
-
-        )
-
-
 class AutorizaCalculoForm(ModelForm):
     responsavel = forms.CharField(required=True)
 

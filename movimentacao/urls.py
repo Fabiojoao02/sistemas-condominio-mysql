@@ -19,10 +19,7 @@ urlpatterns = [
     path('<int:pk>/update', views.expense_update, name='expense_update'),
     path('<int:pk>/delete', views.expense_delete, name='expense_delete'),
 
-    path('movimentacao/paid/<int:idb>/<str:ma>/<int:idm>',
-         views.expense_paid, name='expense_paid'),
-    path('movimentacao/no-paid/<int:idb>/<str:ma>',
-         views.expense_no_paid, name='expense_no_paid'),
+
 
 ]
 

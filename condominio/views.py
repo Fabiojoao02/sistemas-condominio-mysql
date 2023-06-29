@@ -1,4 +1,5 @@
 import os
+import time
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
 from movimentacao.models import Calculos, Leituras, Movimento
@@ -17,6 +18,8 @@ from reportlab.platypus import Table, TableStyle, Image
 from pathlib import Path
 from emailer.views import sendemail
 from pixqrcodegen import Payload
+from tqdm import tqdm
+from tqdm import trange
 
 # graficos
 # import math
@@ -38,6 +41,8 @@ from reportlab.graphics.charts.barcharts import HorizontalBarChart
 from reportlab.graphics.shapes import Drawing, String
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from movimentacao.forms import AutorizaCalculoForm
+from io import BytesIO
+from django.conf import settings
 
 
 @login_required(redirect_field_name='redirect_to')
@@ -434,7 +439,7 @@ class GerarPDF(View):
                 '''
                 select b.id_condominio, cal.mesano, 
                     concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
-                    m.apto_sala, cad.nome morador, c.nome conta,
+                    m.apto_sala, cad.nome morador, c.nome conta, cond.foto,
                     ROUND(valor,2) valor
                 from calculos cal
                     join contas c on
@@ -446,7 +451,9 @@ class GerarPDF(View):
                                             then id_inquilino 
                                             else id_proprietario end
 					join bloco b on
-                    b.id_bloco = m.id_bloco                                            
+                    b.id_bloco = m.id_bloco  
+                    join condominio cond on
+                    cond.id_condominio = b.id_condominio                                          
                 where cal.mesano = %s and m.id_morador = %s
                 order by mesano,m.apto_sala,id_contas                
             ''', [ma, id_morador]
@@ -462,8 +469,22 @@ class GerarPDF(View):
             apto_sala_anterior = None
             morador_anterior = None
             for row in rows:
-                id_condominio, mesano, mes_ano, apto_sala, morador, conta, valor = row
+                id_condominio, mesano, mes_ano, apto_sala, morador, conta, foto, valor = row
+                image_filename = foto
+                # image_path = os.path.join('condominio_imagens', image_filename)
+                image_full_path = os.path.join(
+                    settings.MEDIA_ROOT, image_filename)
+
+                image_full_path = image_full_path.replace('\\', '/')
+
+                # print(image_data)
+                with open(image_full_path, 'rb') as f:
+                    image_data = f.read()
+
+                image = ImageReader(BytesIO(image_data))
                 if apto_sala != apto_sala_anterior:
+                    # Adiciona imagem do condominio
+
                     # Adiciona um subtotal para a categoria anterior
                     if apto_sala_anterior:
                         subtotal = subtotais[apto_sala_anterior]
@@ -629,6 +650,9 @@ class GerarPDF(View):
 
             p.drawImage(caminho_imagem,
                         x=10, y=700, width=130, height=130)
+
+            p.drawImage(image,
+                        x=460, y=700, width=120, height=120)
 
             # p.drawImage(caminho_imagem,
             #           x=400, y=y, width=150, height=150)
@@ -1075,10 +1099,13 @@ def geradorPDFgeral(request, idb, ma):
         ''', [idb, ma]
     )
 
-    for lista in context:
+    pbar = tqdm(context)
+
+    for lista in pbar:
         GerarPDF.get(None, request, ma=lista.mesano,
                      id_morador=lista.id_morador, idb=lista.id_bloco)
-
+        time.sleep(0.25)
+        pbar.set_description(f'enviando para: {lista.apto_sala}')
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')
 
@@ -1113,8 +1140,12 @@ def enviaremail(request, idb, ma):
         ''', [idb, ma]
     )
 
-    for lista in context:
+    pbar = tqdm(context)
+
+    for lista in pbar:
        # print(lista.mesano, lista.email, lista.apto_sala)
+        time.sleep(0.25)
+        pbar.set_description(f'enviando para: {lista.apto_sala}')
 
         sendemail(request, ma=lista.mesano,
                   email=lista.email, apto=lista.apto_sala)
