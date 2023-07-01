@@ -15,6 +15,8 @@ from pathlib import Path
 from django.contrib.messages import constants
 import os
 import pymysql
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,7 +32,7 @@ SECRET_KEY = 'django-insecure-lvbf&&x!wms(vk3b7pu9-!$@#&uk7lbke8=*-7@enw3mnbn=9e
 DEBUG = False
 
 # ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
 
 
 # Application definition
