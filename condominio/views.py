@@ -104,7 +104,7 @@ def listaconblomov(request, id):
             cal.mesano = mov.mesano and
             cal.id_bloco = mov.id_bloco
             where b.id_bloco = ''' + str(id) + '''
-            group by c.id_condominio, c.nome , b.id_bloco, b.nome ,cal.mesano
+            group by c.id_condominio, c.nome , b.id_bloco, b.nome ,cal.mesano,mov.mesano
             order by mov.mesano
         '''),
         'condominio1':  Condominio.objects.raw('''
@@ -144,7 +144,7 @@ def listaconblomorador(request, idb, ma):
                 join bloco b on
                     b.id_bloco = m.id_bloco
             where m.id_bloco = %s and cal.mesano = %s
-            group by b.id_condominio,m.id_bloco,mesano,m.apto_sala,cad.nome 
+            group by b.id_condominio,m.id_bloco,mesano,m.apto_sala,cad.nome,m.id_morador 
             order by cal.mesano, m.id_bloco,m.apto_sala
         ''', [idb, ma]),
 
@@ -350,7 +350,7 @@ def calcularmovimentacao(request, idb, ma):
                     join movimento mov on
                     mov.id_bloco = b.id_bloco
                     where b.id_bloco = %s and mesano = %s
-                    group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano
+                    group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano,mov.situacao
              ''', [idb, ma]),
         'lei':  Leituras.objects.raw('''
                 SELECT id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
@@ -359,10 +359,10 @@ def calcularmovimentacao(request, idb, ma):
                 join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
                 where l.id_bloco = %s and l.mesano = %s
-                group by l.mesano, id_contas ,nome,l.id_bloco 
+                group by l.mesano, id_contas ,nome,l.id_bloco ,id_leituras
              ''', [idb, ma]),
         'lei1':  Leituras.objects.raw('''
-                 SELECT  id_leituras, mov.mesano #,SUM(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+                 SELECT  sum(id_leituras) id_leituras, mov.mesano #,SUM(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
 				,mov.id_bloco id_bloco_mov
                 ,(select sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) totl from leituras le  where le.id_bloco = mov.id_bloco and le.mesano =mov.mesano )as total_leituras
                 ,concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano
@@ -678,13 +678,15 @@ class GerarPDF(View):
                         CAST(ROUND((valor/
                         (select sum(valor) from calculos c1
                             where c1.mesano = cal.mesano  and c1.id_morador = cal.id_morador)*100),0) 
-                            as varchar(50)),%s) Conta,
+                            as char),%s) Conta,
                         ROUND(valor,2) valor
                 	    from calculos cal
                     	join contas c on
                         c.id_conta = cal.id_contas
                 		where cal.mesano = %s and cal.id_morador = %s
-            """, [([separador]), ma, id_morador]
+            """,
+                # [ma, id_morador]
+                [([separador]), ma, id_morador]
 
             )
             dados = cursor.fetchall()
@@ -1094,7 +1096,7 @@ def geradorPDFgeral(request, idb, ma):
                 join condominio cd on
                 cd.id_condominio = b.id_condominio
             where m.id_bloco = %s and cal.mesano = %s 
-            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,
+            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
                 m.apto_sala,cad.nome
         ''', [idb, ma]
     )
@@ -1135,7 +1137,7 @@ def enviaremail(request, idb, ma):
                 join condominio cd on
                 cd.id_condominio = b.id_condominio
             where m.id_bloco = %s and cal.mesano = %s 
-            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,
+            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
                 m.apto_sala,cad.nome, cad.email
         ''', [idb, ma]
     )

@@ -29,10 +29,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-lvbf&&x!wms(vk3b7pu9-!$@#&uk7lbke8=*-7@enw3mnbn=9e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
 
 
 # Application definition
@@ -119,11 +119,18 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'condominio',
+        'NAME': 'railway',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'PASSWORD': 'lobzfc4gdKc4oVJdbpga',
+        'HOST': 'containers-us-west-148.railway.app',
+        'PORT': '7451',
+
+        # 'NAME': 'condominio',
+        # 'USER': 'root',
+        # 'PASSWORD': '',
+        # 'HOST': '127.0.0.1',
+
+
         # 'OPTIONS': {
         #    'sql_mode': 'traditional',
         # }
