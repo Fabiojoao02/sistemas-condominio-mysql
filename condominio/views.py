@@ -353,13 +353,13 @@ def calcularmovimentacao(request, idb, ma):
                     group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano,mov.situacao
              ''', [idb, ma]),
         'lei':  Leituras.objects.raw('''
-                SELECT id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
+                SELECT sum(id_leituras) id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
                 ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,l.id_bloco
                 from leituras l
                 join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
                 where l.id_bloco = %s and l.mesano = %s
-                group by l.mesano, id_contas ,nome,l.id_bloco ,id_leituras
+                group by l.mesano, id_contas ,nome,l.id_bloco 
              ''', [idb, ma]),
         'lei1':  Leituras.objects.raw('''
                  SELECT  sum(id_leituras) id_leituras, mov.mesano #,SUM(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras

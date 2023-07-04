@@ -119,16 +119,16 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'railway',
-        'USER': 'root',
-        'PASSWORD': 'lobzfc4gdKc4oVJdbpga',
-        'HOST': 'containers-us-west-148.railway.app',
-        'PORT': '7451',
-
-        # 'NAME': 'condominio',
+        # 'NAME': 'railway',
         # 'USER': 'root',
-        # 'PASSWORD': '',
-        # 'HOST': '127.0.0.1',
+        # 'PASSWORD': 'lobzfc4gdKc4oVJdbpga',
+        # 'HOST': 'containers-us-west-148.railway.app',
+        # 'PORT': '7451',
+
+        'NAME': 'condominio',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
 
 
         # 'OPTIONS': {
