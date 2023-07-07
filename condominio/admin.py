@@ -41,8 +41,11 @@ class BlocoAdmin(admin.ModelAdmin):
 
 
 class MoradorAdmin(admin.ModelAdmin):
-    list_display = ['apto_sala',  'get_nome_inquilino', 'get_cpf_cnpj_morador', 'get_telefone_morador',
+    list_display = ['apto_sala',  'get_nome_inquilino', 'situacao', 'get_cpf_cnpj_morador', 'get_telefone_morador',
                     'get_email_morador', 'get_nome_proprietario', 'get_nome_bloco', 'foto']
+
+    list_filter = ['apto_sala', 'situacao']
+    search_fields = ['apto_sala', 'situacao']
 
 
 admin.site.register(models.Condominio, CondominioAdmin)
