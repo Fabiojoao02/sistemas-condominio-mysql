@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle, Image
 from pathlib import Path
-from emailer.views import sendemail
+from emailer.views import sendemail, sendwhatsApp
 from pixqrcodegen import Payload
 from tqdm import tqdm
 from tqdm import trange
@@ -43,6 +43,8 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from movimentacao.forms import AutorizaCalculoForm
 from io import BytesIO
 from django.conf import settings
+
+from selenium import webdriver
 
 
 @login_required(redirect_field_name='redirect_to')
@@ -1151,6 +1153,53 @@ def enviaremail(request, idb, ma):
 
         sendemail(request, ma=lista.mesano,
                   email=lista.email, apto=lista.apto_sala)
+
+    # url = reverse('relatorio_calculos_pdf')
+    return redirect('index')
+
+
+@login_required(redirect_field_name='redirect_to')
+def enviarwhatsApp(request, idb, ma):
+
+    # Filtrando com dois parâmetros
+    context = Condominio.objects.raw('''
+          select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
+                b.nome nome_bloco, 
+                concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                cal.mesano,
+                m.apto_sala,
+                cad.nome morador,m.id_morador, cad.telefone,
+                ROUND(sum(valor),2) valor
+            from calculos cal
+                join contas c on
+                    c.id_conta=cal.id_contas
+                join morador m on
+                    m.id_morador=cal.id_morador
+                join cadastro cad on
+                    cad.id_cadastro=case when responsavel='I' 
+                        then id_inquilino else id_proprietario end
+                join bloco b on
+                    b.id_bloco = m.id_bloco
+                join condominio cd on
+                cd.id_condominio = b.id_condominio
+            where m.id_bloco = %s and cal.mesano = %s 
+            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
+                m.apto_sala,cad.nome, cad.email
+        ''', [idb, ma]
+    )
+
+    pbar = tqdm(context)
+
+    # driver = webdriver.Chrome()
+    # driver.get('https://web.whatsapp.com/')
+
+    for lista in pbar:
+       # print(lista.mesano, lista.email, lista.apto_sala)
+        time.sleep(0.25)
+        pbar.set_description(f'enviando WhatsApp para: {lista.apto_sala}')
+
+        sendwhatsApp(request, ma=lista.mesano,
+                     telefone=lista.telefone, apto=lista.apto_sala)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')
