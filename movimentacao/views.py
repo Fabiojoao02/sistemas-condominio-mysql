@@ -49,6 +49,8 @@ def expense_create(request, idb, ma):
     data_anterior = data_atual - timedelta(days=1)
     mes_anterior = data_anterior.strftime('%m%Y')
     form = LeiturasForm(request.POST or None)
+    expense = Leituras.objects.filter(
+        id_bloco=idb, mesano=ma).order_by('id_bloco', 'id_morador')
     if form.is_valid():
         expense = form.save(commit=False)
         id_morador = request.POST.get('id_morador')

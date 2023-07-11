@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle, Image
 from pathlib import Path
-from emailer.views import sendemail, sendwhatsApp
+from emailer.views import sendemail
 from pixqrcodegen import Payload
 from tqdm import tqdm
 from tqdm import trange
@@ -45,6 +45,12 @@ from io import BytesIO
 from django.conf import settings
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
 
 
 @login_required(redirect_field_name='redirect_to')
@@ -1161,47 +1167,110 @@ def enviaremail(request, idb, ma):
 @login_required(redirect_field_name='redirect_to')
 def enviarwhatsApp(request, idb, ma):
 
-    # Filtrando com dois parâmetros
     context = Condominio.objects.raw('''
-          select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
-                b.nome nome_bloco, 
-                concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
-                cal.mesano,
-                m.apto_sala,
-                cad.nome morador,m.id_morador, cad.telefone,
-                ROUND(sum(valor),2) valor
-            from calculos cal
-                join contas c on
-                    c.id_conta=cal.id_contas
-                join morador m on
-                    m.id_morador=cal.id_morador
-                join cadastro cad on
-                    cad.id_cadastro=case when responsavel='I' 
-                        then id_inquilino else id_proprietario end
-                join bloco b on
-                    b.id_bloco = m.id_bloco
-                join condominio cd on
-                cd.id_condominio = b.id_condominio
-            where m.id_bloco = %s and cal.mesano = %s 
-            group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
-                m.apto_sala,cad.nome, cad.email
+            
+            select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
+                    b.nome nome_bloco, 
+                    concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                    cal.mesano,
+                    m.apto_sala,
+                    cad.nome morador,m.id_morador, cad.telefone,
+                    ROUND(sum(valor),2) valor
+                from calculos cal
+                    join contas c on
+                        c.id_conta=cal.id_contas
+                    join morador m on
+                        m.id_morador=cal.id_morador
+                    join cadastro cad on
+                        cad.id_cadastro=case when responsavel='I' 
+                            then id_inquilino else id_proprietario end
+                    join bloco b on
+                        b.id_bloco = m.id_bloco
+                    join condominio cd on
+                    cd.id_condominio = b.id_condominio
+                where m.id_bloco = %s and cal.mesano = %s 
+                group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
+                    m.apto_sala,cad.nome, cad.email limit 1
         ''', [idb, ma]
+
     )
 
-    pbar = tqdm(context)
+    driver = webdriver.Chrome()
+    # driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver.get('https://web.whatsapp.com/')
+    time.sleep(10)
 
-    # driver = webdriver.Chrome()
-    # driver.get('https://web.whatsapp.com/')
+    # Mensagem - Mensagem que sera enviada
+    mensagem = 'Bom dia grupo '
+    mensagem2 = ' ,que o dia de voces seja iluminado'
 
-    for lista in pbar:
-       # print(lista.mesano, lista.email, lista.apto_sala)
-        time.sleep(0.25)
-        pbar.set_description(f'enviando WhatsApp para: {lista.apto_sala}')
+    for lista in context:
+        # for lista in range(1):
+        CAMINHO_ARQUIVO = Path(__file__).parent.parent
+        # print(CAMINHO_ARQUIVO)
+        caminho = CAMINHO_ARQUIVO /  \
+            'emailer' / \
+            'templates\emailer' / \
+            ma / f'{lista.apto_sala}.pdf'  # / arquivo
 
-        sendwhatsApp(request, ma=lista.mesano,
-                     telefone=lista.telefone, apto=lista.apto_sala)
+        # print(caminho)
 
-    # url = reverse('relatorio_calculos_pdf')
+        # print(caminho)
+        diretorio, nome_arquivo = os.path.split(caminho)
+        telefone = '554197034647'  # lista.telefone
+        print('ioioioioioioioioioioioi')
+        print(caminho, telefone)
+
+        # Funcao que pesquisa o Contato/Grupo
+        # search_xpath = '//*[@id="pane-side"]/button/div/div[2]/div/div'
+
+        search_xpath = '//div[@contenteditable="true"][@data-tab="3"]'
+        campo_pesquisa = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, search_xpath)))
+        time.sleep(1)
+        campo_pesquisa.click()
+        campo_pesquisa.send_keys(telefone)
+        campo_pesquisa.send_keys(Keys.ENTER)
+
+        # Funcao que envia midia como mensagem OK esta indo
+        # link = f'https://web.whatsapp.com/send?phone={telefone}&text={mensagem}'
+        # driver.get(link)
+        # send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]'
+        # send_btn = WebDriverWait(driver, 20).until(
+        #    EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
+        # send_btn.click()
+       # while len(WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.ID, 'side')))) < 1:
+        #    time.sleep(1)
+
+        # Aguarde até que o chat seja carregado
+        chat_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/div/div/span'
+        chat = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, chat_xpath)))
+        chat.click()
+
+        file_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[4]/li/div/input'
+        file_input = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, file_xpath)))
+        file_input.send_keys(caminho)
+
+     # //*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[4]/li/div
+
+
+# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[4]/li/div/input
+
+        time.sleep(2)  # Aguarde um pouco para o arquivo ser carregado
+
+        # send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span'
+        send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]'
+        send_btn = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
+        send_btn.click()
+
+        time.sleep(10)  # Aguarde um pouco antes de passa
+
+
+# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span
+# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]
     return redirect('index')
 
 

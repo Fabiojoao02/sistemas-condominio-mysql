@@ -15,6 +15,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from selenium.webdriver.common.keys import Keys
+import pyautogui
 
 
 def sendemail(request, ma, email, apto):
@@ -84,6 +86,7 @@ def sendemail(request, ma, email, apto):
     return redirect('index')
 
 
+'''
 def sendwhatsApp(request, ma, telefone, apto):
     CAMINHO_ARQUIVO = Path(__file__).parent
     caminho = CAMINHO_ARQUIVO / 'templates\emailer' / ma
@@ -96,43 +99,45 @@ def sendwhatsApp(request, ma, telefone, apto):
     diretorio, nome_arquivo = os.path.split(caminho)
     print('ioioioioioioioioioioioi')
     print(caminho)
+    print('fimfimfimfimfimfimfimfim')
     driver = webdriver.Chrome()
     driver.get('https://web.whatsapp.com/')
 
-    messages.success(request, ('WhatsApp sent successfully.'))
-
-    return redirect('index')
-
-
-'''
-      # Localize o campo de pesquisa do WhatsApp e pesquise o número de celular
+    telefone = ['4197034647']
+    # Localize o campo de pesquisa do WhatsApp e pesquise o número de celular
+    # search_xpath = '//*[@id="pane-side"]/button/div/div[2]/div/div'
     search_xpath = '//div[@contenteditable="true"][@data-tab="3"]'
-    search_box = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, search_xpath)))
+    search_box = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, search_xpath)))
     search_box.clear()
     search_box.send_keys(telefone)
-    search_box.submit
+    search_box.send_keys(Keys.ENTER)
 
-
-       # Aguarde até que o chat seja carregado
+    # Aguarde até que o chat seja carregado
     chat_xpath = f'//div[@title="{telefone}"]'
-    chat = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, chat_xpath)))
+    chat = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, chat_xpath)))
     chat.click()
 
-        # Envie o arquivo PDF
+    # Envie o arquivo PDF
     attachment_xpath = '//div[@title="Anexar"]'
-    attachment_btn = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, attachment_xpath)))
+    attachment_btn = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, attachment_xpath)))
     attachment_btn.click()
 
     file_xpath = '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime,application/pdf"]'
-    file_input = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, file_xpath)))
+    file_input = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, file_xpath)))
     file_input.send_keys(caminho)
 
     time.sleep(2)  # Aguarde um pouco para o arquivo ser carregado
 
     send_btn_xpath = '//span[@data-icon="send"]'
-    send_btn = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
+    send_btn = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
     send_btn.click()
 
-    time.sleep(2)  # Aguarde um pouco antes de passa    
+    messages.success(request, ('WhatsApp sent successfully.'))
 
+    return redirect('index')
 '''
