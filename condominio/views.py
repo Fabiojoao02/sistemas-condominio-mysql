@@ -1196,33 +1196,21 @@ def enviarwhatsApp(request, idb, ma):
     )
 
     driver = webdriver.Chrome()
-    # driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get('https://web.whatsapp.com/')
     time.sleep(10)
 
     # Mensagem - Mensagem que sera enviada
-    mensagem = 'Bom dia grupo '
+    mensagem = 'Olá caro condômino '
     mensagem2 = ' ,que o dia de voces seja iluminado'
 
     for lista in context:
-        # for lista in range(1):
         CAMINHO_ARQUIVO = Path(__file__).parent.parent
-        # print(CAMINHO_ARQUIVO)
-        caminho = CAMINHO_ARQUIVO /  \
-            'emailer' / \
-            'templates\emailer' / \
-            ma / f'{lista.apto_sala}.pdf'  # / arquivo
-
-        # print(caminho)
-
-        # print(caminho)
+        caminho = os.path.join(
+            CAMINHO_ARQUIVO, 'emailer', 'templates', 'emailer', ma, f'{lista.apto_sala}.pdf')
         diretorio, nome_arquivo = os.path.split(caminho)
-        telefone = '554197034647'  # lista.telefone
-        print('ioioioioioioioioioioioi')
-        print(caminho, telefone)
+        telefone = '4197034647'  # lista.telefone
 
-        # Funcao que pesquisa o Contato/Grupo
-        # search_xpath = '//*[@id="pane-side"]/button/div/div[2]/div/div'
+        mensagem = f'Olá caro condômino *{lista.morador}* segue o demonstrativo do condomínio'
 
         search_xpath = '//div[@contenteditable="true"][@data-tab="3"]'
         campo_pesquisa = WebDriverWait(driver, 20).until(
@@ -1233,17 +1221,18 @@ def enviarwhatsApp(request, idb, ma):
         campo_pesquisa.send_keys(Keys.ENTER)
 
         # Funcao que envia midia como mensagem OK esta indo
-        # link = f'https://web.whatsapp.com/send?phone={telefone}&text={mensagem}'
-        # driver.get(link)
-        # send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]'
-        # send_btn = WebDriverWait(driver, 20).until(
-        #    EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
-        # send_btn.click()
+        link = f'https://web.whatsapp.com/send?phone={telefone}&text={mensagem}'
+        driver.get(link)
+        send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]'
+        send_btn = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
+        send_btn.click()
        # while len(WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.ID, 'side')))) < 1:
         #    time.sleep(1)
 
         # Aguarde até que o chat seja carregado
         chat_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/div/div/span'
+  #      chat = driver.find_element((By.XPATH, chat_xpath))
         chat = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, chat_xpath)))
         chat.click()
@@ -1253,24 +1242,16 @@ def enviarwhatsApp(request, idb, ma):
             EC.presence_of_element_located((By.XPATH, file_xpath)))
         file_input.send_keys(caminho)
 
-     # //*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[4]/li/div
-
-
-# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[4]/li/div/input
-
         time.sleep(2)  # Aguarde um pouco para o arquivo ser carregado
 
         # send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span'
-        send_btn_xpath = '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]'
+        send_btn_xpath = '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[2]/div[2]/div/div/span'
         send_btn = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
         send_btn.click()
 
         time.sleep(10)  # Aguarde um pouco antes de passa
 
-
-# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span
-# //*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]
     return redirect('index')
 
 
