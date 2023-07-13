@@ -99,6 +99,7 @@
                   <th style="text-align: center;">Valor Total</th>
                   <th style="text-align: center;">Mais informações</th>
                   <th style="text-align: center;">PDF</th>
+                  <th style="text-align: center;">WhatsApp</th>
                </thead>
 
                <tbody>
@@ -121,6 +122,15 @@
                           </a>
                         </a>
                         </td>
+
+                        <td
+                           style="text-align: center;">
+                              <a href="{% url 'enviarwhatsApp' idb=lista.id_bloco ma=lista.mesano id_morador=lista.id_morador%}">
+                              <img src="{% static 'images/whatsapp.png' %}" alt="Descrição da imagem">
+                          </a>
+                        </a>
+                        </td>
+
                      </tr>
                   {% endfor %}
                   {%for l in calculo1 %}
@@ -129,6 +139,7 @@
                      <td></td>
                      <td style="text-align: center;" class="m-0 font-weight-bold text-primary">Total</td>
                   <td style="text-align: right;" class="m-0 font-weight-bold text-primary">{{ l.valor|floatformat:2|intcomma }}</td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   </tr>

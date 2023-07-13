@@ -54,7 +54,7 @@ urlpatterns = [
     # path('sendwhatsApp/<str:ma>/<str:email>/<str:apto>/',
     #     sendwhatsApp, name='sendwhatsApp'),
 
-    path('enviarwhatsApp/<int:idb>/<str:ma>/',
+    path('enviarwhatsApp/<int:idb>/<str:ma>/<int:id_morador>/',
          enviarwhatsApp, name='enviarwhatsApp'),
 
 

@@ -119,7 +119,7 @@
                            </a>
                            </td>
                            <td style="text-align: center;">
-                              <a href="{% url 'enviarwhatsApp' idb=lista.id_bloco ma=lista.mesano %}">
+                              <a href="{% url 'enviarwhatsApp' idb=lista.id_bloco ma=lista.mesano id_morador=0  %}">
                                  <img src="{% static 'images/whatsapp.png' %}" alt="Descrição da imagem">
                            </a>
                            </td>
@@ -130,13 +130,13 @@
                            </td>
                            <td style="text-align: center;">
                               <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
-                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                                 <img src="{% static 'images/sensor.png' %}" alt="Descrição da imagem">
                            </a>
                            </td>
                         {% else %}   
                            <td style="text-align: center;">
                               <a href="{% url 'calcularmovimentacao' idb=lista.id_bloco ma=lista.mesano %}">
-                                 <img src="{% static 'images/info.png' %}" alt="Descrição da imagem">
+                                 <img src="{% static 'images/sensor.png' %}" alt="Descrição da imagem">
                            </a>
                            </td>
                         {% endif %}                           

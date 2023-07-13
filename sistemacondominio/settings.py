@@ -60,7 +60,7 @@ INSTALLED_APPS = [
 
 
     # TODO: Remover debug toobar
-    'debug_toolbar',
+    # 'debug_toolbar',
 ]
 
 DECIMAL_SEPARATOR = '.'
@@ -80,7 +80,7 @@ MIDDLEWARE = [
 
 
     # TODO: Remover debug toobar
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'sistemacondominio.urls'
@@ -119,16 +119,16 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'railway',
-        # 'USER': 'root',
-        # 'PASSWORD': 'lobzfc4gdKc4oVJdbpga',
-        # 'HOST': 'containers-us-west-148.railway.app',
-        # 'PORT': '7451',
+        'NAME': 'vacom_condominio',
+        'USER': 'vacom_fabiojoao',
+        'PASSWORD': 'D&ltaeco2023',
+        'HOST': '108.167.132.104',
+        'PORT': '3306',
 
-        'NAME': 'condominio',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        # 'NAME': 'condominio',
+        # 'USER': 'root',
+        # 'PASSWORD': '',
+        # 'HOST': '127.0.0.1',
 
 
         # 'OPTIONS': {
@@ -230,11 +230,11 @@ SESSION_SAVE_EVERY_REQUEST = False
 # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # TODO: Remover debug toobar
-INTERNAL_IPS = [
-    # ...
-    "127.0.0.1",
-    # ...
-]
+# INTERNAL_IPS = [
+# ...
+#   "127.0.0.1",
+# ...
+# ]
 
 # Para sessions em arquivos ao invés da base de dados
 # SESSION_ENGINE = "django.contrib.sessions.backends.file"

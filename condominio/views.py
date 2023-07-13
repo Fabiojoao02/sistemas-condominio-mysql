@@ -363,6 +363,8 @@ def calcularmovimentacao(request, idb, ma):
         'lei':  Leituras.objects.raw('''
                 SELECT sum(id_leituras) id_leituras, mesano, id_contas ,nome conta, sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as total_leituras
                 ,concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,l.id_bloco
+                ,cast(max(dt_leitura) as date) dt_leitura
+                ,max(valor_m3) valor_m3
                 from leituras l
                 join contas ct on
                 ct.id_conta = l.id_contas and leituras = 1
@@ -1165,35 +1167,55 @@ def enviaremail(request, idb, ma):
 
 
 @login_required(redirect_field_name='redirect_to')
-def enviarwhatsApp(request, idb, ma):
-
-    context = Condominio.objects.raw('''
-            
-            select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
-                    b.nome nome_bloco, 
-                    concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
-                    cal.mesano,
-                    m.apto_sala,
-                    cad.nome morador,m.id_morador, cad.telefone,
-                    ROUND(sum(valor),2) valor
-                from calculos cal
-                    join contas c on
-                        c.id_conta=cal.id_contas
-                    join morador m on
-                        m.id_morador=cal.id_morador
-                    join cadastro cad on
-                        cad.id_cadastro=case when responsavel='I' 
-                            then id_inquilino else id_proprietario end
-                    join bloco b on
-                        b.id_bloco = m.id_bloco
-                    join condominio cd on
-                    cd.id_condominio = b.id_condominio
-                where m.id_bloco = %s and cal.mesano = %s 
-                group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
-                    m.apto_sala,cad.nome, cad.email limit 1
-        ''', [idb, ma]
-
-    )
+def enviarwhatsApp(request, idb, ma, id_morador):
+    if id_morador == 0:
+        context = Condominio.objects.raw('''
+                select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
+                        b.nome nome_bloco, 
+                        concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                        cal.mesano,m.apto_sala,
+                        cad.nome morador,m.id_morador, cad.telefone,ROUND(sum(valor),2) valor
+                    from calculos cal
+                        join contas c on
+                            c.id_conta=cal.id_contas
+                        join morador m on
+                            m.id_morador=cal.id_morador
+                        join cadastro cad on
+                            cad.id_cadastro=case when responsavel='I' 
+                                then id_inquilino else id_proprietario end
+                        join bloco b on
+                            b.id_bloco = m.id_bloco
+                        join condominio cd on
+                        cd.id_condominio = b.id_condominio
+                    where m.id_bloco = %s and cal.mesano = %s 
+                    group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
+                        m.apto_sala,cad.nome, cad.email limit 1
+            ''', [idb, ma]
+        )
+    else:
+        context = Condominio.objects.raw('''
+                select distinct b.id_condominio, cd.nome nome_condominio, m.id_bloco,
+                        b.nome nome_bloco, 
+                        concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                        cal.mesano,m.apto_sala,
+                        cad.nome morador,m.id_morador, cad.telefone,ROUND(sum(valor),2) valor
+                    from calculos cal
+                        join contas c on
+                            c.id_conta=cal.id_contas
+                        join morador m on
+                            m.id_morador=cal.id_morador
+                        join cadastro cad on
+                            cad.id_cadastro=case when responsavel='I' 
+                                then id_inquilino else id_proprietario end
+                        join bloco b on
+                            b.id_bloco = m.id_bloco
+                        join condominio cd on
+                        cd.id_condominio = b.id_condominio
+                    where m.id_bloco = %s and cal.mesano = %s and m.id_morador = %s
+                    group by b.id_condominio, cd.nome , m.id_bloco,b.nome,cal.mesano,m.id_morador,
+                        m.apto_sala,cad.nome, cad.email 
+            ''', [idb, ma, id_morador]
+        )
 
     driver = webdriver.Chrome()
     driver.get('https://web.whatsapp.com/')
