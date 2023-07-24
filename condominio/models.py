@@ -14,6 +14,7 @@ from cadastro.models import Cadastro, Estado
 from django.utils.safestring import mark_safe
 import re
 from utils.validacpf import valida_cpf
+from django.contrib.auth.models import Group
 
 
 class AuthGroup(models.Model):
@@ -132,6 +133,7 @@ class Condominio(models.Model):
     responsavel_pix = models.CharField(max_length=50)
     chave_pix = models.CharField(max_length=50)
     txtid_pix = models.CharField(max_length=500)
+    grupo_permissao = models.ForeignKey(Group, on_delete=models.PROTECT)
 
     class Meta:
         managed = False

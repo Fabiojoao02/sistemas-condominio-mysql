@@ -52,18 +52,48 @@ import time
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
+from django.contrib.auth.models import User, Group
+
 
 @login_required(redirect_field_name='redirect_to')
 def index(request):
+    # Verificar se o usuário é superusuário
+    is_superuser = request.user.is_superuser
+    grupo = str(request.user.groups.all())
+    print(grupo)
+    if is_superuser:
+        # Se o usuário for superusuário, exibir todos os registros do condomínio
+        mensagem_erro = None
+        context = {
+            'nome_pagina': 'Início da dashboard',
+            'listcondo':  Condominio.objects.raw('''
+            select c.id_condominio, c.nome nome_condominio, cidade,bairro,estado
+            from condominio c
+            order by nome_condominio
+        '''),
+            'mensagem_erro': mensagem_erro,
+        }
+    else:
+        # Para usuários não superusuários, filtrar os registros do condomínio com base no grupo do usuário logado
+        user_group_ids = request.user.groups.values_list('id', flat=True)
+        # condominios = user_group_ids
+        if not user_group_ids:
+            # Caso o usuário não pertença a nenhum grupo, retornar uma lista vazia de condomínios
+            mensagem_erro = 'Você não pertence a nenhum grupo de permissão.'
+            context = {'mensagem_erro': mensagem_erro}
+        else:
+            mensagem_erro = None
+            context = {
+                'nome_pagina': 'Início da dashboard',
+                'listcondo':  Condominio.objects.raw('''
+                select c.id_condominio, c.nome nome_condominio, cidade,bairro,estado
+                from condominio c
+                where grupo_permissao in %s
+                order by nome_condominio
+            ''', [tuple(user_group_ids)]),
+                'mensagem_erro': mensagem_erro,
+            }
 
-    context = {
-        'nome_pagina': 'Início da dashboard',
-        'listcondo':  Condominio.objects.raw('''
-        select c.id_condominio, c.nome nome_condominio, cidade,bairro,estado
-        from condominio c
-        order by nome_condominio
-    ''')
-    }
     return render(request, 'index.html', context)
 
 
@@ -123,6 +153,7 @@ def listaconblomov(request, id):
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome
             order by b.id_bloco
+
         '''),
     }
     # url = reverse('relatorio_calculos_pdf')
@@ -409,7 +440,7 @@ class GerarPDF(View):
     def get(self, request, ma, id_morador, idb):
 
         caminho_imagem = Path(__file__).parent
-       # Define o caminho do arquivo
+        # Define o caminho do arquivo
         caminho_arquivo = Path(__file__).parent.parent
         caminho_imagem = caminho_arquivo / 'pixqrcodegen.png'
         # imagem = Image(caminho_imagem)
@@ -1131,7 +1162,7 @@ def enviaremail(request, idb, ma):
                 b.nome nome_bloco, 
                 concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
                 cal.mesano,
-                m.apto_sala,
+                m.apto_sala, concat(m.apto_sala,'-',cad.nome) apto_morador, 
                 cad.nome morador,m.id_morador, cad.email,
                 ROUND(sum(valor),2) valor
             from calculos cal
@@ -1155,12 +1186,12 @@ def enviaremail(request, idb, ma):
     pbar = tqdm(context)
 
     for lista in pbar:
-       # print(lista.mesano, lista.email, lista.apto_sala)
+        # print(lista.mesano, lista.email, lista.apto_sala)
         time.sleep(0.25)
-        pbar.set_description(f'enviando para: {lista.apto_sala}')
+        pbar.set_description(f'enviando para: {lista.apto_morador}')
 
         sendemail(request, ma=lista.mesano,
-                  email=lista.email, apto=lista.apto_sala)
+                  email=lista.email, apto=lista.apto_morador)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')
@@ -1249,7 +1280,7 @@ def enviarwhatsApp(request, idb, ma, id_morador):
         send_btn = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, send_btn_xpath)))
         send_btn.click()
-       # while len(WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.ID, 'side')))) < 1:
+        # while len(WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.ID, 'side')))) < 1:
         #    time.sleep(1)
 
         # Aguarde até que o chat seja carregado
