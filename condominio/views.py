@@ -1188,10 +1188,10 @@ def enviaremail(request, idb, ma):
     for lista in pbar:
         # print(lista.mesano, lista.email, lista.apto_sala)
         time.sleep(0.25)
-        pbar.set_description(f'enviando para: {lista.apto_morador}')
+        pbar.set_description(f'enviando para: {lista.apto_sala}')
 
         sendemail(request, ma=lista.mesano,
-                  email=lista.email, apto=lista.apto_morador)
+                  email=lista.email, apto=lista.apto_sala)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')
