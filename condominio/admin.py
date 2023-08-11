@@ -41,7 +41,7 @@ class BlocoAdmin(admin.ModelAdmin):
 
 
 class MoradorAdmin(admin.ModelAdmin):
-    list_display = ['apto_sala',  'get_nome_inquilino', 'situacao', 'get_cpf_cnpj_morador', 'get_telefone_morador',
+    list_display = ['apto_sala',  'get_nome_inquilino', 'qt_moradores', 'get_cpf_cnpj_morador', 'get_telefone_morador',
                     'get_email_morador', 'get_nome_proprietario', 'get_nome_bloco', 'foto']
 
     list_filter = ['apto_sala', 'situacao']

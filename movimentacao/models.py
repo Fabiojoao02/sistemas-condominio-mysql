@@ -151,6 +151,10 @@ class Movimento(models.Model):
 class MovimentoMSG(models.Model):
     id_movimento_msg = models.AutoField(primary_key=True)
     mesano = models.CharField(max_length=6)
+    id_bloco = models.ForeignKey(
+        Bloco, models.DO_NOTHING, db_column='id_bloco')
+    total_moradores = models.IntegerField()
+
     mensagem = models.CharField(max_length=100)
 
     def __str__(self) -> str:

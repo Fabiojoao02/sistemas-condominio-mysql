@@ -367,9 +367,9 @@ def calcularmovimentacao(request, idb, ma):
                     case when mov.situacao='A' then 'Aberto'
                         when mov.situacao='M' then 'Movimentação'
                         when mov.situacao='F' then 'Fechado' end situacao,
-                    concat(left(mesano,2),'/',right(mesano,4)) as mes_ano,
-                    ROUND(sum(valor),2)  valor_total,
-                    ROUND(sum(valor),2)  +
+                    concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano,
+                    ROUND(sum(mov.valor),2)  valor_total,
+                    ROUND(sum(mov.valor),2)  +
 					ifnull((SELECT  sum(ROUND((leitura_final-leitura_Inicial) * valor_m3,2)) as valor_total_leitura 
                             from leituras l
                             join contas ct on
@@ -379,16 +379,16 @@ def calcularmovimentacao(request, idb, ma):
                     FROM bloco b1
                     JOIN morador m ON m.id_bloco = b1.id_bloco
                     where m.situacao = 'A'  and b1.id_bloco = b.id_bloco) nr_condomiminos,
-                    (select sum(m.qt_moradores) soma
-                    FROM bloco b1
-                    JOIN morador m ON m.id_bloco = b1.id_bloco
-                    where m.situacao = 'A' and b1.id_bloco = b.id_bloco) qde_moradores
+					total_moradores qde_moradores
                     from condominio c
                     join bloco b on
                     b.id_condominio = c.id_condominio 
                     join movimento mov on
                     mov.id_bloco = b.id_bloco
-                    where b.id_bloco = %s and mesano = %s
+                    left join movimento_msg mg on
+                    mg.id_bloco = mov.id_bloco and 
+                    mg.mesano = mov.mesano  
+                    where b.id_bloco = %s and mov.mesano = %s
                     group by c.id_condominio, c.nome, b.id_bloco, b.nome , mov.mesano,mov.situacao
              ''', [idb, ma]),
         'lei':  Leituras.objects.raw('''
@@ -596,15 +596,16 @@ class GerarPDF(View):
         with connection.cursor() as cursor:
             cursor.execute(
                 '''
-                select m.mesano, id_bloco , id_contas, nome, valor, mensagem,
+                select m.mesano, m.id_bloco , id_contas, nome, valor, mensagem,
                 concat(cast(id_contas as char(30)),'-', nome) cod_nome,
                 concat(left(m.mesano,2),'/',right(m.mesano,4)) as mes_ano
                 from movimento m
                 left join movimento_msg msg on
-                    msg.mesano = m.mesano
+                    msg.mesano = m.mesano and
+                    msg.id_bloco = m.id_bloco
                 join  contas c on
                     c.id_conta = m.id_contas
-                where id_bloco = %s and m.mesano = %s
+                where m.id_bloco = %s and m.mesano = %s
                 ''', [idb, ma]
             )
             rowsm = cursor.fetchall()
