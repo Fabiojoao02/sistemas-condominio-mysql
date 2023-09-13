@@ -11,6 +11,7 @@ from pathlib import Path
 from airflow.utils.email import send_email
 from django.db import connection
 import django
+import openpyxl
 # from . models import  Leituras, Calculos, Bloco
 
 # Configurações para o Django

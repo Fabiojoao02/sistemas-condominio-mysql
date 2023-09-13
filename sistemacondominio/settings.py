@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'tipocalculo.apps.TipocalculoConfig',
     'movimentacao.apps.MovimentacaoConfig',
     'accounts.apps.AccountsConfig',
+    # 'airflow',
+    # 'corsheaders',
 
 
 
