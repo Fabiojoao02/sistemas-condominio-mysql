@@ -123,7 +123,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'vacom_condominio',
         'USER': 'vacom_fabiojoao',
-        'PASSWORD': 'D&ltaeco2023',
+        'PASSWORD': 'D&lteco2023',
         'HOST': '108.167.132.104',
         'PORT': '3306',
 
