@@ -10,6 +10,7 @@ from airflow.utils.task_group import TaskGroup
 from datetime import datetime, timedelta
 import pandas as pd
 import os
+import shutil
 from pathlib import Path
 import mysql.connector
 
@@ -84,8 +85,10 @@ def process_file(**kwarg):
     else:
         email_ok = 0
 
-    # os.replace(Variable.get('path_file_mov'),
-     #          Variable.get('path_file_expurgos'))
+    # Copia o arquivo
+    shutil.copy(Variable.get('path_file_mov'),
+                Variable.get('path_file_expurgos'))
+    # remove arquivo
     os.remove(Variable.get('path_file_mov'))
     # os.remove(CAMINHO_ARQUIVO)
 
