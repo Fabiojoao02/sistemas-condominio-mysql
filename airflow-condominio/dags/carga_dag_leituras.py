@@ -21,10 +21,6 @@ import mysql.connector
 # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistemacondominio.settings')
 # django.setup()
 
-ROOT_FOLDER = Path(__file__).parent.parent.parent
-CAMINHO_ARQUIVO = ROOT_FOLDER / 'arquivos_carga' / 'expurgos' / 'cargas_mov.csv'
-
-print(CAMINHO_ARQUIVO)
 
 # Configurar as informações de conexão
 mysql_config = {
@@ -45,10 +41,10 @@ default_args = {
 }
 
 # schedule_interval="*/3 * * * * "
-dag = DAG('carga_mov', description='Dados da Movimentacao',
+dag = DAG('carga_leitura', description='Dados da Leitura',
           schedule_interval=None, start_date=datetime(2023, 9, 10),
           catchup=False, default_args=default_args, default_view='graph',
-          doc_md="## Dag para registrar os movimentos do Mês e Ano")
+          doc_md="## Dag para registrar as leituras do Mês e Ano")
 
 group_check_temp = TaskGroup("group_check_temp", dag=dag)
 group_database = TaskGroup('group_database', dag=dag)
@@ -56,15 +52,15 @@ group_database = TaskGroup('group_database', dag=dag)
 
 file_sensor_task = FileSensor(
     task_id='file_sensor_task',
-    filepath=Variable.get('path_file_mov'),
-    fs_conn_id='fs_default_mov',
+    filepath=Variable.get('path_file_lei'),
+    fs_conn_id='fs_default_lei',
     poke_interval=10,
     dag=dag)
 
 
 def process_file(**kwarg):
     # df_gas = pd.read_excel(Variable.get('path_file'), sheet_name='gas')
-    df_mov = pd.read_csv(Variable.get('path_file_mov'), delimiter=';',
+    df_mov = pd.read_csv(Variable.get('path_file_lei'), delimiter=';',
                          encoding='utf-8')
 
     # condominio = df_mov['condominio']
@@ -76,22 +72,26 @@ def process_file(**kwarg):
     kwarg['ti'].xcom_push(key='mesano', value=mesano)
     kwarg['ti'].xcom_push(key='conta', value=df_mov['conta'].tolist())
     kwarg['ti'].xcom_push(
-        key='tipoCalculo', value=df_mov['tipoCalculo'].tolist())
-    kwarg['ti'].xcom_push(key='valor', value=df_mov['valor'].tolist())
+        key='id_morador', value=df_mov['id_morador'].tolist())
+    kwarg['ti'].xcom_push(key='leitura_inicial',
+                          value=df_mov['leitura_inicial'].tolist())
+    kwarg['ti'].xcom_push(key='leitura_final',
+                          value=df_mov['leitura_final'].tolist())
+    kwarg['ti'].xcom_push(
+        key='dt_leitura', value=df_mov['dt_leitura'].tolist())
+
+    kwarg['ti'].xcom_push(
+        key='valorM3', value=df_mov['valorM3'].tolist())
 
     if mesano:
         email_ok = 1
     else:
         email_ok = 0
 
-    # os.replace(Variable.get('path_file_mov'),
-     #          Variable.get('path_file_expurgos'))
-    os.remove(Variable.get('path_file_mov'))
-    # os.remove(CAMINHO_ARQUIVO)
+    # remova arquivo da pasta
+    os.remove(Variable.get('path_file_lei'))
 
     return email_ok
-
-    # remova arquivo da pasta
 
 
 # NotADirectoryError: [Errno 20] Not a directory: '/opt/airflow/data/cargas.xlsx'
@@ -106,19 +106,27 @@ def insert_data(ti):
     # Crie uma conexão com o banco de dados MySQL
 
     conn = mysql.connector.connect(**mysql_config)
-
     blocos = ti.xcom_pull(task_ids="get_data", key="bloco")
     mesanos = ti.xcom_pull(task_ids="get_data", key="mesano")
     contas = ti.xcom_pull(task_ids="get_data", key="conta")
-    tipoCalculos = ti.xcom_pull(task_ids="get_data", key="tipoCalculo")
-    valores = ti.xcom_pull(task_ids="get_data", key="valor")
+    id_moradores = ti.xcom_pull(task_ids="get_data", key="id_morador")
+    leitura_inicials = ti.xcom_pull(task_ids="get_data", key="leitura_inicial")
+    leitura_finals = ti.xcom_pull(task_ids="get_data", key="leitura_final")
+    dt_leituras = ti.xcom_pull(task_ids="get_data", key="dt_leitura")
+    valorm3s = ti.xcom_pull(task_ids="get_data", key="valorM3")
 
     cursor = conn.cursor()
     with conn.cursor() as cursor:
-        for bloco, mesano, conta, tipoCalculo, valor in zip(blocos, mesanos, contas, tipoCalculos, valores):
-            cursor.execute('''INSERT INTO movimento (id_bloco, mesano, id_contas, id_tipo_calculo, valor)
-                             VALUES (%s, %s, %s, %s, %s);''', (bloco, mesano, conta, tipoCalculo, float(valor.replace(',', '.'))))
+
+        for bloco, mesano, conta, id_morador, leitura_inicial, leitura_final, dt_leitura, valorm3 in zip(blocos, mesanos, contas, id_moradores, leitura_inicials, leitura_finals, dt_leituras, valorm3s):
+
+            cursor.execute('''INSERT INTO leituras (id_bloco, mesano, id_contas, id_morador,leitura_inicial,leitura_final, dt_leitura, valor_m3)
+                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s);''',
+                           (bloco, mesano, conta, id_morador, float(leitura_inicial.replace(',', '.')), float(leitura_final.replace(',', '.')), datetime.strptime(dt_leitura, '%d/%m/%Y').date(),  float(valorm3.replace(',', '.'))
+                            )
+                           )
         conn.commit()
+# datetime.strptime(dt_leitura, '%d/%m/%Y').date().strftime('%Y/%m/%d'),
 
 
 def delete_data(ti):
@@ -129,11 +137,14 @@ def delete_data(ti):
     blocos = ti.xcom_pull(task_ids="get_data", key="bloco")
     mesanos = ti.xcom_pull(task_ids="get_data", key="mesano")
 
+    print(blocos)
+    print(mesanos)
+
     cursor = conn.cursor()
     with conn.cursor() as cursor:
         for bloco, mesano in zip(blocos, mesanos):
             cursor.execute(
-                '''DELETE FROM movimento where id_bloco=%s and mesano=%s and situacao<>'F';''', (bloco, mesano))
+                '''DELETE FROM leituras where id_bloco=%s and mesano=%s;''', (bloco, mesano))
         conn.commit()
 
 
@@ -156,8 +167,8 @@ send_email_alert = EmailOperator(
     task_id='send_email_alert',
     to='fbianastacio@gmail.com',
     subject='Airlfow alert',
-    html_content='''<h3>Alerta de Movimento. </h3>
-                                <p> Dag: carga_mov </p>
+    html_content='''<h3>Alerta de Temperatrura Leituras. </h3>
+                                <p> Dag: carga_leitura </p>
                                 ''',
     task_group=group_check_temp,
     dag=dag)
@@ -166,8 +177,8 @@ send_email_normal = EmailOperator(
     task_id='send_email_normal',
     to='fbianastacio@gmail.com',
     subject='Airlfow advise',
-    html_content='''<h3>Temperaturas Movimento normais. </h3>
-                                <p> Dag: carga_mov </p>
+    html_content='''<h3>Temperaturas Leituras normais . </h3>
+                                <p> Dag: carga_leitura </p>
                                 ''',
     task_group=group_check_temp,
     dag=dag)
@@ -179,7 +190,6 @@ def avalia_temp(ti):
     if number == 0:
         return 'group_check_temp.send_email_alert'
     else:
-        # os.remove(Variable.get('path_file_mov'))
         return 'group_check_temp.send_email_normal'
 
 
