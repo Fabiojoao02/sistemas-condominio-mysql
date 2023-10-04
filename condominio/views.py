@@ -687,19 +687,26 @@ class GerarPDF(View):
             p.setFillColor(black)
             # Adiciona a imagem ao conteúdo do PDF
             # adiciona o QRCODE
-            qrcode(request, f'{round(total_geral,2)}', id_condominio)
-            # Adicionando a imagem
 
-            p.drawImage(caminho_imagem,
-                        x=10, y=700, width=130, height=130)
+            # Inicio Fabio comentado o QRCODE para configurar para dona Fatima
+
+            qrcode(request, f'{round(total_geral,2)}', id_condominio)
+
+            # Adicionando a imagem do QRCODE
+
+#            p.drawImage(caminho_imagem,
+#                        x=10, y=700, width=130, height=130)
+
+            # Adicionando a imagem do Condominio
 
             p.drawImage(image,
                         x=460, y=700, width=120, height=120)
 
-            # p.drawImage(caminho_imagem,
-            #           x=400, y=y, width=150, height=150)
+#            p.drawImage(caminho_imagem,
+#                       x=400, y=y, width=150, height=150)
 
             # final do QRCODE
+            # FIM Fabio comentado o QRCODE para configurar para dona Fatima
             y -= 25
             if mensagem:
                 p.setFillColor(red)

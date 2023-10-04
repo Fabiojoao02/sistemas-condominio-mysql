@@ -133,7 +133,7 @@ class Condominio(models.Model):
     responsavel_pix = models.CharField(max_length=50)
     chave_pix = models.CharField(max_length=50)
     txtid_pix = models.CharField(max_length=500)
-    grupo_permissao = models.ForeignKey(Group, on_delete=models.PROTECT)
+    # grupo_permissao = models.ForeignKey(Group, on_delete=models.PROTECT)
 
     class Meta:
         managed = False
@@ -256,7 +256,7 @@ class Morador(models.Model):
 
     def get_email_morador(self):
         return '%s' % (self.id_inquilino.email)
-    get_email_morador.short_description = 'Telefone'
+    get_email_morador.short_description = 'Email'
 
     def get_cpf_cnpj_morador(self):
        # return f'{self.cpf[0:3]}.{self.cpf[3:6]}.{self.cpf[6:9]}-{self.cpf[9:11]}'
