@@ -40,7 +40,14 @@ def sendemail(request, ma, email, apto):
         # print(caminho)
         diretorio, nome_arquivo = os.path.split(caminho)
 
-        corpo = f'Olá caro condômino {apto}. segue anexo o demonstrativo do condominio do Mês Ano: {ma}'
+        corpo = f'''
+        <p>Olá caro condômino {apto}. </p>
+        <p>Segue anexo o demonstrativo do condominio do Mês Ano: {ma} </p>
+        <p>Favor efetuar o pagamento até dia 10 do mes corrente. </p>
+        <p></p>
+        <p>Atenciosamente,</p>
+        <p>Condominio das Palmeiras</p>
+        '''
         email_msg = MIMEMultipart()
         email_msg['From'] = login
         email_msg['To'] = email
