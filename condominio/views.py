@@ -53,6 +53,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 from django.contrib.auth.models import User, Group
+from condominio.relatoriopdf import GeraRelatorioPDF
 
 
 @login_required(redirect_field_name='redirect_to')
@@ -433,6 +434,14 @@ def calcularmovimentacao(request, idb, ma):
             messages.success(request, 'Calculo gerado com sucesso')
 
     return render(request, 'calcularmovimentacao.html', context)
+
+
+@login_required(redirect_field_name='redirect_to')
+def relatoriomovimentacao(request, idb, ma):
+
+    GeraRelatorioPDF.get(None, request, ma=ma, idb=idb)
+    return redirect('index')
+    # return render(request, 'relatoriomovimentacao.html', context)
 
 
 class GerarPDF(View):
