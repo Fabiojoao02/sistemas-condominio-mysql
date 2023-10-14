@@ -97,6 +97,10 @@ class Leituras(models.Model):
         return utils.formata_mesano(self.mesano)
     get_formata_mesano_leitura.short_description = 'MES/ANO'
 
+    def get_dt_leitura_formatada(self):
+        return f' {utils.formata_data(self.dt_leitura)}'
+    get_dt_leitura_formatada.short_description = 'Data troca'
+
     def __str__(self) -> str:
         return self.mesano
 

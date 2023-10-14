@@ -15,6 +15,7 @@ from django.utils.safestring import mark_safe
 import re
 from utils.validacpf import valida_cpf
 from django.contrib.auth.models import Group
+from utils import utils
 
 
 class AuthGroup(models.Model):
@@ -116,6 +117,52 @@ class Bloco(models.Model):
         db_table = 'bloco'
         verbose_name = 'Bloco'
         verbose_name_plural = 'Blocos'
+
+
+class Controlegas(models.Model):
+    id_controelgas = models.AutoField(primary_key=True)
+    id_condominio = models.ForeignKey(
+        'Condominio', models.DO_NOTHING, db_column='id_condominio')
+    dt_troca = models.DateTimeField()
+    mesano = models.CharField(max_length=6)
+    volume_kg = models.FloatField()
+    valor_cilindro = models.FloatField()
+    volume_m3 = models.FloatField()
+    valor_m3 = models.FloatField()
+    aberto = models.BooleanField(default=True)
+
+    def get_volume_m3(self):
+        return f' {self.volume_m3:.3f}'.replace('.', ',')
+    get_volume_m3.short_description = 'Volume m3'
+
+    def get_valor_cilindro(self):
+        return f' {self.valor_cilindro:.2f}'.replace('.', ',')
+    get_valor_cilindro.short_description = 'Valor Cilindro'
+
+    def get_volume_kg(self):
+        return f' {self.volume_kg:.3f}'.replace('.', ',')
+    get_volume_kg.short_description = 'Volume Kg'
+
+    def get_valor_m3(self):
+        return f' {self.valor_m3:.3f}'.replace('.', ',')
+    get_valor_m3.short_description = 'Valor m3'
+
+    def get_dt_troca_formatada(self):
+        return f' {utils.formata_data(self.dt_troca)}'
+    get_dt_troca_formatada.short_description = 'Data troca'
+
+    def get_formata_mesano_calculo(self):
+        return utils.formata_mesano(self.mesano)
+    get_formata_mesano_calculo.short_description = 'MES/ANO'
+
+    def __str__(self) -> str:
+        return self.mesano
+
+    class Meta:
+        managed = False
+        db_table = 'controlegas'
+        verbose_name = 'Controle gas'
+        verbose_name_plural = 'Controle gas'
 
 
 class Condominio(models.Model):

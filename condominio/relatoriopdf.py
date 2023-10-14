@@ -1,5 +1,6 @@
 import os
 import time
+import urllib.parse
 from django.contrib.auth.decorators import login_required
 from . models import Condominio
 from movimentacao.models import Calculos, Leituras, Movimento
@@ -10,7 +11,7 @@ from django.db import connection
 from utils import utils
 # from PIL import Image
 from django.views.generic import View
-from reportlab.lib.colors import red, black, blue, gray, green
+from reportlab.lib.colors import red, black, blue, gray, green, yellowgreen, orange, white
 from django.contrib import messages
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
@@ -40,6 +41,8 @@ from movimentacao.forms import AutorizaCalculoForm
 from io import BytesIO
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+from reportlab.graphics.widgets.markers import makeMarker
 
 
 class GeraRelatorioPDF(View):
@@ -143,7 +146,7 @@ class GeraRelatorioPDF(View):
                     # p.drawString(100, 100, '\n\n')
                     p.setFillColor(blue)
                     p.drawString(
-                        150, y, f'{condominio} - {nome_bloco} ')
+                        150, 800, f'{condominio} - {nome_bloco} ')
                     p.setFillColor(black)
                     y -= 20
                     p.setFont('Helvetica', 14)
@@ -152,7 +155,7 @@ class GeraRelatorioPDF(View):
                 if linha % 25 == 0 and linha != 0:
                     p.setFont('Helvetica-Bold', 14)
                     p.drawString(
-                        150, 765, 'Demonstrativo das contas Mês Ano: '+mes_ano)
+                        150, 765, 'Relatório gerencial das contas Mês Ano: '+mes_ano)
                     # p.drawString(100, 100, '\n\n')
                     p.setFont('Helvetica', 14)
                     # Define a cor do texto do cabeçalho
@@ -167,7 +170,7 @@ class GeraRelatorioPDF(View):
                     # p.drawString(100, 100, '\n\n')
                     p.setFont('Helvetica-Bold', 14)
                     p.drawString(
-                        150, 765, 'Demonstrativo das contas Mês Ano: '+mes_ano)
+                        150, 765, 'Relatório gerencial das contas Mês Ano: '+mes_ano)
                     # p.drawString(100, 100, '\n\n')
 #                    y -= 20
                     p.drawString(150, y, 'Apto/Sala - Morador')
@@ -510,6 +513,288 @@ class GeraRelatorioPDF(View):
             # *********************************FIM Grafica de Barras
             # p.showPage()
 
+# Inicio grafico de linhas de tempo do gas
+        # graficos movimento condomino
+        # Executa a consulta SQL bruta e itera sobre os resultados
+
+           # ****************Leitura do Gás
+        # Executa a consulta SQL bruta e itera sobre os resultados
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                    select volume_m3, 
+                           cast(max(dt_troca) as date) dt_troca,
+                    max(DATEDIFF(dt_leitura, dt_troca)) dias,
+                    concat(left(max(l.mesano),2),'/',right(max(l.mesano),4)) as mes_ano,
+                    round((select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    ),3) acumuado_m3,
+                    round(volume_m3 -(select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    ) ,3) 
+                    saldo,
+                    round(100-((select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    )/volume_m3)*100 ,1) as percentual,
+                    round((max(DATEDIFF(dt_leitura, dt_troca)) * volume_m3) /
+                    (select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    )-max(DATEDIFF(dt_leitura, dt_troca)),0)  as estimativa_falta_em_dias
+                    from leituras l
+                    join bloco b on
+                    b.id_bloco = l.id_bloco
+                    join controlegas gas on
+                    gas.id_condominio = b.id_condominio
+                    where l.id_bloco = %s
+                    and DATEDIFF(dt_leitura, dt_troca) >0
+
+            ''', [idb]
+            )
+            rowsg = cursor.fetchall()
+            if len(rowsg) > 0:
+                p.showPage()
+                y = 200
+                linha = 0
+                subtotais = {}
+                # margem = 50
+                total_geral_valor = 0
+                total_geral_consumo = 0
+                subtotal = 0
+                conta_anterior = None
+                for row in rowsg:
+                    volume_m3, dt_troca, dias, mes_ano,  acumuado_m3, saldo, percentual, estimativa_falta_em_dias = row
+
+                    # Converter dt_troca para o formato "d/m/Y"
+                    dt_troca_formatada = dt_troca.strftime("%d/%m/%Y")
+                    estimativa_falta_em_dias = int(estimativa_falta_em_dias)
+                    p.setFont('Helvetica-Bold', 14)
+
+                    p.setFillColor(blue)
+                    p.drawString(
+                        150, 800, 'Controle cilindro gás')
+                    p.setFillColor(black)
+
+                    # p.setFont('Helvetica-Bold', 12)
+                    texto = f'''
+                    Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3 
+                    troca do cilindro efetuada dia {dt_troca_formatada} no momento temos {dias} dias,
+                    um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3 com um saldo de {utils.formata_valorm3(saldo)}m3, 
+                    mês e ano atual {mes_ano}.
+                    '''
+                    linhas = texto.split('\n')
+                    for i, linha in enumerate(linhas):
+                        p.drawString(10, 780 - i*15, linha)
+
+                    # percentual = 50
+
+                    if percentual < 25:
+                        p.setFont('Helvetica-Bold', 12)
+                        p.setFillColor(red)
+                    elif percentual >= 25 and percentual <= 49:
+                        p.setFont('Helvetica-Bold', 12)
+                        p.setFillColor(orange)
+                    else:
+                        p.setFont('Helvetica-Bold', 12)
+                        p.setFillColor(green)
+
+                    p.drawString(
+                        150, 695, f'Capacidade até o momento no cilindro {percentual}% de gás.')
+                    p.drawString(
+                        150, 680, f'Estimativa em dias do cilindro {estimativa_falta_em_dias} dias.')
+                    p.setFillColor(black)
+
+        # *INICIO*************query grafico guage
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                    select  distinct 
+                    round(((select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    )/volume_m3)*100 ,2) as percentual
+                    from leituras l
+                    join bloco b on
+                    b.id_bloco = l.id_bloco
+                    join controlegas gas on
+                    gas.id_condominio = b.id_condominio
+                    where l.id_bloco = %s
+                    and DATEDIFF(dt_leitura, dt_troca) >0
+                """,
+                [idb]
+            )
+            dados = cursor.fetchall()
+
+            percentual = dados[0][0]
+
+            p.setFillColor(black)
+            p.drawString(150, 632, 'Mapa do cilindro')
+            # Chama a função para desenhar o medidor
+            utils.draw_gauge(p, percentual)
+            # d.add(chart)
+            # renderPDF.draw(d, p, 100, y)
+
+        # *FIM*************query grafico guage
+
+        # **************query grafico de barras
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                    select concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
+                    round(sum(leitura_final)  - sum(leitura_inicial),3)  total
+                    from leituras l
+                    join bloco b on
+                    b.id_bloco = l.id_bloco
+                    join controlegas gas on
+                    gas.id_condominio = b.id_condominio
+                    where l.id_bloco = %s
+                    and DATEDIFF(dt_leitura, dt_troca) > 0
+                    group by cast(dt_leitura as date),l.mesano,volume_m3
+                """,
+                [idb]
+
+            )
+            dados = cursor.fetchall()
+            # *********************************Grafica de Barras
+            # Cria o gráfico de barras verticais
+            y = 200
+            # Criando o objeto Drawing para conter o gráfico
+            # Criando a lista de labels e valores a partir dos dados da query
+            labels = [label for label, _ in dados]
+            valores = [valor for _, valor in dados]
+
+            # Criando o objeto Drawing para conter o gráfico
+            d = Drawing(100, 500)
+
+            # Configurando o gráfico de barras verticais
+           # Configurando o gráfico de barras verticais
+            chart = HorizontalLineChart()
+            chart.x = 50
+            chart.y = 60
+            chart.height = 200
+            chart.width = 350
+            chart.data = [valores]
+
+            chart.joinedLines = 1
+            catNames = labels
+            chart.categoryAxis.categoryNames = catNames
+            chart.categoryAxis.labels.boxAnchor = 'n'
+            chart.valueAxis.valueMin = 0
+            chart.valueAxis.valueMax = 45
+            chart.valueAxis.valueStep = 5
+            chart.lines[0].strokeWidth = 2
+            chart.lines[1].strokeWidth = 1.5
+
+            # # Adicionando os valores sobre os rótulos de barra
+            for i, data in enumerate(chart.data):
+                for j, value in enumerate(data):
+                    x = chart.x + j * (chart.width / len(data)) + \
+                        (chart.width / len(data)) / 2
+                    y = chart.y + chart.height + 10
+                    # label = String(x, y, str(value))
+                    label = String(x, y, f'{utils.formata_valorm3(value)}')
+#                    label.fontName = 'Helvetica'
+                    label.fontSize = 10
+                    label.textAnchor = 'middle'
+                    d.add(label)
+
+            # Calcular os valores acumulados
+            acumulado = [sum(valores[:i+1]) for i in range(len(valores))]
+
+            # Adicionar os dados acumulados ao gráfico
+            chart.data.append(acumulado)
+
+            # Adicionar os valores acumulados sobre os rótulos de barra
+            for i, data in enumerate(chart.data):
+                for j, value in enumerate(data):
+                    x = chart.x + j * (chart.width / len(data)) + \
+                        (chart.width / len(data)) / 2
+                    if i == 0:
+                        y = chart.y + chart.height + 10
+                    else:
+                        y = chart.y + chart.height + 25  # Ajuste aqui para evitar sobreposição
+                    label = String(x, y, f'{utils.formata_valorm3(value)}')
+                    label.fontSize = 10
+                    label.textAnchor = 'middle'
+                    d.add(label)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                    select distinct volume_m3,
+                    round(volume_m3 -(select sum(leitura_final)  - sum(leitura_inicial) 
+                            from leituras l1
+                            join bloco b1 on
+                            b1.id_bloco = l1.id_bloco
+                            join controlegas gas1 on
+                            gas1.id_condominio = b1.id_condominio
+                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                    ) ,3) saldo
+                    from leituras l
+                    join bloco b on
+                    b.id_bloco = l.id_bloco
+                    join controlegas gas on
+                    gas.id_condominio = b.id_condominio
+                    where l.id_bloco = %s
+                    and DATEDIFF(dt_leitura, dt_troca) > 0
+                """,
+                [idb]
+
+            )
+            dados = cursor.fetchall()
+            # Certifique-se de que a consulta retornou algum dado
+            if dados:
+                # Acesso ao primeiro valor da primeira linha
+                meta_valor = dados[0][0]
+                meta_valor_plotar = dados[0][0]/2
+                saldo = dados[0][1]
+            else:
+                # Trate o caso em que não há dados retornados pela consulta
+                meta_valor = None
+                saldo = None
+
+                # Adicionar a linha da meta ao gráfico
+            meta_y = chart.y + (chart.height *
+                                (1 - (meta_valor / chart.valueAxis.valueMax)))
+            # Ajustar a posição da meta para a escala desejada
+            if chart.y <= meta_y <= chart.y + chart.height:
+                d.add(Line(chart.x, meta_y, chart.x + chart.width,
+                           meta_y, strokeWidth=1, strokeColor=colors.green))
+
+                # Calcular a posição para o rótulo da meta
+                label_x = chart.x  # + chart.width
+                label_y = meta_y - 10
+                # Adicionar um rótulo para indicar o valor da meta
+                label = String(
+                    label_x, label_y, f'Capacidade total m3: {meta_valor}', fontSize=10, fillColor=colors.black)
+                d.add(label)
+            # Adicionando o gráfico ao objeto Drawing
+            d.add(chart)
+            renderPDF.draw(d, p, 100, y)
+        # fim grafico de linha no tempo do gas
+
         # Fim leitura do gas
 
             p.save()
@@ -521,5 +806,8 @@ class GeraRelatorioPDF(View):
 
         os.rename('relatoriocalculospdf.pdf', nome_arquivo)
 
+        # Construa a nova URL com o novo parâmetro
+        nova_url = f'/listaconblomov/{idb}/'
+
         messages.success(request, ('Email sent successfully.'))
-        return redirect('index')
+        return redirect(nova_url)

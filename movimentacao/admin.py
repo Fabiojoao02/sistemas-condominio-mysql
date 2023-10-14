@@ -21,7 +21,7 @@ class CalculosAdmin(admin.ModelAdmin):
 class LeiturasAdmin(admin.ModelAdmin):
 
     list_display = ['id_leituras', 'get_formata_mesano_leitura', 'get_apto_salaLei', 'get_nome_moradorLei', 'get_contasleitura',
-                    'get_formatvalorm3', 'leitura_inicial', 'leitura_final', 'dt_leitura']
+                    'get_formatvalorm3', 'leitura_inicial', 'leitura_final', 'get_dt_leitura_formatada']
     list_per_page = 15  # lista 10 registrod=s na pagina
     list_filter = [
         'mesano',

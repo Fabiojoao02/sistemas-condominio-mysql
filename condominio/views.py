@@ -440,7 +440,9 @@ def calcularmovimentacao(request, idb, ma):
 def relatoriomovimentacao(request, idb, ma):
 
     GeraRelatorioPDF.get(None, request, ma=ma, idb=idb)
-    return redirect('index')
+    # Construa a nova URL com o novo parâmetro
+    nova_url = f'/listaconblomov/{idb}/'
+    return redirect(nova_url)
     # return render(request, 'relatoriomovimentacao.html', context)
 
 

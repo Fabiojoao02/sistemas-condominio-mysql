@@ -48,7 +48,15 @@ class MoradorAdmin(admin.ModelAdmin):
     search_fields = ['apto_sala', 'situacao']
 
 
+class ControlegasAdmin(admin.ModelAdmin):
+    list_display = ['id_condominio',  'mesano', 'get_dt_troca_formatada', 'get_volume_kg', 'get_valor_cilindro',
+                    'get_volume_m3', 'get_valor_m3', 'aberto']
+
+    list_filter = ['mesano', 'dt_troca']
+    search_fields = ['mesano', 'dt_troca']
+
+
 admin.site.register(models.Condominio, CondominioAdmin)
 admin.site.register(models.Bloco, BlocoAdmin)
 admin.site.register(models.Morador, MoradorAdmin)
-# admin.site.register(models.Cadastro, CadastroAdmin)
+admin.site.register(models.Controlegas, ControlegasAdmin)
