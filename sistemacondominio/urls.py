@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura, GerarPDF, geradorPDFgeral, enviaremail, calcularmovimentacao, enviarwhatsApp, relatoriomovimentacao
+from condominio.views import index, listacondominio, listaconblomov, listaconblomorador, listaconta, listaleitura, GerarPDF, geradorPDFgeral, enviaremail, enviaremailgerencial, calcularmovimentacao, enviarwhatsApp, relatoriomovimentacao, sendemailgerencial
 from emailer.views import sendemail
 from movimentacao.views import lancar_leituras
 
@@ -51,8 +51,11 @@ urlpatterns = [
     path('enviaremail/<int:idb>/<str:ma>/',
          enviaremail, name='enviaremail'),
 
-    # path('sendwhatsApp/<str:ma>/<str:email>/<str:apto>/',
-    #     sendwhatsApp, name='sendwhatsApp'),
+    path('sendemailgerencial/<str:ma>/<str:email>/<str:idb>/<str:apto>/',
+         sendemailgerencial, name='sendemailgerencial'),
+
+    path('enviaremailgerencial/<int:idb>/<str:ma>/',
+         enviaremailgerencial, name='enviaremailgerencial'),
 
     path('enviarwhatsApp/<int:idb>/<str:ma>/<int:id_morador>/',
          enviarwhatsApp, name='enviarwhatsApp'),

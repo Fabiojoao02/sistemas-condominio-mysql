@@ -180,6 +180,7 @@ class Condominio(models.Model):
     responsavel_pix = models.CharField(max_length=50)
     chave_pix = models.CharField(max_length=50)
     txtid_pix = models.CharField(max_length=500)
+
     # grupo_permissao = models.ForeignKey(Group, on_delete=models.PROTECT)
 
     class Meta:

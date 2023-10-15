@@ -22,6 +22,7 @@ class Cadastro(models.Model):
     email = models.CharField(max_length=250)
     telefone = models.CharField(max_length=250)
     data_nascimento = models.DateField(blank=True, null=True)
+    emailgerencial = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return self.nome

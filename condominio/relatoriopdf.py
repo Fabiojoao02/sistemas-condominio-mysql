@@ -590,15 +590,14 @@ class GeraRelatorioPDF(View):
 
                     p.setFillColor(blue)
                     p.drawString(
-                        150, 800, 'Controle cilindro gás')
+                        100, 800, f'Controle cilindro gás mês/ano atual: {mes_ano} troca dia {dt_troca_formatada} ')
                     p.setFillColor(black)
 
                     # p.setFont('Helvetica-Bold', 12)
                     texto = f'''
-                    Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3 
-                    troca do cilindro efetuada dia {dt_troca_formatada} no momento temos {dias} dias,
-                    um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3 com um saldo de {utils.formata_valorm3(saldo)}m3, 
-                    mês e ano atual {mes_ano}.
+                    Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3, 
+                    no momento temos {dias} dias, um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3 
+                    com um saldo de {utils.formata_valorm3(saldo)}m3. 
                     '''
                     linhas = texto.split('\n')
                     for i, linha in enumerate(linhas):
@@ -619,7 +618,7 @@ class GeraRelatorioPDF(View):
                     p.drawString(
                         150, 695, f'Capacidade até o momento no cilindro {percentual}% de gás.')
                     p.drawString(
-                        150, 680, f'Estimativa em dias do cilindro {estimativa_falta_em_dias} dias.')
+                        150, 680, f'Estimativa do cilindro para próxima troca de {estimativa_falta_em_dias} dias.')
                     p.setFillColor(black)
 
         # *INICIO*************query grafico guage

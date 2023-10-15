@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import Table, TableStyle, Image
 from pathlib import Path
-from emailer.views import sendemail
+from emailer.views import sendemail, sendemailgerencial
 from pixqrcodegen import Payload
 from tqdm import tqdm
 from tqdm import trange
@@ -1211,6 +1211,40 @@ def enviaremail(request, idb, ma):
 
         sendemail(request, ma=lista.mesano,
                   email=lista.email, apto=lista.apto_sala)
+
+    # url = reverse('relatorio_calculos_pdf')
+    return redirect('index')
+
+
+@login_required(redirect_field_name='redirect_to')
+def enviaremailgerencial(request, idb, ma):
+
+    # Filtrando com dois parâmetros
+    context = Condominio.objects.raw('''
+            select distinct b.id_bloco, b.nome nome_bloco, 
+            b.id_condominio,
+            cad.nome responsavel, email
+            from bloco b
+            join condominio con on
+            con.id_condominio = b.id_condominio
+            join morador m on
+            m.id_bloco = b.id_bloco 
+            join cadastro cad on
+            cad.id_cadastro in (id_inquilino,id_proprietario) and
+                email is not null  and emailgerencial = 1  
+            where b.id_bloco=%s                                     
+        ''', [idb]
+    )
+
+    pbar = tqdm(context)
+
+    for lista in pbar:
+        # print(lista.mesano, lista.email, lista.apto_sala)
+        time.sleep(0.25)
+        pbar.set_description(f'enviando para: {lista.responsavel}')
+
+        sendemailgerencial(request, ma=lista.mesano, idb=lista.id_bloco,
+                           email=lista.email, apto=lista.responsavel)
 
     # url = reverse('relatorio_calculos_pdf')
     return redirect('index')

@@ -4,7 +4,7 @@ from . import models
 
 class CadastroAdmin(admin.ModelAdmin):
     list_display = ['nome', 'endereco', 'cidade', 'estado',
-                    'bairro', 'telefone', 'email']
+                    'bairro', 'telefone', 'email', 'emailgerencial']
     list_per_page = 10  # lista 10 registrod=s na pagina
 
 
