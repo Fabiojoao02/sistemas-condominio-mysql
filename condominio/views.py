@@ -1243,11 +1243,13 @@ def enviaremailgerencial(request, idb, ma):
         time.sleep(0.25)
         pbar.set_description(f'enviando para: {lista.responsavel}')
 
-        sendemailgerencial(request, ma=lista.mesano, idb=lista.id_bloco,
+        sendemailgerencial(request, ma=ma, idb=lista.id_bloco,
                            email=lista.email, apto=lista.responsavel)
 
-    # url = reverse('relatorio_calculos_pdf')
-    return redirect('index')
+    nova_url = f'/listaconblomov/{idb}/'
+
+    # messages.success(request, ('Email sent successfully.'))
+    return redirect(nova_url)
 
 
 @login_required(redirect_field_name='redirect_to')

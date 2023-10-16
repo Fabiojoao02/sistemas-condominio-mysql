@@ -17,6 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.common.keys import Keys
 import pyautogui
+from utils import utils
 
 
 def sendemail(request, ma, email, apto):
@@ -41,9 +42,12 @@ def sendemail(request, ma, email, apto):
         diretorio, nome_arquivo = os.path.split(caminho)
 
         corpo = f'''
+        <h3>Demonstrativo</h3>
+        <p></p>
         <p>Olá caro condômino {apto}. </p>
-        <p>Segue anexo o demonstrativo do condominio do Mês Ano: {ma} </p>
-        <p>Favor efetuar o pagamento até dia 10 do mes corrente. </p>
+        <p>Segue anexo o demonstrativo do condominio do Mês Ano: {utils.formata_mesano(ma)} </p>
+        <p><h3>Favor efetuar o pagamento até dia 10 do mes corrente. </h3></p>
+        <p></p>
         <p></p>
         <p>Atenciosamente,</p>
         <p>Condominio das Palmeiras</p>
@@ -51,7 +55,8 @@ def sendemail(request, ma, email, apto):
         email_msg = MIMEMultipart()
         email_msg['From'] = login
         email_msg['To'] = email
-        email_msg['Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {ma}'
+        email_msg[
+            'Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {utils.formata_mesano(ma)} '
 
         with open(caminho, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype='pdf')
@@ -60,7 +65,7 @@ def sendemail(request, ma, email, apto):
 
         email_msg.attach(attachment)
 
-        email_msg.attach(MIMEText(corpo, 'plain'))
+        email_msg.attach(MIMEText(corpo, 'html'))
         server.sendmail(email_msg['From'],
                         email_msg['To'], email_msg.as_string())
 
@@ -115,9 +120,10 @@ def sendemailgerencial(request, ma, email, idb, apto):
         diretorio, nome_arquivo = os.path.split(caminho)
 
         corpo = f'''
-        <p>Olá caro condômino {apto}. </p>
-        <p>Segue anexo o demonstrativo do condominio do Mês Ano: {ma} </p>
-        <p>Favor efetuar o pagamento até dia 10 do mes corrente. </p>
+        <h3>Relatório gerencial</h3>
+        <p>Olá caro proprietário Sr(a). {apto}. </p>
+        <p>Segue anexo o relatório gerencial do condominio do Mês Ano: {utils.formata_mesano(ma)} </p>
+        <p></p>
         <p></p>
         <p>Atenciosamente,</p>
         <p>Condominio das Palmeiras</p>
@@ -125,7 +131,8 @@ def sendemailgerencial(request, ma, email, idb, apto):
         email_msg = MIMEMultipart()
         email_msg['From'] = login
         email_msg['To'] = email
-        email_msg['Subject'] = f'Demonstrativo condomínio Referente Mês Ano: {ma}'
+        email_msg[
+            'Subject'] = f'Relatório gerencial  Referente Mês Ano: {utils.formata_mesano(ma)}'
 
         with open(caminho, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype='pdf')
@@ -134,7 +141,7 @@ def sendemailgerencial(request, ma, email, idb, apto):
 
         email_msg.attach(attachment)
 
-        email_msg.attach(MIMEText(corpo, 'plain'))
+        email_msg.attach(MIMEText(corpo, 'html'))
         server.sendmail(email_msg['From'],
                         email_msg['To'], email_msg.as_string())
 
@@ -163,5 +170,8 @@ def sendemailgerencial(request, ma, email, idb, apto):
         print('Ocorreu um erro inesperado: ', e)
 
     # finally:
+       # Construa a nova URL com o novo parâmetro
+    nova_url = f'/listaconblomov/{idb}/'
 
-    return redirect('index')
+    # messages.success(request, ('Email sent successfully.'))
+    return redirect(nova_url)

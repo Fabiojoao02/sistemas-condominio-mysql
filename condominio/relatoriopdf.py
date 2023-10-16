@@ -808,5 +808,5 @@ class GeraRelatorioPDF(View):
         # Construa a nova URL com o novo parâmetro
         nova_url = f'/listaconblomov/{idb}/'
 
-        messages.success(request, ('Email sent successfully.'))
+        # messages.success(request, ('Email sent successfully.'))
         return redirect(nova_url)
