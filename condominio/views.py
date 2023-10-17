@@ -21,6 +21,7 @@ from pixqrcodegen import Payload
 from tqdm import tqdm
 from tqdm import trange
 
+
 # graficos
 # import math
 import random
@@ -51,6 +52,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 
 from django.contrib.auth.models import User, Group
 from condominio.relatoriopdf import GeraRelatorioPDF
@@ -1303,7 +1305,13 @@ def enviarwhatsApp(request, idb, ma, id_morador):
             ''', [idb, ma, id_morador]
         )
 
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.headless = False
+    # driver = webdriver.Chrome()
+    version = "118.0.5993.70"
+    urll = 'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/118.0.5993.70/win32/chromedriver-win32.zip'
+    service = Service(ChromeDriverManager(urll).install())
+    driver = webdriver.Chrome(service=service, options=options)
     driver.get('https://web.whatsapp.com/')
     time.sleep(10)
 
@@ -1316,7 +1324,7 @@ def enviarwhatsApp(request, idb, ma, id_morador):
         caminho = os.path.join(
             CAMINHO_ARQUIVO, 'emailer', 'templates', 'emailer', ma, f'{lista.apto_sala}.pdf')
         diretorio, nome_arquivo = os.path.split(caminho)
-        telefone = '4197034647'  # lista.telefone
+        telefone = lista.telefone
 
         mensagem = f'Olá caro condômino *{lista.morador}* segue o demonstrativo do condomínio'
 

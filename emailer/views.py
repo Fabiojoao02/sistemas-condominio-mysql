@@ -46,7 +46,7 @@ def sendemail(request, ma, email, apto):
         <p></p>
         <p>Olá caro condômino {apto}. </p>
         <p>Segue anexo o demonstrativo do condominio do Mês Ano: {utils.formata_mesano(ma)} </p>
-        <p><h3>Favor efetuar o pagamento até dia 10 do mes corrente. </h3></p>
+        <p><h3>Atenção: Favor efetuar o pagamento até dia 10 do mes corrente. </h3></p>
         <p></p>
         <p></p>
         <p>Atenciosamente,</p>
