@@ -86,11 +86,12 @@ class GeraRelatorioPDF(View):
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
             cursor.execute('''
-                  select b.id_condominio, cond.nome condominio, m.id_bloco, cond.foto, b.nome nome_bloco,
+                 select b.id_condominio, cond.nome condominio, m.id_bloco, cond.foto, b.nome nome_bloco,
                         concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
                         cal.mesano,
                         m.apto_sala, m.id_morador,
                         cad.nome morador,
+                        round(cm.qt_morador,0)  qt_morador,
                         count(*) qde_contas,
                         ROUND(sum(valor), 2) valor 
                      from calculos cal
@@ -102,22 +103,27 @@ class GeraRelatorioPDF(View):
                         join bloco b on
                            b.id_bloco = m.id_bloco
                         join condominio cond on
-                        cond.id_condominio = b.id_condominio                               
+                        cond.id_condominio = b.id_condominio      
+                        join calculos_morador cm on
+                        cm.id_bloco = cal.id_bloco and
+                        cm.mesano = cal.mesano and
+                        cm.id_morador = cal.id_morador
                      where m.id_bloco = %s and cal.mesano = %s
-                     group by b.id_condominio,m.id_bloco,mesano,m.apto_sala,cad.nome,m.id_morador,cond.foto,cond.foto , b.nome,cond.nome  
+                     group by b.id_condominio,m.id_bloco,mesano,m.apto_sala,cad.nome,m.id_morador,cond.foto,cond.foto , b.nome,cond.nome  , cm.qt_morador
                      order by cal.mesano, m.id_bloco,m.apto_sala
-                     ''', [idb, ma]
-                           )
+                ''', [idb, ma]
+            )
             rows = cursor.fetchall()
             y = 750
             linha = 0
             subtotais = {}
             # margem = 50
             total_geral = 0
+            qt_morador_geral = 0
             id_bloco_anterior = None
             mesano_anterior = None
             for row in rows:
-                id_condominio, condominio, id_bloco, foto, nome_bloco, mes_ano, mesano, apto_sala, id_morador, morador, qde_contas, valor = row
+                id_condominio, condominio, id_bloco, foto, nome_bloco, mes_ano, mesano, apto_sala, id_morador, morador, qt_morador, qde_contas, valor = row
                 image_filename = foto
                 # image_path = os.path.join('condominio_imagens', image_filename)
                 image_full_path = os.path.join(
@@ -161,7 +167,8 @@ class GeraRelatorioPDF(View):
                     # Define a cor do texto do cabeçalho
                     # Adiciona uma nova página depois de cada quatro linhas
                     p.drawString(150, y, 'Apto/Sala - Morador')
-                    p.drawAlignedString(500, y, 'Valor')
+                    p.drawString(440, y, 'Qde')
+                    p.drawAlignedString(580, y, 'Valor')
                     p.showPage()
                     p.setFont('Helvetica', 14)
                     y = 750
@@ -174,22 +181,26 @@ class GeraRelatorioPDF(View):
                     # p.drawString(100, 100, '\n\n')
 #                    y -= 20
                     p.drawString(150, y, 'Apto/Sala - Morador')
-                    p.drawAlignedString(500, y, 'Valor')
+                    p.drawString(440, y, 'Qde')
+                    p.drawAlignedString(580, y, 'Valor')
                     p.setFont('Helvetica', 14)
                     y -= 20
                 # Adiciona os dados ao PDF
                 p.drawString(
                     150, y, f'{apto_sala} - {morador} ')
+                p.drawString(
+                    450, y, f'{int(qt_morador)}')
 
                 # rows.setStyle(style)  # Aplica o estilo à tabela
                 p.drawAlignedString(
-                    500, y, f'{utils.formata_valor(valor)}')
+                    580, y, f'{utils.formata_valor(valor)}')
                 y -= 20
                 # Atualiza os subtotais e total geral
                 if mesano_anterior not in subtotais:
                     subtotais[mesano] = 0
                 subtotais[mesano] += valor
                 total_geral += valor
+                qt_morador_geral += qt_morador
                 linha += 1
 
             # Adiciona o total geral
@@ -198,7 +209,10 @@ class GeraRelatorioPDF(View):
             p.drawString(
                 150, y, f'Total geral')
             p.drawAlignedString(
-                450, y, f'{utils.formata_valor(total_geral)}'
+                457, y, f'{int(qt_morador_geral)}'
+            )
+            p.drawAlignedString(
+                530, y, f'{utils.formata_valor(total_geral)}'
             )
             p.setFont('Helvetica', 14)
 
