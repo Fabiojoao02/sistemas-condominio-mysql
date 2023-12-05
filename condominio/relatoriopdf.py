@@ -535,9 +535,9 @@ class GeraRelatorioPDF(View):
         # Executa a consulta SQL bruta e itera sobre os resultados
         with connection.cursor() as cursor:
             cursor.execute('''
-                    select volume_m3, 
-                           cast(max(dt_troca) as date) dt_troca,
-                    max(DATEDIFF(dt_leitura, dt_troca)) dias,
+            select volume_m3, 
+                    cast(max(dt_troca) as date) dt_troca,
+                    DATEDIFF(max(dt_leitura), max(dt_troca)) dias,
                     concat(left(max(l.mesano),2),'/',right(max(l.mesano),4)) as mes_ano,
                     round((select sum(leitura_final)  - sum(leitura_inicial) 
                             from leituras l1
@@ -545,7 +545,7 @@ class GeraRelatorioPDF(View):
                             b1.id_bloco = l1.id_bloco
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
-                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            where l1.id_bloco = l.id_bloco   and cast(gas1.dt_troca as date)  = (select max(cast(dt_troca as date)) from controlegas) and DATEDIFF(dt_leitura, dt_troca) > 0 
                     ),3) acumuado_m3,
                     round(volume_m3 -(select sum(leitura_final)  - sum(leitura_inicial) 
                             from leituras l1
@@ -553,7 +553,7 @@ class GeraRelatorioPDF(View):
                             b1.id_bloco = l1.id_bloco
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
-                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            where l1.id_bloco = l.id_bloco   and cast(gas1.dt_troca as date)  = (select max(cast(dt_troca as date)) from controlegas) and DATEDIFF(dt_leitura, dt_troca) > 0 
                     ) ,3) 
                     saldo,
                     round(100-((select sum(leitura_final)  - sum(leitura_inicial) 
@@ -562,7 +562,7 @@ class GeraRelatorioPDF(View):
                             b1.id_bloco = l1.id_bloco
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
-                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            where l1.id_bloco = l.id_bloco and l1.mesano = l.mesano and DATEDIFF(dt_leitura, dt_troca) > 0 
                     )/volume_m3)*100 ,1) as percentual,
                     round((max(DATEDIFF(dt_leitura, dt_troca)) * volume_m3) /
                     (select sum(leitura_final)  - sum(leitura_inicial) 
@@ -571,14 +571,14 @@ class GeraRelatorioPDF(View):
                             b1.id_bloco = l1.id_bloco
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
-                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            where l1.id_bloco = l.id_bloco and l1.mesano = l.mesano and DATEDIFF(l.dt_leitura, gas.dt_troca) > 0 
                     )-max(DATEDIFF(dt_leitura, dt_troca)),0)  as estimativa_falta_em_dias
                     from leituras l
                     join bloco b on
                     b.id_bloco = l.id_bloco
                     join controlegas gas on
                     gas.id_condominio = b.id_condominio
-                    where l.id_bloco = %s
+                    where l.id_bloco = %s 
                     and DATEDIFF(dt_leitura, dt_troca) >0
 
             ''', [idb]
@@ -639,14 +639,15 @@ class GeraRelatorioPDF(View):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                    select  distinct 
+                select  
+        
                     round(((select sum(leitura_final)  - sum(leitura_inicial) 
                             from leituras l1
                             join bloco b1 on
                             b1.id_bloco = l1.id_bloco
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
-                            where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            where l1.id_bloco = l.id_bloco and l1.mesano = l.mesano and DATEDIFF(dt_leitura, dt_troca) > 0 
                     )/volume_m3)*100 ,2) as percentual
                     from leituras l
                     join bloco b on
@@ -654,7 +655,7 @@ class GeraRelatorioPDF(View):
                     join controlegas gas on
                     gas.id_condominio = b.id_condominio
                     where l.id_bloco = %s
-                    and DATEDIFF(dt_leitura, dt_troca) >0
+                   and DATEDIFF(dt_leitura, dt_troca) > 0 
                 """,
                 [idb]
             )
@@ -675,16 +676,26 @@ class GeraRelatorioPDF(View):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                    select concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
-                    round(sum(leitura_final)  - sum(leitura_inicial),3)  total
+                 select concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
+							round((select sum(leitura_final)  - sum(leitura_inicial) 
+								from leituras l1
+								join bloco b1 on
+								b1.id_bloco = l1.id_bloco
+								join controlegas gas1 on
+								gas1.id_condominio = b1.id_condominio
+								where l1.id_bloco = 2 and DATEDIFF(dt_leitura, dt_troca) > 0 and
+                                 cast(gas1.dt_troca as date)  = (select max(cast(dt_troca as date)) from controlegas)
+                                ),2)  total
+                                                          
                     from leituras l
                     join bloco b on
                     b.id_bloco = l.id_bloco
                     join controlegas gas on
                     gas.id_condominio = b.id_condominio
                     where l.id_bloco = %s
-                    and DATEDIFF(dt_leitura, dt_troca) > 0
-                    group by cast(dt_leitura as date),l.mesano,volume_m3
+                    and DATEDIFF(dt_leitura, dt_troca) > 0 
+                    and cast(dt_leitura as date) >= (select max(cast(dt_troca as date)) from controlegas)
+                    group by l.mesano
                 """,
                 [idb]
 
@@ -764,6 +775,7 @@ class GeraRelatorioPDF(View):
                             join controlegas gas1 on
                             gas1.id_condominio = b1.id_condominio
                             where DATEDIFF(dt_leitura, dt_troca) > 0 and l1.id_bloco = l.id_bloco
+                            and cast(gas1.dt_troca as date)  = (select max(cast(dt_troca as date)) from controlegas)
                     ) ,3) saldo
                     from leituras l
                     join bloco b on
