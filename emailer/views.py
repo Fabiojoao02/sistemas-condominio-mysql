@@ -20,7 +20,7 @@ import pyautogui
 from utils import utils
 
 
-def sendemail(request, ma, email, apto):
+def sendemail(request, ma, idb, email, apto):
 
     try:
         host = "smtp.gmail.com"
@@ -37,7 +37,7 @@ def sendemail(request, ma, email, apto):
         # caminho.unlink  # apagar
         caminho.mkdir(exist_ok=True)
         caminho = CAMINHO_ARQUIVO / 'templates\emailer' / \
-            ma / f'{apto}.pdf'  # / arquivo
+            ma / f'{idb}_{apto}.pdf'  # / arquivo
         # print(caminho)
         diretorio, nome_arquivo = os.path.split(caminho)
 
@@ -61,7 +61,7 @@ def sendemail(request, ma, email, apto):
         with open(caminho, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype='pdf')
             attachment.add_header('Content-Disposition',
-                                  'attachment', filename=f'{apto}.pdf')
+                                  'attachment', filename=f'{idb}_{apto}.pdf')
 
         email_msg.attach(attachment)
 
@@ -137,7 +137,7 @@ def sendemailgerencial(request, ma, email, idb, apto):
         with open(caminho, 'rb') as f:
             attachment = MIMEApplication(f.read(), _subtype='pdf')
             attachment.add_header('Content-Disposition',
-                                  'attachment', filename=f'{apto}.pdf')
+                                  'attachment', filename=f'{idb}_{apto}.pdf')
 
         email_msg.attach(attachment)
 

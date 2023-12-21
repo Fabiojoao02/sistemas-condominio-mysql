@@ -46,7 +46,7 @@ urlpatterns = [
          listaconta, name='listaconta'),
     path('listaleitura/<int:idb>/<str:ma>/<int:id_morador>/',
          listaleitura, name='listaleitura'),
-    path('sendemail/<str:ma>/<str:email>/<str:apto>/',
+    path('sendemail/<str:ma>/<int:idb>/<str:email>/<str:apto>/',
          sendemail, name='sendemail'),
     path('enviaremail/<int:idb>/<str:ma>/',
          enviaremail, name='enviaremail'),

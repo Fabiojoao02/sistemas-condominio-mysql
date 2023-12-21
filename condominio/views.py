@@ -1122,7 +1122,7 @@ class GerarPDF(View):
             # finaliza o detalhamento
 
             p.save()
-            nome_arquivo = arquivo / f'{apto_sala_anterior}.pdf'
+            nome_arquivo = arquivo / f'{idb}_{apto_sala_anterior}.pdf'
            # print(nome_arquivo)
             if nome_arquivo.exists():
                 nome_arquivo.unlink()  # apagar
@@ -1211,7 +1211,7 @@ def enviaremail(request, idb, ma):
         time.sleep(0.25)
         pbar.set_description(f'enviando para: {lista.apto_sala}')
 
-        sendemail(request, ma=lista.mesano,
+        sendemail(request, ma=lista.mesano, idb=lista.id_bloco,
                   email=lista.email, apto=lista.apto_sala)
 
     # url = reverse('relatorio_calculos_pdf')
@@ -1322,7 +1322,7 @@ def enviarwhatsApp(request, idb, ma, id_morador):
     for lista in context:
         CAMINHO_ARQUIVO = Path(__file__).parent.parent
         caminho = os.path.join(
-            CAMINHO_ARQUIVO, 'emailer', 'templates', 'emailer', ma, f'{lista.apto_sala}.pdf')
+            CAMINHO_ARQUIVO, 'emailer', 'templates', 'emailer', ma, f'{idb}_{lista.apto_sala}.pdf')
         diretorio, nome_arquivo = os.path.split(caminho)
         telefone = lista.telefone
 
