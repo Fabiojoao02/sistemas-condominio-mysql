@@ -131,7 +131,7 @@ def listaconblomov(request, id):
 
     context = {
         'condominio':  Condominio.objects.raw('''
-            select 
+            select
             c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
             , concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano
             , cal.mesano mesano_cal, mov.mesano mesano
@@ -146,7 +146,8 @@ def listaconblomov(request, id):
             cal.id_bloco = mov.id_bloco
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome ,cal.mesano,mov.mesano
-            order by mov.mesano
+            order by mov.mesano desc
+            limit 12
         '''),
         'condominio1':  Condominio.objects.raw('''
             select c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco

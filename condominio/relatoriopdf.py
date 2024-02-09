@@ -650,7 +650,7 @@ class GeraRelatorioPDF(View):
             cursor.execute(
                 """
                 select  distinct
-                           round(100-((select sum(leitura_final)  - sum(leitura_inicial) 
+                           round(((select sum(leitura_final)  - sum(leitura_inicial) 
                             from leituras l1
                             join bloco b1 on
                             b1.id_bloco = l1.id_bloco
@@ -697,7 +697,7 @@ class GeraRelatorioPDF(View):
                 where l.id_bloco = %s and aberto=1
                     and DATEDIFF(dt_leitura, dt_troca) > 0 
                     and cast(dt_leitura as date) >= (select max(cast(dt_troca as date)) from controlegas where  aberto=1)
-                group by l.mesano
+                group by l.mesano desc
             """,
                 [idb]
 
