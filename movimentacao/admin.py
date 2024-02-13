@@ -1,7 +1,7 @@
 from django.contrib import admin
 # from . import models
 from django.db.models import Sum
-from .models import Leituras, Calculos, Movimento, Cadastro, MovimentoMSG
+from .models import Leituras, Calculos, Movimento, Cadastro, MovimentoMSG, MovimentoAnexos
 from django.db import connection
 
 
@@ -43,4 +43,11 @@ class MovimentoAdmin(admin.ModelAdmin):
 @ admin.register(MovimentoMSG)
 class MovimentoAdminMSG(admin.ModelAdmin):
     list_display = ['mesano', 'mensagem']
+    list_per_page = 15  # lista 10 registrod=s na pagina
+
+
+@ admin.register(MovimentoAnexos)
+class MovimentoAdminAnexos(admin.ModelAdmin):
+    list_display = ['id_bloco',
+                    'get_formata_mesano_movimento_anexo', 'descricao', 'situacao', 'anexo']
     list_per_page = 15  # lista 10 registrod=s na pagina

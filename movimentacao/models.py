@@ -158,7 +158,6 @@ class MovimentoMSG(models.Model):
     id_bloco = models.ForeignKey(
         Bloco, models.DO_NOTHING, db_column='id_bloco')
     total_moradores = models.IntegerField()
-
     mensagem = models.CharField(max_length=100)
 
     def __str__(self) -> str:
@@ -169,3 +168,27 @@ class MovimentoMSG(models.Model):
         db_table = 'movimento_msg'
         verbose_name = 'Messagem'
         verbose_name_plural = 'Mensagens'
+
+
+class MovimentoAnexos(models.Model):
+    id_movimento_anexo = models.AutoField(primary_key=True)
+    id_bloco = models.ForeignKey(
+        Bloco, models.DO_NOTHING, db_column='id_bloco')
+    mesano = models.CharField(max_length=6)
+    descricao = models.CharField(max_length=250)
+    situacao = models.BooleanField(default=True)
+    anexo = models.ImageField(
+        upload_to='movimento_anexos', blank=True, null=True)
+
+    def get_formata_mesano_movimento_anexo(self):
+        return utils.formata_mesano(self.mesano)
+    get_formata_mesano_movimento_anexo.short_description = 'MES/ANO'
+
+    def __str__(self) -> str:
+        return self.mesano
+
+    class Meta:
+        managed = False
+        db_table = 'movimento_anexos'
+        verbose_name = 'Anexo'
+        verbose_name_plural = 'Anexos'

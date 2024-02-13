@@ -824,12 +824,73 @@ class GeraRelatorioPDF(View):
 
         # Fim leitura do gas
 
-            p.save()
+        # **************query informar os anexos- Inicio*******************
 
-            nome_arquivo = arquivo / f'{ma}_{idb}.pdf'
-            print(nome_arquivo)
-            if nome_arquivo.exists():
-                nome_arquivo.unlink()  # apagar
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                select m.id_bloco, b.nome nome_bloco, m.mesano,
+                    concat(left(m.mesano,2),'/',right(m.mesano,4)) as mes_ano,
+                    descricao, anexo foto
+                from movimento_anexos m
+                join bloco b on
+                    b.id_bloco = m.id_bloco
+                where m.id_bloco = %s and m.situacao = 1
+            """, [idb]
+
+            )
+            rows = cursor.fetchall()
+            p.showPage()
+
+            y = 750
+            linha = 0
+            altura_maxima_imagem = 200
+            mesano_anterior = None
+            for row in rows:
+                id_bloco, nome_bloco, mesano, mes_ano,  descricao, foto = row
+                image_filename = foto
+                # image_path = os.path.join('condominio_imagens', image_filename)
+                image_full_path = os.path.join(
+                    settings.MEDIA_ROOT, image_filename)
+
+                image_full_path = image_full_path.replace('\\', '/')
+
+                # print(image_data)
+                with open(image_full_path, 'rb') as f:
+                    image_data = f.read()
+
+                image = ImageReader(BytesIO(image_data))
+
+            # Verificar se há espaço suficiente na página para adicionar a próxima imagem
+                if y < altura_maxima_imagem:
+                    # Adicionar uma nova página
+                    p.showPage()
+                    # Reiniciar a posição de y
+                    y = 750
+
+                p.setFont('Helvetica', 14)
+                p.drawString(
+                    150, 780, 'Comprovantes e anexos Mês Ano: '+mes_ano)
+                # p.drawString(100, 100, '\n\n')
+               # p.drawString(150, y, 'Descrição do anexo')
+                p.setFont('Helvetica', 14)
+                y -= 20
+                # Adiciona os dados ao PDF
+                p.drawString(
+                    10, y, f'{descricao}')
+                p.drawImage(image,
+                            x=160, y=y-200, width=200, height=200)
+                y -= 220
+                linha += 1
+
+        # **************query informar os anexos- Fim*******************
+
+        p.save()
+
+        nome_arquivo = arquivo / f'{ma}_{idb}.pdf'
+        print(nome_arquivo)
+        if nome_arquivo.exists():
+            nome_arquivo.unlink()  # apagar
 
         os.rename('relatoriocalculospdf.pdf', nome_arquivo)
 
