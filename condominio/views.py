@@ -134,6 +134,7 @@ def listaconblomov(request, id):
             select
             c.id_condominio, c.nome nome_condominio, b.id_bloco, b.nome nome_bloco
             , concat(left(mov.mesano,2),'/',right(mov.mesano,4)) as mes_ano
+            , concat(right(mov.mesano,4),'/',left(mov.mesano,2)) as ano_mes
             , cal.mesano mesano_cal, mov.mesano mesano
             , (select ROUND(sum(m.valor),2) from movimento m where m.id_bloco = mov.id_bloco and m.mesano = mov.mesano) valor_total  
             from condominio c
@@ -146,7 +147,7 @@ def listaconblomov(request, id):
             cal.id_bloco = mov.id_bloco
             where b.id_bloco = ''' + str(id) + '''
             group by c.id_condominio, c.nome , b.id_bloco, b.nome ,cal.mesano,mov.mesano
-            order by mov.mesano desc
+            order by ano_mes desc
             limit 12
         '''),
         'condominio1':  Condominio.objects.raw('''
@@ -847,6 +848,7 @@ class GerarPDF(View):
                 '''
                   select con.nome conta, 
                         concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
+                        concat(right(l.mesano,4),'/',left(l.mesano,2)) as ano_mes,
 						cast(l.dt_leitura as date) as dt_leitura ,
 						valor_m3, l.leitura_final, l.leitura_inicial,
                         ROUND((l.leitura_final - l.leitura_inicial),2) consumo_m3,
@@ -863,8 +865,8 @@ class GerarPDF(View):
                     join contas con on
                         con.id_conta = l.id_contas
                     where l.id_morador = %s 
-                    and l.dt_leitura >= cast(date_add(now(), INTERVAL -12 MONTH) as date) 
-                    order by l.mesano, l.id_morador, conta 
+                    order by ano_mes desc, l.id_morador, conta 
+                    limit 12
                 ''', [id_morador]
             )
             rowsl = cursor.fetchall()
@@ -878,7 +880,7 @@ class GerarPDF(View):
                 total_geral = 0
                 conta_anterior = None
                 for row in rowsl:
-                    conta, mes_ano, dt_leitura, valor_m3, leitura_final, leitura_inicial, consumo_m3,  vl_consumo = row
+                    conta, mes_ano, ano_mes, dt_leitura, valor_m3, leitura_final, leitura_inicial, consumo_m3,  vl_consumo = row
                     if conta != conta_anterior:
                         # Adiciona um subtotal para a categoria anterior
                         if conta_anterior:
@@ -948,7 +950,7 @@ class GerarPDF(View):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        select concat(left(l.mesano,2),'/',right(l.mesano,4)) as mes_ano,
+                      select concat(right(l.mesano,4),'/',left(l.mesano,2)) as mes_ano,
                                 ROUND((l.leitura_final - l.leitura_inicial),2) consumo_m3
                             from leituras l
                             join morador m on
@@ -956,8 +958,8 @@ class GerarPDF(View):
                             join contas con on
                                 con.id_conta = l.id_contas
                             where l.id_morador = %s
-                            and l.dt_leitura >= cast(date_add(now(), INTERVAL -12 MONTH) as date) 
-                            order by l.mesano, l.id_morador
+                            order by mes_ano desc, l.id_morador
+                            limit 12
                     """, [id_morador]
 
                     )
@@ -972,7 +974,7 @@ class GerarPDF(View):
                     # ]
                     # *********************************Grafica de Barras
                     # Cria o gráfico de barras verticais
-                    y -= 300
+                    y -= 310
                     # Criando o objeto Drawing para conter o gráfico
                     # Criando a lista de labels e valores a partir dos dados da query
                     labels = [label for label, _ in dados]
@@ -980,7 +982,7 @@ class GerarPDF(View):
 
                     # len(dados)
                     # Criando o objeto Drawing para conter o gráfico
-                    d = Drawing(400, 200)
+                    d = Drawing(450, 200)
 
                     # Configurando o gráfico de barras verticais
                     chart = VerticalBarChart()
@@ -1025,7 +1027,7 @@ class GerarPDF(View):
 
                             # Adicionando o gráfico ao objeto Drawing
                     d.add(chart)
-                    renderPDF.draw(d, p, 80, y)
+                    renderPDF.draw(d, p, 80, y-50)
                 # fim controle grafico leituras
 
             # 3 pagina do PDF caso o condômino tenha movimentação de leituras
@@ -1038,16 +1040,15 @@ class GerarPDF(View):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    select concat(left(cal.mesano,2),'/',right(cal.mesano,4)) as mes_ano,
+                    select concat(right(cal.mesano,4),'/',left(cal.mesano,2)) as mes_ano,
                         ROUND(sum(valor),2) valor
                     from calculos cal
                     join contas con on
                         con.id_conta = cal.id_contas
-                    where cal.id_morador = %s and
-                        concat(right(cal.mesano,4),left(cal.mesano,2)) >= 
-                    replace(left(cast(date_add(now(), INTERVAL -12 MONTH) as date),7),'-','')
+                    where cal.id_morador = %s
                     group by cal.mesano
-                    order by cal.mesano
+                    order by mes_ano desc
+                    limit 12
                 """, [id_morador]
 
                 )

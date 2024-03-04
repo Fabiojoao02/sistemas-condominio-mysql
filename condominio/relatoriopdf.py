@@ -835,8 +835,8 @@ class GeraRelatorioPDF(View):
                 from movimento_anexos m
                 join bloco b on
                     b.id_bloco = m.id_bloco
-                where m.id_bloco = %s and m.situacao = 1
-            """, [idb]
+                where m.id_bloco = %s and m.mesano = %s and m.situacao = 1
+            """, [idb, ma]
 
             )
             rows = cursor.fetchall()
