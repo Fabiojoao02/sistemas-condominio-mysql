@@ -618,11 +618,18 @@ class GeraRelatorioPDF(View):
                     p.setFillColor(black)
 
                     # p.setFont('Helvetica-Bold', 12)
-                    texto = f'''
-                    Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3, 
-                    no momento temos {dias} dias, um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3 
-                    com um saldo de {utils.formata_valorm3(saldo)}m3. 
-                    '''
+                    if saldo > 0:
+                        texto = f'''
+                        Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3, 
+                        no momento temos {dias} dias, um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3 
+                        com um saldo de {utils.formata_valorm3(saldo)}m3. 
+                        '''
+                    else:
+                        texto = f'''
+                        Cilindro P45 contendo 20kg, equivalente volume cúbico {utils.formata_valorm3(volume_m3)}m3, 
+                        no momento temos e meta comprida de dias, 
+                        um total acumulado de {utils.formata_valorm3(acumuado_m3)}m3. 
+                        '''
                     linhas = texto.split('\n')
                     for i, linha in enumerate(linhas):
                         p.drawString(10, 780 - i*15, linha)
@@ -639,11 +646,18 @@ class GeraRelatorioPDF(View):
                         p.setFont('Helvetica-Bold', 12)
                         p.setFillColor(green)
 
-                    p.drawString(
-                        150, 695, f'Capacidade até o momento no cilindro {percentual}% de gás.')
-                    p.drawString(
-                        150, 680, f'Estimativa do cilindro para próxima troca de {estimativa_falta_em_dias} dias.')
-                    p.setFillColor(black)
+                    if saldo > 0:
+                        p.drawString(
+                            150, 695, f'Capacidade até o momento no cilindro {percentual}% de gás.')
+                        p.drawString(
+                            150, 680, f'Estimativa do cilindro para próxima troca de {estimativa_falta_em_dias} dias.')
+                        p.setFillColor(black)
+                    else:
+                        p.setFont('Helvetica-Bold', 12)
+                        p.setFillColor(orange)
+                        p.drawString(
+                            150, 695, f'Capacidade atingiu o limite pré-estabelecido ultrapassando {percentual}% de gás.')
+                        p.setFillColor(black)
 
         # *INICIO*************query grafico guage
         with connection.cursor() as cursor:
@@ -698,6 +712,7 @@ class GeraRelatorioPDF(View):
                     and DATEDIFF(dt_leitura, dt_troca) > 0 
                     and cast(dt_leitura as date) >= (select max(cast(dt_troca as date)) from controlegas where  aberto=1)
                 group by l.mesano desc
+                order by concat(right(l.mesano,4),'/',left(l.mesano,2)) 
             """,
                 [idb]
 
