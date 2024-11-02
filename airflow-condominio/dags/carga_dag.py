@@ -29,12 +29,15 @@ print(CAMINHO_ARQUIVO)
 
 # Configurar as informações de conexão
 mysql_config = {
-    'user': 'vacom_fabiojoao',
-    'password': 'D&lteco2023',
-    'host': '108.167.132.104',
-    'database': 'vacom_condominio'
+    'database': 'condominio',
+    'user': 'root',
+    'password': '',
+    'host': 'host.docker.internal'
 }
-
+# 'user': 'vacom_fabiojoao',
+# 'password': 'D&lteco2023',
+# 'host': '108.167.132.104',
+# 'database': 'vacom_condominio'
 
 default_args = {
     'depends_on_past': False,

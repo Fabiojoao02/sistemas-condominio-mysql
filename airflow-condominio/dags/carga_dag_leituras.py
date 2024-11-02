@@ -25,12 +25,18 @@ import mysql.connector
 
 # Configurar as informações de conexão
 mysql_config = {
-    'user': 'vacom_fabiojoao',
-    'password': 'D&lteco2023',
-    'host': '108.167.132.104',
-    'database': 'vacom_condominio'
+    'database': 'condominio',
+    'user': 'root',
+    'password': '',
+    #    'host': '127.0.0.1'
+    'host': 'host.docker.internal'
+
 }
 
+# 'user': 'vacom_fabiojoao',
+# 'password': 'D&lteco2023',
+# 'host': '108.167.132.104',
+# 'database': 'vacom_condominio'
 
 default_args = {
     'depends_on_past': False,
@@ -44,6 +50,7 @@ default_args = {
 # schedule_interval="*/3 * * * * "
 dag = DAG('carga_leitura', description='Dados da Leitura',
           schedule_interval=None, start_date=datetime(2023, 9, 10),
+
           catchup=False, default_args=default_args, default_view='graph',
           doc_md="## Dag para registrar as leituras do Mês e Ano")
 

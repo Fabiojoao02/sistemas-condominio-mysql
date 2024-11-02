@@ -121,16 +121,16 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'vacom_condominio',
-        'USER': 'vacom_fabiojoao',
-        'PASSWORD': 'D&lteco2023',
-        'HOST': '108.167.132.104',
+        # 'NAME': 'vacom_condominio',
+        # 'USER': 'vacom_fabiojoao',
+        # 'PASSWORD': 'D&lteco2023',
+        # 'HOST': '108.167.132.104',
         'PORT': '3306',
 
-        # 'NAME': 'condominio',
-        # 'USER': 'root',
-        # 'PASSWORD': '',
-        # 'HOST': '127.0.0.1',
+        'NAME': 'condominio',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
 
 
         # 'OPTIONS': {
