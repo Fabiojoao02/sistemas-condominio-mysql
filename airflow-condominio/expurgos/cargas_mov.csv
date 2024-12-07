@@ -1,8 +1,7 @@
 ﻿condominio;bloco;mesano;conta;descricao;tipoCalculo;valor
-2;2;102024;1;Agua;2;755,76
-2;2;102024;2;Luz;1;158,78
-2;2;102024;4;Diarista;1;800
-2;2;102024;5;Manutenção elevador;1;360
-2;2;102024;17;Lampadas elevador;1;158
-2;2;102024;8;Jardinagem;1;80
-2;2;102024;6;Material limpeza;1;100
+2;2;112024;1;Agua;2;818,24
+2;2;112024;2;Luz;1;156,31
+2;2;112024;4;Diarista;1;900
+2;2;112024;5;Manutenção elevador;1;360
+2;2;112024;18;Limpeza caixa dagua;1;100
+2;2;112024;8;Jardinagem;1;80
