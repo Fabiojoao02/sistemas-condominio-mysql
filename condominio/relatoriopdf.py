@@ -538,7 +538,16 @@ class GeraRelatorioPDF(View):
               select volume_m3, 
                     cast(dt_troca as date) dt_troca,
                     DATEDIFF(max(dt_leitura), dt_troca) dias,
-                    concat(left(max(l.mesano),2),'/',right(max(l.mesano),4)) as mes_ano,
+				 (SELECT max(concat(left(gas1.mesano,2),'/',right(gas1.mesano,4))) anomes
+						  from leituras l1
+									join bloco b1 on
+									b1.id_bloco = l1.id_bloco
+									join controlegas gas1 on
+									gas1.id_condominio = b1.id_condominio 
+									where l1.id_bloco = l.id_bloco and gas1.aberto=1
+						ORDER BY right(gas1.mesano,4) desc , left(gas1.mesano,2) desc
+				) as mes_ano,
+
                     round((select sum(leitura_final)  - sum(leitura_inicial) 
                             from leituras l1
                             join bloco b1 on
