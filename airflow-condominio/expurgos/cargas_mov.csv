@@ -1,9 +1,9 @@
 ﻿condominio;bloco;mesano;conta;descricao;tipoCalculo;valor
-2;2;112025;1;Agua;2;960,96
-2;2;112025;2;Luz;1;179,72
-2;2;112025;22;Zelador;1;1000
-2;2;112025;5;Manutenção elevador;1;360
-2;2;112025;8;Jardinagem;1;80
-2;2;112025;30;Material iluminação corredores;1;886,46
-2;2;112025;31;copia de chaves;1;70
-2;2;112025;27;material refom=rma;1;186,80
+2;2;122025;1;Agua;1;1202,75
+2;2;122025;33;Luz condominio;1;64,74
+2;2;122025;34;Luz elevador;1;118,04
+2;2;122025;22;Zelador;1;1000
+2;2;122025;5;Manutenção elevador;1;360
+2;2;122025;8;Jardinagem;1;80
+2;2;122025;27;reforma condominio;1;186,80
+2;2;122025;32;Fechadura;1;700
