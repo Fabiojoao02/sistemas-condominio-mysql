@@ -768,7 +768,7 @@ class GerarPDF(View):
             # Configurando o gráfico de barras verticais
             chart = VerticalBarChart()
             chart.x = 50
-            chart.y = 30
+            chart.y = 10#300#30
             chart.height = 100
             chart.width = 300
             chart.data = [valores]
@@ -825,7 +825,7 @@ class GerarPDF(View):
             y -= 20
             pc = Pie()
             pc.x = 100  # 65
-            pc.y = 400
+            pc.y = 350
             pc.width = 110
             pc.height = 110
             pc.data = [value for _, value in dados]
