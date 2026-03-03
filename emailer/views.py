@@ -26,7 +26,7 @@ def sendemail(request, ma, idb, email, apto):
         host = "smtp.gmail.com"
         port = 587  # 465  # 587
         login = 'condodaspalmeiras50@gmail.com'
-        senha = 'ikywlvlglvccymuo'
+        senha = 'pjnu hdyq njrw pnwy'
         server = smtplib.SMTP(host, port)
         server.ehlo()
         server.starttls()
@@ -104,7 +104,7 @@ def sendemailgerencial(request, ma, email, idb, apto):
         host = "smtp.gmail.com"
         port = 587  # 465  # 587
         login = 'condodaspalmeiras50@gmail.com'
-        senha = 'ikywlvlglvccymuo'
+        senha = 'pjnu hdyq njrw pnwy'
         server = smtplib.SMTP(host, port)
         server.ehlo()
         server.starttls()
