@@ -81,7 +81,8 @@ x-airflow-common:
     #configuração do email
     AIRFLOW__SMTP__SMTP_HOST: smtp.gmail.com
     AIRFLOW__SMTP__SMTP_USER: condodaspalmeiras50@gmail.com
-    AIRFLOW__SMTP__SMTP_PASSWORD: ikywlvlglvccymuo
+    AIRFLOW__SMTP__SMTP_PASSWORD: 'pjnu hdyq njrw pnwy'
+    #AIRFLOW__SMTP__SMTP_PASSWORD: ikywlvlglvccymuo
     AIRFLOW__SMTP__SMTP_PORT: 587
     AIRFLOW__SMTP__MAIL_FROM: Airflow
 
@@ -133,13 +134,7 @@ services:
     ports:
       - "8080:8080"
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "--fail",
-          "http://localhost:8080/health"
-        ]
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -154,13 +149,7 @@ services:
     <<: *airflow-common
     command: scheduler
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "--fail",
-          "http://localhost:8974/health"
-        ]
+      test: [ "CMD", "curl", "--fail", "http://localhost:8974/health" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -198,11 +187,7 @@ services:
     <<: *airflow-common
     command: triggerer
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"'
-        ]
+      test: [ "CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"' ]
       interval: 30s
       timeout: 10s
       retries: 5
