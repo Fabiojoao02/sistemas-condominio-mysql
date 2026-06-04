@@ -1,9 +1,10 @@
 ﻿condominio;bloco;mesano;conta;descricao;tipoCalculo;valor
-2;2;042026;1;Agua consumo;2;531,12
-2;2;042026;38;Taxa Agua;1;743,2
-2;2;042026;33;Luz condominio;1;148,17
-2;2;042026;34;Luz elevado;1;115,06
-2;2;042026;22;Zelador;1;1000
-2;2;042026;5;Manutenção elevador;1;360
-2;2;042026;8;Jardinagem;1;100
-2;2;042026;40;Manuteção portão garagem;1;420
+2;2;052026;1;Agua consumo;2;480,88
+2;2;052026;38;Taxa Agua;1;743,2
+2;2;052026;2;Luz condominio;1;254,18
+2;2;052026;22;Zelador;1;1000
+2;2;052026;5;Manutenção elevador;1;360
+2;2;052026;8;Jardinagem;1;100
+2;2;052026;40;Manutenção portão garagem;3;60
+2;2;052026;41;Ajuste mes anterior porta garagem;3;7,5
+2;2;052026;42;Monitoramento;1;79,80
