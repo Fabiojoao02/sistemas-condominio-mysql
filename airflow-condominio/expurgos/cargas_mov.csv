@@ -1,10 +1,10 @@
 ﻿condominio;bloco;mesano;conta;descricao;tipoCalculo;valor
-2;2;062026;1;Agua consumo;2;656,48
-2;2;062026;38;Taxa Agua;1;743,2
-2;2;062026;33;Luz condominio;1;155,27
-2;2;062026;34;Luz elevador;1;117,5
-2;2;062026;22;Zelador;1;1000
-2;2;062026;5;Manutenção elevador;1;360
-2;2;062026;8;Jardinagem;1;100
-2;2;062026;6;material limp;1;232
-2;2;062026;42;Monitoramento;1;79,80
+2;2;072026;1;Agua consumo;2;327,92
+2;2;072026;38;Taxa Agua, esgoto;1;877,84
+2;2;072026;33;Luz condominio;1;144,94
+2;2;072026;34;Luz elevador;1;115,33
+2;2;072026;22;Zelador;1;1000
+2;2;072026;5;Manutenção elevador;1;360
+2;2;072026;8;Jardinagem;1;100
+2;2;072026;14;manuntecao portao;1;200
+2;2;072026;42;Monitoramento;1;79,80
